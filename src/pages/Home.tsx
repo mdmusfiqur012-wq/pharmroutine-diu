@@ -26,7 +26,7 @@ export default function Home() {
     () => (db ? db.announcements.filter((a) => a.is_active).sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.created_at.localeCompare(a.created_at)).slice(0, 4) : []),
     [db],
   );
-  const batches = useMemo(() => (db ? [...db.batches].sort((a, b) => a.batch_no - b.batch_no) : []), [db]);
+  const batches = useMemo(() => (db ? db.batches.filter((b) => b.is_active).sort((a, b) => a.batch_no - b.batch_no) : []), [db]);
   const rooms = useMemo(() => (db ? db.rooms.filter((r) => r.is_active) : []), [db]);
   const faculty = useMemo(() => (db ? db.faculty.filter((f) => f.is_active) : []), [db]);
 
@@ -42,7 +42,7 @@ export default function Home() {
         <div className="pointer-events-none absolute -bottom-24 right-32 h-64 w-64 rounded-full bg-amber-400/20 blur-3xl" />
         <div className="relative flex flex-wrap items-center justify-between gap-6">
           <div className="max-w-xl">
-            <Badge tone="amber">Fall 2026 · Batches 29 – 38</Badge>
+            <Badge tone="amber">Fall 2026 · Batches 29 – 36</Badge>
             <h1 className="mt-3 text-2xl font-extrabold leading-tight sm:text-4xl">
               Class & Laboratory Routine Portal
             </h1>

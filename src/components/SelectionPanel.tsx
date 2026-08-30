@@ -23,13 +23,13 @@ export function SelectionPanel({
   loading?: boolean;
 }) {
   const semesters = useMemo(() => [...db.semesters].sort((a, b) => (Number(b.is_active) - Number(a.is_active)) || a.name.localeCompare(b.name)), [db.semesters]);
-  const batches = useMemo(() => [...db.batches].sort((a, b) => b.batch_no - a.batch_no), [db.batches]);
+  const batches = useMemo(() => db.batches.filter((b) => b.is_active).sort((a, b) => b.batch_no - a.batch_no), [db.batches]);
   const activeSemester = semesters.find((s) => s.is_active) ?? semesters[0];
 
   const sel = selection && semesters.some((s) => s.id === selection.semester_id) ? selection : null;
   const semesterId = sel?.semester_id ?? activeSemester?.id ?? '';
   const batch = batches.find((b) => b.id === sel?.batch_id);
-  const sections = db.sections.filter((s) => s.batch_id === batch?.id);
+  const sections = db.sections.filter((s) => s.batch_id === batch?.id && (s.name === 'A' || s.name === 'B'));
   const section = sections.find((s) => s.id === sel?.section_id);
   const groups = section ? labGroupsFor(db, section.id) : [];
   const showLabGroup = Boolean(section && groups.length);

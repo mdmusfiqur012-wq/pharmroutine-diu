@@ -10,7 +10,7 @@ let pass = 0, fail = 0;
 const ok = (cond: boolean, msg: string) => { if (cond) { pass++; } else { fail++; console.error('  ✗ FAIL:', msg); } };
 
 console.log('== Batch-specific schedule construction ==');
-for (const b of db.batches) {
+for (const b of db.batches.filter((x) => x.is_active)) {
   const offs = offDaysFor(db, sem.id, b.id);
   const active = activeClassDays(db, sem.id, b.id);
   ok(active.length + offs.length === db.classDays.length, `${b.name}: active(${active.length}) + off(${offs.length}) covers ${db.classDays.length} days`);
@@ -36,13 +36,15 @@ const gA1 = db.labGroups.find((g) => g.section_id === secA.id && g.name === 'A1'
 const gA2 = db.labGroups.find((g) => g.section_id === secA.id && g.name === 'A2')!;
 const r34 = buildStudentRoutine(db, { semester_id: sem.id, batch_id: b34.id, section_id: secA.id, lab_group_id: gA1.id }, { showOffDays: true });
 const r34b = buildStudentRoutine(db, { semester_id: sem.id, batch_id: b34.id, section_id: secA.id, lab_group_id: gA2.id }, { showOffDays: true });
-ok(isOffDay(db, sem.id, b34.id, 'd-sat'), 'Batch 34: Saturday is an off day');
-const satRow = r34.days.find((d) => d.id === 'd-sat');
-ok(Boolean(satRow), 'Batch 34: Saturday rendered as a row (showOffDays=true)');
-const satEntries = r34.entries.filter((e) => e.day_id === 'd-sat');
-ok(satEntries.length === 0, 'Batch 34: zero classes on Saturday');
+ok(isOffDay(db, sem.id, b34.id, 'd-wed'), 'Batch 34: Wednesday is an off day (official sheet)');
+const satRow = r34.days.find((d) => d.id === 'd-wed');
+ok(Boolean(satRow), 'Batch 34: Wednesday rendered as a row (showOffDays=true)');
+const wedEntries = r34.entries.filter((e) => e.day_id === 'd-wed');
+ok(wedEntries.length === 0, 'Batch 34: zero classes on Wednesday');
 const b29 = db.batches.find((b) => b.batch_no === 29)!;
-ok(!isOffDay(db, sem.id, b29.id, 'd-sat') && isOffDay(db, sem.id, b29.id, 'd-tue'), 'Batch 29: Saturday ACTIVE, Tuesday OFF — batches are independent');
+ok(!isOffDay(db, sem.id, b29.id, 'd-sat') && isOffDay(db, sem.id, b29.id, 'd-sun'), 'Batch 29: Saturday ACTIVE, Sunday OFF — batches are independent');
+const b36 = db.batches.find((b) => b.batch_no === 36)!;
+ok(offDaysFor(db, sem.id, b36.id).length === 0, 'Batch 36: no off day (grid has 36 on every class day)');
 const a1labs = r34.entries.filter((e) => e.class_type === 'lab');
 const a2labs = r34b.entries.filter((e) => e.class_type === 'lab');
 ok(a1labs.length > 0, 'Batch 34/A1: has lab sessions');
@@ -58,7 +60,7 @@ const fDaySlots = new Set(fr.entries.map((e) => `${e.day_id}|${e.time_slot_id}`)
 ok(fDaySlots.size === fr.entries.length, 'no double-booking for DSR');
 
 console.log('== Room schedule (AB-403) ==');
-const room = db.rooms.find((r) => r.code === 'AB-403')!;
+const room = db.rooms.find((r) => r.code === 'AB-1 403')!;
 const rs = buildRoomSchedule(db, room.id);
 const slots = db.timeSlots.map((s) => s.id);
 const allDaySlots = new Set(rs.entries.map((e) => `${e.day_id}|${e.time_slot_id}`));
@@ -70,15 +72,25 @@ ok(free, 'AB-403 has some free slots (availability checker works)');
 
 console.log('== Global integrity ==');
 const fk = new Set(), rk = new Set(), sk = new Set(), gk = new Set();
+const activeBatches = new Set(db.batches.filter((b) => b.is_active).map((b) => b.id));
 let bad = 0;
 for (const e of db.routineEntries) {
   const ds = `${e.day_id}|${e.time_slot_id}`;
   if (fk.has(`${e.faculty_id}|${ds}`)) { bad++; console.error('  ✗ faculty clash', e.id); }
   if (rk.has(`${e.room_id}|${ds}`)) { bad++; console.error('  ✗ room clash', e.id); }
-  if (sk.has(`${e.batch_id}|${e.section_id}|${ds}`)) { bad++; console.error('  ✗ section clash', e.id); }
-  if (e.lab_group_id && gk.has(`${e.lab_group_id}|${ds}`)) { bad++; console.error('  ✗ group clash', e.id); }
-  fk.add(`${e.faculty_id}|${ds}`); rk.add(`${e.room_id}|${ds}`); sk.add(`${e.batch_id}|${e.section_id}|${ds}`);
-  if (e.lab_group_id) gk.add(`${e.lab_group_id}|${ds}`);
+  /* section / group rules only apply to real pharmacy batches — the
+     dormant batch carries other-department room reservations (AGS/NFE/CQI) */
+  if (activeBatches.has(e.batch_id)) {
+    /* section rule applies to THEORY only — a group's lab may run
+       parallel to the section's theory class for the other group */
+    if (e.class_type === 'theory') {
+      if (sk.has(`${e.batch_id}|${e.section_id}|${ds}`)) { bad++; console.error('  ✗ section clash', e.id); }
+      sk.add(`${e.batch_id}|${e.section_id}|${ds}`);
+    }
+    if (e.lab_group_id && gk.has(`${e.lab_group_id}|${ds}`)) { bad++; console.error('  ✗ group clash', e.id); }
+    if (e.lab_group_id) gk.add(`${e.lab_group_id}|${ds}`);
+  }
+  fk.add(`${e.faculty_id}|${ds}`); rk.add(`${e.room_id}|${ds}`);
 }
 ok(bad === 0, `no conflicts across ${db.routineEntries.length} entries`);
 ok(db.routineEntries.every((e) => e.class_type === 'lab' ? Boolean(e.lab_group_id) : !e.lab_group_id), 'theory ⇔ no group, lab ⇔ group');
@@ -96,8 +108,9 @@ console.log(freeIssues.length ? '   free probe: (has issues — fine, checks wha
 
 console.log('== Search ==');
 ok(searchRoutine(db, sem.id, 'DSR').length > 0, 'search by initials works');
-ok(searchRoutine(db, sem.id, 'AB-403').length > 0, 'search by room works');
-ok(searchRoutine(db, sem.id, 'Pharmacology').length > 0, 'search by course works');
+ok(searchRoutine(db, sem.id, 'AB-1 403').length > 0, 'search by room works');
+ok(searchRoutine(db, sem.id, '0916-4101').length > 0, 'search by official course code works');
+ok(searchRoutine(db, sem.id, 'MUA').length > 0, 'search by guest/regular faculty works');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -33,7 +33,7 @@ export interface Batch {
 
 export interface Section {
   id: ID;
-  name: 'A' | 'B';
+  name: 'A' | 'B' | 'RT';
   batch_id: ID;
 }
 

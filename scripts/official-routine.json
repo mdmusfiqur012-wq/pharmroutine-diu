@@ -1,0 +1,3781 @@
+{
+  "semester": {
+    "id": "sem-f26",
+    "name": "Fall 2026",
+    "code": "FA26",
+    "is_active": true,
+    "start_date": "2026-09-01",
+    "end_date": "2027-01-15"
+  },
+  "days": [
+    {
+      "id": "d-sat",
+      "name": "Saturday",
+      "sequence": 1
+    },
+    {
+      "id": "d-sun",
+      "name": "Sunday",
+      "sequence": 2
+    },
+    {
+      "id": "d-mon",
+      "name": "Monday",
+      "sequence": 3
+    },
+    {
+      "id": "d-tue",
+      "name": "Tuesday",
+      "sequence": 4
+    },
+    {
+      "id": "d-wed",
+      "name": "Wednesday",
+      "sequence": 5
+    },
+    {
+      "id": "d-thu",
+      "name": "Thursday",
+      "sequence": 6
+    }
+  ],
+  "slots": [
+    {
+      "id": "t1",
+      "label": "8:30 AM \u2013 10:00 AM",
+      "start": "08:30",
+      "end": "10:00"
+    },
+    {
+      "id": "t2",
+      "label": "10:00 AM \u2013 11:30 AM",
+      "start": "10:00",
+      "end": "11:30"
+    },
+    {
+      "id": "t3",
+      "label": "11:30 AM \u2013 1:00 PM",
+      "start": "11:30",
+      "end": "13:00"
+    },
+    {
+      "id": "t4",
+      "label": "1:00 PM \u2013 2:30 PM",
+      "start": "13:00",
+      "end": "14:30"
+    },
+    {
+      "id": "t5",
+      "label": "2:30 PM \u2013 4:00 PM",
+      "start": "14:30",
+      "end": "16:00"
+    },
+    {
+      "id": "t6",
+      "label": "4:00 PM \u2013 5:30 PM",
+      "start": "16:00",
+      "end": "17:30"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "r-103",
+      "code": "AB-1 103",
+      "name": "Classroom AB-103",
+      "type": "theory"
+    },
+    {
+      "id": "r-104",
+      "code": "AB-1 104",
+      "name": "Classroom AB-104",
+      "type": "theory"
+    },
+    {
+      "id": "r-402",
+      "code": "AB-1 402",
+      "name": "Lecture Theatre 2",
+      "type": "theory"
+    },
+    {
+      "id": "r-403",
+      "code": "AB-1 403",
+      "name": "Lecture Theatre 3",
+      "type": "theory"
+    },
+    {
+      "id": "r-404",
+      "code": "AB-1 404",
+      "name": "Lecture Theatre 4",
+      "type": "theory"
+    },
+    {
+      "id": "r-405",
+      "code": "AB-1 405",
+      "name": "Classroom AB-405",
+      "type": "theory"
+    },
+    {
+      "id": "r-406",
+      "code": "AB-1 406",
+      "name": "Classroom AB-406",
+      "type": "theory"
+    },
+    {
+      "id": "r-504",
+      "code": "AB-1 504",
+      "name": "Seminar Hall AB-504",
+      "type": "theory"
+    },
+    {
+      "id": "r-602",
+      "code": "AB-1 602",
+      "name": "Pharmacology Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-603",
+      "code": "AB-1 603",
+      "name": "Pharmaceutical Chemistry Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-605",
+      "code": "AB-1 605",
+      "name": "Instrumentation Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-606",
+      "code": "AB-1 606",
+      "name": "Computer & Bio-Simulation Lab",
+      "type": "lab"
+    },
+    {
+      "id": "r-702",
+      "code": "AB-1 702",
+      "name": "Pharmaceutics Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-703",
+      "code": "AB-1 703",
+      "name": "Microbiology Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-704",
+      "code": "AB-1 704",
+      "name": "Pharmacognosy Laboratory",
+      "type": "lab"
+    },
+    {
+      "id": "r-706",
+      "code": "AB-1 706",
+      "name": "Physiology Laboratory",
+      "type": "lab"
+    }
+  ],
+  "faculty": [
+    {
+      "initials": "MUA",
+      "name": "Prof. Dr. Muniruddin Ahamed",
+      "designation": "Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "DSS",
+      "name": "Prof. Dr. Sharifa Sultana",
+      "designation": "Professor & Head",
+      "type": "regular"
+    },
+    {
+      "initials": "DSR",
+      "name": "Prof. Dr. Mohammed Shafikur Rahman",
+      "designation": "Associate Dean & Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "DSH",
+      "name": "Dr. Md. Sarowar Hossain",
+      "designation": "Associate Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "DMS",
+      "name": "Dr. Md. Shafikur Rahman",
+      "designation": "Associate Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "DMR",
+      "name": "Dr. Md. Mizanur Rahman",
+      "designation": "Associate Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "AKA",
+      "name": "Mr. Md. A.K. Azad",
+      "designation": "Assistant Professor & Coordinator (M.Pharm)",
+      "type": "regular"
+    },
+    {
+      "initials": "MTA",
+      "name": "Ms. Tahmina Afroz",
+      "designation": "Assistant Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "NAS",
+      "name": "Ms. Nazneen Ahmed Sultana",
+      "designation": "Assistant Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "SJM",
+      "name": "Ms. Sultana Juhara Mannan",
+      "designation": "Assistant Professor",
+      "type": "regular"
+    },
+    {
+      "initials": "MSK",
+      "name": "Md. Shajib Khan",
+      "designation": "Lecturer (Senior Scale)",
+      "type": "regular"
+    },
+    {
+      "initials": "MSH",
+      "name": "Mr. Md. Sadman Hasib",
+      "designation": "Lecturer (Senior Scale)",
+      "type": "regular"
+    },
+    {
+      "initials": "SKM",
+      "name": "Mr. Shadhan Kumar Mondal",
+      "designation": "Lecturer (Senior Scale)",
+      "type": "regular"
+    },
+    {
+      "initials": "SKB",
+      "name": "Mr. Subrato Kumar Barman",
+      "designation": "Lecturer (Senior Scale)",
+      "type": "regular"
+    },
+    {
+      "initials": "MAP",
+      "name": "Mr. Anwar Parvez",
+      "designation": "Lecturer (Senior Scale)",
+      "type": "regular"
+    },
+    {
+      "initials": "NJN",
+      "name": "Ms. Najibah Nasrin",
+      "designation": "Lecturer",
+      "type": "regular"
+    },
+    {
+      "initials": "MHL",
+      "name": "Md. Mahadi Hasan Lavlu",
+      "designation": "Lecturer",
+      "type": "regular"
+    },
+    {
+      "initials": "BSS",
+      "name": "Ms. Bristi Saha",
+      "designation": "Lecturer",
+      "type": "regular"
+    },
+    {
+      "initials": "SAF",
+      "name": "Most. Shahina Afroz",
+      "designation": "Lecturer",
+      "type": "regular"
+    },
+    {
+      "initials": "BTS",
+      "name": "Ms. Bithe Saha",
+      "designation": "Lecturer",
+      "type": "regular"
+    }
+  ],
+  "guests": [
+    {
+      "initials": "MM",
+      "name": "Prof. Dr. Mohammad Didare Alam Muhsin",
+      "type": "guest"
+    },
+    {
+      "initials": "SER",
+      "name": "Prof. Dr. Sohel Rana",
+      "type": "guest"
+    },
+    {
+      "initials": "MMS",
+      "name": "Prof. Mohammad Mafruhi Sattar",
+      "type": "guest"
+    },
+    {
+      "initials": "AI",
+      "name": "Ashraful Islam",
+      "type": "guest"
+    },
+    {
+      "initials": "RZ",
+      "name": "Reazur Rahman",
+      "type": "guest"
+    },
+    {
+      "initials": "FIJ",
+      "name": "FIJ (Guest Faculty)",
+      "type": "guest"
+    }
+  ],
+  "ged": [
+    {
+      "initials": "MRS",
+      "name": "MRS (English)",
+      "type": "ged"
+    },
+    {
+      "initials": "HTS",
+      "name": "HTS (CSE)",
+      "type": "ged"
+    },
+    {
+      "initials": "MRA",
+      "name": "MRA (Math & Statistics)",
+      "type": "ged"
+    },
+    {
+      "initials": "MK",
+      "name": "MK (HEB)",
+      "type": "ged"
+    }
+  ],
+  "cells": [
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 104",
+      "slot": 1,
+      "raw": "0531-1207/35A/SKM",
+      "code": "0531-1207",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 104",
+      "slot": 2,
+      "raw": "0531-1205/35A/MUA",
+      "code": "0531-1205",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "MUA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0531-1205/35B/MUA",
+      "code": "0531-1205",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "MUA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0912-1209/35A/MMS",
+      "code": "0912-1209",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "MMS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 104",
+      "slot": 5,
+      "raw": "0912-1209/35A/MMS",
+      "code": "0912-1209",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "MMS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 402",
+      "slot": 1,
+      "raw": "0917-4207/29A/MAP",
+      "code": "0917-4207",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0912-1209/35B/SAF",
+      "code": "0912-1209",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 402",
+      "slot": 3,
+      "raw": "0916-4209/29B/AI",
+      "code": "0916-4209",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "AI"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0916-4209/29A/AI",
+      "code": "0916-4209",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "AI"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 402",
+      "slot": 5,
+      "raw": "0414-3209/31B/RZ",
+      "code": "0414-3209",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "RZ"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0917-1103/36B/MTA",
+      "code": "0917-1103",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 403",
+      "slot": 3,
+      "raw": "0031-411/30B/NAS",
+      "code": "0031-411",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0531-2101/34A/DMS",
+      "code": "0531-2101",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "0916-3207/31A/SKM",
+      "code": "0916-3207",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 403",
+      "slot": 6,
+      "raw": "0414-3209/31A/RZ",
+      "code": "0414-3209",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "RZ"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 404",
+      "slot": 1,
+      "raw": "0917-1103/36A/MTA",
+      "code": "0917-1103",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0231-111/36A/MRS",
+      "code": "0231-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MRS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-1101/36A/ MSK",
+      "code": "0916-1101",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0916-1101/36B/ MSK",
+      "code": "0916-1101",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 404",
+      "slot": 5,
+      "raw": "0512-2107/34A/DSH",
+      "code": "0512-2107",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "DSH"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0531-2103/34B/FIJ",
+      "code": "0531-2103",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": "0916-3107/32B/DMS",
+      "code": "0916-3107",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 405",
+      "slot": 4,
+      "raw": "0916-3101/32A/NAS",
+      "code": "0916-3101",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 405",
+      "slot": 5,
+      "raw": "0916-3107/32A/DMS",
+      "code": "0916-3107",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 406",
+      "slot": 1,
+      "raw": "0231-111/36B/MRS",
+      "code": "0231-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MRS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0916-4101/30A/MSH ",
+      "code": "0916-4101",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0916-4201/29A/MSH",
+      "code": "0916-4201",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 406",
+      "slot": 4,
+      "raw": "0916-4201/29B/MSH",
+      "code": "0916-4201",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 406",
+      "slot": 5,
+      "raw": "0916-4101/30B/MSH",
+      "code": "0916-4101",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "0031-411/30A/DMR",
+      "code": "0031-411",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "0916-4205/29B/FIJ",
+      "code": "0916-4205",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "0916-3203/31B/DMR",
+      "code": "0916-3203",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "0531-1207/35B/BTS",
+      "code": "0531-1207",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "0917-4207/29B/MAP",
+      "code": "0917-4207",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "0413-4113/30B/MSK",
+      "code": "0413-4113",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 603",
+      "slot": 3,
+      "raw": "0511-2110/34B1/MTA",
+      "code": "0511-2110",
+      "batch": 34,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MTA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 603",
+      "slot": 4,
+      "raw": "0511-2110/34B2/MTA",
+      "code": "0511-2110",
+      "batch": 34,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MTA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 605",
+      "slot": 1,
+      "raw": "0916-4206/29B1/MSK",
+      "code": "0916-4206",
+      "batch": 29,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MSK"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 605",
+      "slot": 2,
+      "raw": "0916-4106/30B1/MAP",
+      "code": "0916-4106",
+      "batch": 30,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MAP"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 605",
+      "slot": 4,
+      "raw": "0916-4106/30B2/MAP",
+      "code": "0916-4106",
+      "batch": 30,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MAP"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 606",
+      "slot": 4,
+      "raw": "0916-3104/32B1/DMR",
+      "code": "0916-3104",
+      "batch": 32,
+      "section": "B",
+      "group": "B1",
+      "faculty": "DMR"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 606",
+      "slot": 5,
+      "raw": "0916-3104/32B2/DMR",
+      "code": "0916-3104",
+      "batch": 32,
+      "section": "B",
+      "group": "B2",
+      "faculty": "DMR"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 702",
+      "slot": 1,
+      "raw": "0916-3106/32A1/AKA",
+      "code": "0916-3106",
+      "batch": 32,
+      "section": "A",
+      "group": "A1",
+      "faculty": "AKA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 702",
+      "slot": 2,
+      "raw": "0916-3106/32A2/AKA",
+      "code": "0916-3106",
+      "batch": 32,
+      "section": "A",
+      "group": "A2",
+      "faculty": "AKA"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 702",
+      "slot": 3,
+      "raw": "0512-2108/34B2/SAF",
+      "code": "0512-2108",
+      "batch": 34,
+      "section": "B",
+      "group": "B2",
+      "faculty": "SAF"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 702",
+      "slot": 4,
+      "raw": "0512-2108/34B1/SAF",
+      "code": "0512-2108",
+      "batch": 34,
+      "section": "B",
+      "group": "B1",
+      "faculty": "SAF"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 704",
+      "slot": 1,
+      "raw": "0916-3108/32A2/NAS",
+      "code": "0916-3108",
+      "batch": 32,
+      "section": "A",
+      "group": "A2",
+      "faculty": "NAS"
+    },
+    {
+      "day": "Saturday",
+      "room": "AB-1 704",
+      "slot": 2,
+      "raw": "0916-3108/32A1/NAS",
+      "code": "0916-3108",
+      "batch": 32,
+      "section": "A",
+      "group": "A1",
+      "faculty": "NAS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 104",
+      "slot": 1,
+      "raw": "0917-1203/35B/SJM",
+      "code": "0917-1203",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 104",
+      "slot": 2,
+      "raw": "0916-4103/30A/DSS",
+      "code": "0916-4103",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0916-4103/30B/DSS",
+      "code": "0916-4103",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0916-4105/30B/SKB",
+      "code": "0916-4105",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 104",
+      "slot": 5,
+      "raw": "0916-4107/30B/DSR",
+      "code": "0916-4107",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "DSR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 1,
+      "raw": "0541-111/36A/MRA",
+      "code": "0541-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MRA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0231-111/36A/MRS",
+      "code": "0231-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MRS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 3,
+      "raw": "0916-3105/32A/AKA",
+      "code": "0916-3105",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "AKA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0912-2105/34A/SAF",
+      "code": "0912-2105",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 5,
+      "raw": "0916-3107/32A/DMS",
+      "code": "0916-3107",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 402",
+      "slot": 6,
+      "raw": "0223-111/33B/MAP",
+      "code": "0223-111",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 403",
+      "slot": 1,
+      "raw": "0231-111/36B/MRS",
+      "code": "0231-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MRS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0541-111/36B/MRA",
+      "code": "0541-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MRA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 403",
+      "slot": 3,
+      "raw": "0531-2101/34B/BSS",
+      "code": "0531-2101",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0916-2207/33A/MSK",
+      "code": "0916-2207",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "0916-3103/32B/NJN",
+      "code": "0916-3103",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 404",
+      "slot": 1,
+      "raw": "0511-2109/34A/NJN",
+      "code": "0511-2109",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0916-3105/32B/AKA",
+      "code": "0916-3105",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "AKA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-3101/32B/NAS",
+      "code": "0916-3101",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0912-1105/36B/BSS",
+      "code": "0912-1105",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 404",
+      "slot": 5,
+      "raw": "0031-411/30A/DMR",
+      "code": "0031-411",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0912-2105/34B/SAF",
+      "code": "0912-2105",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 405",
+      "slot": 2,
+      "raw": "0916-2205/33B/DMR",
+      "code": "0916-2205",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": "0916-3203/31A/DMR",
+      "code": "0916-3203",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 405",
+      "slot": 4,
+      "raw": "0916-3207/31A/SKM",
+      "code": "0916-3207",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 405",
+      "slot": 5,
+      "raw": "0916-3205/31A/MHL",
+      "code": "0916-3205",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0916-2205/33A/SAF",
+      "code": "0916-2205",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0531-2103/34A/FIJ",
+      "code": "0531-2103",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 406",
+      "slot": 4,
+      "raw": "0916-3205/31B/MHL",
+      "code": "0916-3205",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 406",
+      "slot": 5,
+      "raw": "0916-3207/31B/SKM",
+      "code": "0916-3207",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 605",
+      "slot": 1,
+      "raw": "0916-3206/31B2/SKM",
+      "code": "0916-3206",
+      "batch": 31,
+      "section": "B",
+      "group": "B2",
+      "faculty": "SKM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 605",
+      "slot": 2,
+      "raw": "0916-3206/31B1/SKM",
+      "code": "0916-3206",
+      "batch": 31,
+      "section": "B",
+      "group": "B1",
+      "faculty": "SKM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 606",
+      "slot": 1,
+      "raw": "0916-3204/31B1/MHL",
+      "code": "0916-3204",
+      "batch": 31,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MHL"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 606",
+      "slot": 2,
+      "raw": "0916-3204/31B2/MHL",
+      "code": "0916-3204",
+      "batch": 31,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MHL"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 606",
+      "slot": 3,
+      "raw": "0916-4104/30A2/NJN",
+      "code": "0916-4104",
+      "batch": 30,
+      "section": "A",
+      "group": "A2",
+      "faculty": "NJN"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 606",
+      "slot": 4,
+      "raw": "0916-4104/30A1/NJN",
+      "code": "0916-4104",
+      "batch": 30,
+      "section": "A",
+      "group": "A1",
+      "faculty": "NJN"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 702",
+      "slot": 2,
+      "raw": "0912-1210/35A2/FIJ",
+      "code": "0912-1210",
+      "batch": 35,
+      "section": "A",
+      "group": "A2",
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 702",
+      "slot": 3,
+      "raw": "0916-2208/33B1/SJM",
+      "code": "0916-2208",
+      "batch": 33,
+      "section": "B",
+      "group": "B1",
+      "faculty": "SJM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 702",
+      "slot": 4,
+      "raw": "0916-2208/33B2/SJM",
+      "code": "0916-2208",
+      "batch": 33,
+      "section": "B",
+      "group": "B2",
+      "faculty": "SJM"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 703",
+      "slot": 1,
+      "raw": "0531-1208/35A2/DSH",
+      "code": "0531-1208",
+      "batch": 35,
+      "section": "A",
+      "group": "A2",
+      "faculty": "DSH"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 703",
+      "slot": 2,
+      "raw": "0531-1208/35A1/DSH",
+      "code": "0531-1208",
+      "batch": 35,
+      "section": "A",
+      "group": "A1",
+      "faculty": "DSH"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 703",
+      "slot": 3,
+      "raw": "0531-1208/35B1/DSH",
+      "code": "0531-1208",
+      "batch": 35,
+      "section": "B",
+      "group": "B1",
+      "faculty": "DSH"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 703",
+      "slot": 4,
+      "raw": "0912-1210/35B2/FIJ",
+      "code": "0912-1210",
+      "batch": 35,
+      "section": "B",
+      "group": "B2",
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 704",
+      "slot": 1,
+      "raw": "0531-1206/35A1/MUA",
+      "code": "0531-1206",
+      "batch": 35,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 704",
+      "slot": 3,
+      "raw": "0916-4102/30A1/BTS",
+      "code": "0916-4102",
+      "batch": 30,
+      "section": "A",
+      "group": "A1",
+      "faculty": "BTS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 704",
+      "slot": 4,
+      "raw": "0916-4102/30A2/BTS",
+      "code": "0916-4102",
+      "batch": 30,
+      "section": "A",
+      "group": "A2",
+      "faculty": "BTS"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 704",
+      "slot": 5,
+      "raw": "0531-1206/35B1/MUA",
+      "code": "0531-1206",
+      "batch": 35,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 706",
+      "slot": 1,
+      "raw": "0916-4108/30B2/DSR",
+      "code": "0916-4108",
+      "batch": 30,
+      "section": "B",
+      "group": "B2",
+      "faculty": "DSR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 706",
+      "slot": 2,
+      "raw": "0916-4108/30B1/DSR",
+      "code": "0916-4108",
+      "batch": 30,
+      "section": "B",
+      "group": "B1",
+      "faculty": "DSR"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 706",
+      "slot": 3,
+      "raw": "0916-2202/33B2/MSH",
+      "code": "0916-2202",
+      "batch": 33,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Sunday",
+      "room": "AB-1 706",
+      "slot": 4,
+      "raw": "0916-2202/33B1/MSH",
+      "code": "0916-2202",
+      "batch": 33,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 104",
+      "slot": 1,
+      "raw": "0916-4103/30B/DSS",
+      "code": "0916-4103",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 104",
+      "slot": 2,
+      "raw": "0916-4103/30A/DSS",
+      "code": "0916-4103",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0916-4107/30A/DSR",
+      "code": "0916-4107",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DSR"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0916-4203/29B/NJN",
+      "code": "0916-4203",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 1,
+      "raw": "0916-3107/32B/DMS",
+      "code": "0916-3107",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0916-4205/29B/FIJ",
+      "code": "0916-4205",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 3,
+      "raw": "0916-2205/33A/SAF",
+      "code": "0916-2205",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0916-2201/33A/SKB",
+      "code": "0916-2201",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 5,
+      "raw": "0223-111 /33A/MAP",
+      "code": "0223-111",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 402",
+      "slot": 6,
+      "raw": "0531-1205/Retake/MAP",
+      "code": "0531-1205",
+      "section": "RT",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 403",
+      "slot": 1,
+      "raw": " 0916-3109/32A/MTA",
+      "code": "0916-3109",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0916-3103/32A/SKM",
+      "code": "0916-3103",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 403",
+      "slot": 3,
+      "raw": "0511-2109/34B/NJN",
+      "code": "0511-2109",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0916-3101/32A/NAS",
+      "code": "0916-3101",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "0031-411/30B/NAS",
+      "code": "0031-411",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 404",
+      "slot": 1,
+      "raw": "0512-2107/34A/DSH",
+      "code": "0512-2107",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "DSH"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0511-2203/33B/BTS",
+      "code": "0511-2203",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-3201/31A/BTS",
+      "code": "0916-3201",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0531-2103/34B/FIJ",
+      "code": "0531-2103",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 404",
+      "slot": 5,
+      "raw": "0541-111/36A/MRA",
+      "code": "0541-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MRA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0413-4113/30A/BSS",
+      "code": "0413-4113",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 2,
+      "raw": "0916-4107/30B/DSR",
+      "code": "0916-4107",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "DSR"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": "0916-2205/33B/DMR",
+      "code": "0916-2205",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 4,
+      "raw": "0916-3105/32B/AKA",
+      "code": "0916-3105",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "AKA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 5,
+      "raw": "0916-2207/33B/MSK",
+      "code": "0916-2207",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 405",
+      "slot": 6,
+      "raw": "0916-1101/36A/MSK",
+      "code": "0916-1101",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 406",
+      "slot": 1,
+      "raw": "0916-3203/31A/DMR",
+      "code": "0916-3203",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0512-2107/34B/DSH",
+      "code": "0512-2107",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "DSH"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0916-3207/31B/SKM",
+      "code": "0916-3207",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 406",
+      "slot": 4,
+      "raw": "0916-4205/29A/SJM",
+      "code": "0916-4205",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 406",
+      "slot": 5,
+      "raw": "0916-4211/29A/SAF",
+      "code": "0916-4211",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 603",
+      "slot": 2,
+      "raw": "0511-2110/34A2/MTA",
+      "code": "0511-2110",
+      "batch": 34,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MTA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 603",
+      "slot": 3,
+      "raw": "0511-2110/34A1/MTA",
+      "code": "0511-2110",
+      "batch": 34,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MTA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 605",
+      "slot": 4,
+      "raw": "0916-3206/31A2/SKM",
+      "code": "0916-3206",
+      "batch": 31,
+      "section": "A",
+      "group": "A2",
+      "faculty": "SKM"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 605",
+      "slot": 5,
+      "raw": "0916-3206/31A1/SKM",
+      "code": "0916-3206",
+      "batch": 31,
+      "section": "A",
+      "group": "A1",
+      "faculty": "SKM"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 606",
+      "slot": 2,
+      "raw": "0916-4206/29A1/MSK",
+      "code": "0916-4206",
+      "batch": 29,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MSK"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 606",
+      "slot": 3,
+      "raw": "0916-4206/29A2/MSK",
+      "code": "0916-4206",
+      "batch": 29,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MSK"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 606",
+      "slot": 4,
+      "raw": "0916-3204/31A1/MHL",
+      "code": "0916-3204",
+      "batch": 31,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MHL"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 606",
+      "slot": 5,
+      "raw": "0916-3204/31A2/MHL",
+      "code": "0916-3204",
+      "batch": 31,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MHL"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 702",
+      "slot": 2,
+      "raw": "0916-3106/32B1/AKA",
+      "code": "0916-3106",
+      "batch": 32,
+      "section": "B",
+      "group": "B1",
+      "faculty": "AKA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 702",
+      "slot": 3,
+      "raw": "0916-3106/32B2/AKA",
+      "code": "0916-3106",
+      "batch": 32,
+      "section": "B",
+      "group": "B2",
+      "faculty": "AKA"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 703",
+      "slot": 3,
+      "raw": "0531-1102/36A1/DSS",
+      "code": "0531-1102",
+      "batch": 36,
+      "section": "A",
+      "group": "A1",
+      "faculty": "DSS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 703",
+      "slot": 4,
+      "raw": "0531-1102/36A2/DSS",
+      "code": "0531-1102",
+      "batch": 36,
+      "section": "A",
+      "group": "A2",
+      "faculty": "DSS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 704",
+      "slot": 2,
+      "raw": "0916-3108/32B2/NAS",
+      "code": "0916-3108",
+      "batch": 32,
+      "section": "B",
+      "group": "B2",
+      "faculty": "NAS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 704",
+      "slot": 3,
+      "raw": "0916-3108/32B1/NAS",
+      "code": "0916-3108",
+      "batch": 32,
+      "section": "B",
+      "group": "B1",
+      "faculty": "NAS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 704",
+      "slot": 4,
+      "raw": "0916-3202/31B1/DMS",
+      "code": "0916-3202",
+      "batch": 31,
+      "section": "B",
+      "group": "B1",
+      "faculty": "DMS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 704",
+      "slot": 5,
+      "raw": "0916-3202/31B2/DMS",
+      "code": "0916-3202",
+      "batch": 31,
+      "section": "B",
+      "group": "B2",
+      "faculty": "DMS"
+    },
+    {
+      "day": "Monday",
+      "room": "AB-1 706",
+      "slot": 4,
+      "raw": "0916-4108/30A1/DSR",
+      "code": "0916-4108",
+      "batch": 30,
+      "section": "A",
+      "group": "A1",
+      "faculty": "DSR"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 1,
+      "raw": "0916-3105/32A/AKA",
+      "code": "0916-3105",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "AKA"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 2,
+      "raw": "0531-1205/35A/MUA",
+      "code": "0531-1205",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "MUA"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0531-2101/34B/BSS",
+      "code": "0531-2101",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0512-2107/34B/DSH",
+      "code": "0512-2107",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "DSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 5,
+      "raw": "0531-1205/Retake/MAP",
+      "code": "0531-1205",
+      "section": "RT",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 104",
+      "slot": 6,
+      "raw": "0916-3103/32A/SKM",
+      "code": "0916-3103",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 402",
+      "slot": 1,
+      "raw": "0916-3203/31B/DMR",
+      "code": "0916-3203",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "DMR"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0916-2201/33B/SKB",
+      "code": "0916-2201",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 402",
+      "slot": 3,
+      "raw": "0531-1205/35B/MUA",
+      "code": "0531-1205",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "MUA"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0531-1207/35B/BTS",
+      "code": "0531-1207",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 402",
+      "slot": 6,
+      "raw": "0916-4105/30A/SKB",
+      "code": "0916-4105",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 403",
+      "slot": 1,
+      "raw": "0511-2203/33A/SKB",
+      "code": "0511-2203",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0916-3109/32A/MTA",
+      "code": "0916-3109",
+      "batch": 32,
+      "section": "A",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 403",
+      "slot": 3,
+      "raw": "0916-1101/36B/MSK",
+      "code": "0916-1101",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0223-111 /33B/MAP",
+      "code": "0223-111",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "CQI MEETING",
+      "special": "CQI"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 404",
+      "slot": 1,
+      "raw": "0531-2101/34A/DMS",
+      "code": "0531-2101",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "DMS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0531-2103/34A/FIJ",
+      "code": "0531-2103",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-3201/31B/BTS",
+      "code": "0916-3201",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0912-2105/34A/SAF",
+      "code": "0912-2105",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0531-1207/35A/SKM",
+      "code": "0531-1207",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "SKM"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 405",
+      "slot": 2,
+      "raw": "0223-111/33A/MAP",
+      "code": "0223-111",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": " 0916-3109/32B/MTA",
+      "code": "0916-3109",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 405",
+      "slot": 4,
+      "raw": "0916-3101/32B/NAS",
+      "code": "0916-3101",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "NAS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 406",
+      "slot": 1,
+      "raw": "0912-2105/34B/SAF",
+      "code": "0912-2105",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0531-1201/35B/BSS",
+      "code": "0531-1201",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0916-4101/30B/MSH",
+      "code": "0916-4101",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 406",
+      "slot": 4,
+      "raw": "0916-4101/30A/MSH",
+      "code": "0916-4101",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 603",
+      "slot": 1,
+      "raw": "0917-1104/36B2/MSH",
+      "code": "0917-1104",
+      "batch": 36,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 603",
+      "slot": 2,
+      "raw": "0917-1104/36B1/MSH",
+      "code": "0917-1104",
+      "batch": 36,
+      "section": "B",
+      "group": "B1",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 606",
+      "slot": 1,
+      "raw": "0916-4104/30B2/NJN",
+      "code": "0916-4104",
+      "batch": 30,
+      "section": "B",
+      "group": "B2",
+      "faculty": "NJN"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 606",
+      "slot": 2,
+      "raw": "0916-4104/30B1/NJN",
+      "code": "0916-4104",
+      "batch": 30,
+      "section": "B",
+      "group": "B1",
+      "faculty": "NJN"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 606",
+      "slot": 3,
+      "raw": "0916-3104/32A2/DMR",
+      "code": "0916-3104",
+      "batch": 32,
+      "section": "A",
+      "group": "A2",
+      "faculty": "DMR"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 606",
+      "slot": 4,
+      "raw": "0916-3104/32A1/DMR",
+      "code": "0916-3104",
+      "batch": 32,
+      "section": "A",
+      "group": "A1",
+      "faculty": "DMR"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 702",
+      "slot": 1,
+      "raw": "0912-1210/35B1/FIJ",
+      "code": "0912-1210",
+      "batch": 35,
+      "section": "B",
+      "group": "B1",
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 702",
+      "slot": 4,
+      "raw": "0912-1210/35A1/FIJ",
+      "code": "0912-1210",
+      "batch": 35,
+      "section": "A",
+      "group": "A1",
+      "faculty": "FIJ"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 703",
+      "slot": 5,
+      "raw": "0531-1208/35B2/DSH",
+      "code": "0531-1208",
+      "batch": 35,
+      "section": "B",
+      "group": "B2",
+      "faculty": "DSH"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 704",
+      "slot": 1,
+      "raw": "0916-4102/30B1/BTS",
+      "code": "0916-4102",
+      "batch": 30,
+      "section": "B",
+      "group": "B1",
+      "faculty": "BTS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 704",
+      "slot": 2,
+      "raw": "0916-4102/30B2/BTS",
+      "code": "0916-4102",
+      "batch": 30,
+      "section": "B",
+      "group": "B2",
+      "faculty": "BTS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 704",
+      "slot": 3,
+      "raw": "0916-3202/31A1/DMS",
+      "code": "0916-3202",
+      "batch": 31,
+      "section": "A",
+      "group": "A1",
+      "faculty": "DMS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 704",
+      "slot": 4,
+      "raw": "0916-3202/31A2/DMS",
+      "code": "0916-3202",
+      "batch": 31,
+      "section": "A",
+      "group": "A2",
+      "faculty": "DMS"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 706",
+      "slot": 3,
+      "raw": "0916-3102/32A1/SKB",
+      "code": "0916-3102",
+      "batch": 32,
+      "section": "A",
+      "group": "A1",
+      "faculty": "SKB"
+    },
+    {
+      "day": "Tuesday",
+      "room": "AB-1 706",
+      "slot": 4,
+      "raw": "0916-3102/32A2/SKB",
+      "code": "0916-3102",
+      "batch": 32,
+      "section": "A",
+      "group": "A2",
+      "faculty": "SKB"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 104",
+      "slot": 1,
+      "raw": "0912-1105/36B/DSS",
+      "code": "0912-1105",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 104",
+      "slot": 2,
+      "raw": "0912-1105/36A/DSS",
+      "code": "0912-1105",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "DSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0531-1201/35A/BSS",
+      "code": "0531-1201",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0917-1203/35A/SJM",
+      "code": "0917-1203",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0916-2207/33B/MSK",
+      "code": "0916-2207",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 402",
+      "slot": 3,
+      "raw": "0916-4205/29A/SJM",
+      "code": "0916-4205",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0917-4207/29B/MAP",
+      "code": "0917-4207",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 402",
+      "slot": 5,
+      "raw": "0916-1103/36B/MTA",
+      "code": "0916-1103",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 403",
+      "slot": 1,
+      "raw": "0611-111/36A/HTS",
+      "code": "0611-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "HTS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0611-111/36B/HTS",
+      "code": "0611-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "HTS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 403",
+      "slot": 3,
+      "raw": "0916-1103/36A/MTA",
+      "code": "0916-1103",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0916-4107/30A/DSR",
+      "code": "0916-4107",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "DSR"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "0912-1105/36A/BSS",
+      "code": "0912-1105",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 404",
+      "slot": 1,
+      "raw": "0912-1209/35B/SAF",
+      "code": "0912-1209",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "SAF"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0916-3201/31A/BTS",
+      "code": "0916-3201",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-3205/31A/MHL",
+      "code": "0916-3205",
+      "batch": 31,
+      "section": "A",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0916-2207/33A/MSK",
+      "code": "0916-2207",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "MSK"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 404",
+      "slot": 5,
+      "raw": "0917-4207/29A/MAP",
+      "code": "0917-4207",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "MAP"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0916-3103/32B/NJN",
+      "code": "0916-3103",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 405",
+      "slot": 2,
+      "raw": "0916-3109/32B/MTA",
+      "code": "0916-3109",
+      "batch": 32,
+      "section": "B",
+      "group": null,
+      "faculty": "MTA"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": "0511-2203/33B/BTS",
+      "code": "0511-2203",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 405",
+      "slot": 4,
+      "raw": "0916-3205/31B/MHL",
+      "code": "0916-3205",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 405",
+      "slot": 5,
+      "raw": "0916-3201/31B/BTS",
+      "code": "0916-3201",
+      "batch": 31,
+      "section": "B",
+      "group": null,
+      "faculty": "BTS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 406",
+      "slot": 1,
+      "raw": "0916-4105/30B/SKB",
+      "code": "0916-4105",
+      "batch": 30,
+      "section": "B",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0916-4105/30A/SKB",
+      "code": "0916-4105",
+      "batch": 30,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0916-4201/29B/MSH",
+      "code": "0916-4201",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 406",
+      "slot": 4,
+      "raw": "0916-4201/29A/MSH",
+      "code": "0916-4201",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "MSH"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 605",
+      "slot": 1,
+      "raw": "0916-4106/30A2/MAP",
+      "code": "0916-4106",
+      "batch": 30,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MAP"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 605",
+      "slot": 3,
+      "raw": "0916-4106/30A1/MAP",
+      "code": "0916-4106",
+      "batch": 30,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MAP"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 605",
+      "slot": 5,
+      "raw": "0916-4206/29B2/MSK",
+      "code": "0916-4206",
+      "batch": 29,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MSK"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 702",
+      "slot": 1,
+      "raw": "0916-2208/33A2/SJM",
+      "code": "0916-2208",
+      "batch": 33,
+      "section": "A",
+      "group": "A2",
+      "faculty": "SJM"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 702",
+      "slot": 2,
+      "raw": "0916-2208/33A1/SJM",
+      "code": "0916-2208",
+      "batch": 33,
+      "section": "A",
+      "group": "A1",
+      "faculty": "SJM"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 703",
+      "slot": 3,
+      "raw": "0531-1102/36B1/DSS",
+      "code": "0531-1102",
+      "batch": 36,
+      "section": "B",
+      "group": "B1",
+      "faculty": "DSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 703",
+      "slot": 4,
+      "raw": "0531-1102/36B2/DSS",
+      "code": "0531-1102",
+      "batch": 36,
+      "section": "B",
+      "group": "B2",
+      "faculty": "DSS"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 704",
+      "slot": 2,
+      "raw": "0531-1206/35A2/MUA",
+      "code": "0531-1206",
+      "batch": 35,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 704",
+      "slot": 3,
+      "raw": "0531-1206/35B2/MUA",
+      "code": "0531-1206",
+      "batch": 35,
+      "section": "B",
+      "group": "B2",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 706",
+      "slot": 1,
+      "raw": "0916-2202/33A1/MSH",
+      "code": "0916-2202",
+      "batch": 33,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 706",
+      "slot": 2,
+      "raw": "0916-2202/33A2/MSH",
+      "code": "0916-2202",
+      "batch": 33,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MSH"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 706",
+      "slot": 3,
+      "raw": "0916-4108/30A2/DSR",
+      "code": "0916-4108",
+      "batch": 30,
+      "section": "A",
+      "group": "A2",
+      "faculty": "DSR"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 706",
+      "slot": 4,
+      "raw": "0916-3102/32B2/SKB",
+      "code": "0916-3102",
+      "batch": 32,
+      "section": "B",
+      "group": "B2",
+      "faculty": "SKB"
+    },
+    {
+      "day": "Wednesday",
+      "room": "AB-1 706",
+      "slot": 5,
+      "raw": "0916-3102/32B1/SKB",
+      "code": "0916-3102",
+      "batch": 32,
+      "section": "B",
+      "group": "B1",
+      "faculty": "SKB"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 1,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 2,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 3,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 4,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 5,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 103",
+      "slot": 6,
+      "raw": "AGS",
+      "special": "AGS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 104",
+      "slot": 3,
+      "raw": "0916-4211/29B/MHL",
+      "code": "0916-4211",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 104",
+      "slot": 4,
+      "raw": "0916-4203/29B/NJN",
+      "code": "0916-4203",
+      "batch": 29,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 402",
+      "slot": 1,
+      "raw": "0222-113/34B/MK",
+      "code": "0222-113",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "MK"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 402",
+      "slot": 2,
+      "raw": "0222-113/34A/MK",
+      "code": "0222-113",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "MK"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 402",
+      "slot": 4,
+      "raw": "0511-2203/33A/SKB",
+      "code": "0511-2203",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 402",
+      "slot": 5,
+      "raw": "0916-2209/33A/MHL",
+      "code": "0916-2209",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 403",
+      "slot": 1,
+      "raw": "0917-1203/35A/SJM",
+      "code": "0917-1203",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 403",
+      "slot": 2,
+      "raw": "0917-1203/35B/SJM",
+      "code": "0917-1203",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "SJM"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 403",
+      "slot": 4,
+      "raw": "0916-2209/33B/MHL",
+      "code": "0916-2209",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "MHL"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 403",
+      "slot": 5,
+      "raw": "0916-2201/33B/SKB",
+      "code": "0916-2201",
+      "batch": 33,
+      "section": "B",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 404",
+      "slot": 2,
+      "raw": "0916-2201/33A/SKB",
+      "code": "0916-2201",
+      "batch": 33,
+      "section": "A",
+      "group": null,
+      "faculty": "SKB"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 404",
+      "slot": 3,
+      "raw": "0916-4203/29A/SER",
+      "code": "0916-4203",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "SER"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 404",
+      "slot": 4,
+      "raw": "0916-4203/29A/SER",
+      "code": "0916-4203",
+      "batch": 29,
+      "section": "A",
+      "group": null,
+      "faculty": "SER"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 405",
+      "slot": 1,
+      "raw": "0531-1201/35B/BSS",
+      "code": "0531-1201",
+      "batch": 35,
+      "section": "B",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 405",
+      "slot": 2,
+      "raw": "0531-1201/35A/BSS",
+      "code": "0531-1201",
+      "batch": 35,
+      "section": "A",
+      "group": null,
+      "faculty": "BSS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 405",
+      "slot": 3,
+      "raw": "0611-111/36B/HTS",
+      "code": "0611-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "HTS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 406",
+      "slot": 1,
+      "raw": "0541-111/36B/MRA",
+      "code": "0541-111",
+      "batch": 36,
+      "section": "B",
+      "group": null,
+      "faculty": "MRA"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 406",
+      "slot": 2,
+      "raw": "0611-111/36A/HTS",
+      "code": "0611-111",
+      "batch": 36,
+      "section": "A",
+      "group": null,
+      "faculty": "HTS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 406",
+      "slot": 3,
+      "raw": "0511-2109/34B/NJN",
+      "code": "0511-2109",
+      "batch": 34,
+      "section": "B",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 406",
+      "slot": 5,
+      "raw": "0511-2109/34A/NJN",
+      "code": "0511-2109",
+      "batch": 34,
+      "section": "A",
+      "group": null,
+      "faculty": "NJN"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 1,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 2,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 3,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 4,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 5,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 504",
+      "slot": 6,
+      "raw": "NFE",
+      "special": "NFE"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 603",
+      "slot": 3,
+      "raw": "0917-1104/36A1/MUA",
+      "code": "0917-1104",
+      "batch": 36,
+      "section": "A",
+      "group": "A1",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 603",
+      "slot": 4,
+      "raw": "0917-1104/36A2/MUA",
+      "code": "0917-1104",
+      "batch": 36,
+      "section": "A",
+      "group": "A2",
+      "faculty": "MUA"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 702",
+      "slot": 3,
+      "raw": "0512-2108/34A1/BSS",
+      "code": "0512-2108",
+      "batch": 34,
+      "section": "A",
+      "group": "A1",
+      "faculty": "BSS"
+    },
+    {
+      "day": "Thursday",
+      "room": "AB-1 702",
+      "slot": 4,
+      "raw": "0512-2108/34A2/BSS",
+      "code": "0512-2108",
+      "batch": 34,
+      "section": "A",
+      "group": "A2",
+      "faculty": "BSS"
+    }
+  ],
+  "batchOffDays": [
+    {
+      "batch": 29,
+      "section": "A",
+      "day": "SUNDAY"
+    },
+    {
+      "batch": 29,
+      "section": "B",
+      "day": "SUNDAY"
+    },
+    {
+      "batch": 30,
+      "section": "A",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 30,
+      "section": "B",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 31,
+      "section": "A",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 31,
+      "section": "B",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 32,
+      "section": "A",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 32,
+      "section": "B",
+      "day": "THURSDAY"
+    },
+    {
+      "batch": 33,
+      "section": "A",
+      "day": "SATURDAY"
+    },
+    {
+      "batch": 33,
+      "section": "B",
+      "day": "SATURDAY"
+    },
+    {
+      "batch": 34,
+      "section": "A",
+      "day": "WEDNESDAY"
+    },
+    {
+      "batch": 34,
+      "section": "B",
+      "day": "WEDNESDAY"
+    },
+    {
+      "batch": 35,
+      "section": "A",
+      "day": "MONDAY"
+    },
+    {
+      "batch": 35,
+      "section": "B",
+      "day": "MONDAY"
+    },
+    {
+      "batch": 36,
+      "section": "A",
+      "day": "WEDNESDAY"
+    },
+    {
+      "batch": 36,
+      "section": "B",
+      "day": "WEDNESDAY"
+    }
+  ],
+  "facultyOffDays": {
+    "MUA": [
+      "None",
+      "None"
+    ],
+    "DSS": [
+      "Friday",
+      "Saturday"
+    ],
+    "DSR": [
+      "Thursday",
+      "Saturday"
+    ],
+    "DMS": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "DMR": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "FIJ": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "AKA": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "SJM": [
+      "Friday",
+      "Saturday"
+    ],
+    "MTA": [
+      "Thursday",
+      "Friday"
+    ],
+    "NAS": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "MSK": [
+      "Thursday",
+      "Friday"
+    ],
+    "MSH": [
+      "Thursday",
+      "Friday"
+    ],
+    "SKM": [
+      "Wednesday",
+      "Thursday"
+    ],
+    "SKB": [
+      "Friday",
+      "Saturday"
+    ],
+    "MAP": [
+      "Thursday",
+      "Friday"
+    ],
+    "MHL": [
+      "Friday",
+      "Saturday"
+    ],
+    "SAF": [
+      "Thursday",
+      "Friday"
+    ],
+    "BSS": [
+      "Friday",
+      "Saturday"
+    ],
+    "BTS": [
+      "Thursday",
+      "Friday"
+    ],
+    "NJN": [
+      "Friday",
+      "Saturday"
+    ]
+  }
+}

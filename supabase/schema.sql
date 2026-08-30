@@ -60,7 +60,7 @@ create table if not exists batches (
 -- ---------------------------------------------------------------- sections
 create table if not exists sections (
   id        uuid primary key default gen_random_uuid(),
-  name      text not null check (name in ('A','B')),
+  name      text not null check (name in ('A','B','RT')),
   batch_id  uuid not null references batches(id) on delete cascade,
   unique (batch_id, name)
 );
@@ -300,6 +300,11 @@ begin
   end if;
 
   -- 3. section overlap (a section cannot have two classes at the same time)
+  --     - theory always clashes (any other class on the section)
+  --     - a lab clashes with the section's theory, but two labs of
+  --       DIFFERENT groups may run in parallel (official DIU sheet does this)
+  --     - inactive batches (room reservations: AGS/NFE/CQI) are excluded
+  if exists (select 1 from batches bb where bb.id = new.batch_id and bb.is_active) then
   select e.id, c.title cl, f.name fn, b.name bn, s.name sn, coalesce(g.name, '-') gn,
          d.short_name dn, ts.label tl
     into clash
@@ -317,10 +322,13 @@ begin
      and e.time_slot_id = new.time_slot_id
      and e.status <> 'cancelled'
      and e.id is distinct from new.id
+     and (e.class_type = 'theory' or new.class_type = 'theory'
+          or (e.class_type = 'lab' and new.class_type = 'lab' and e.lab_group_id = new.lab_group_id))
    limit 1;
   if found then
     raise exception 'CONFLICT [section]: Batch % Section % already has "%" (group %) with % on %, %',
       clash.bn, clash.sn, clash.cl, clash.gn, clash.fn, clash.dn, clash.tl;
+  end if;
   end if;
 
   -- 4. lab-group overlap
