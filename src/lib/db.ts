@@ -290,7 +290,7 @@ async function fetchProfile(id: string | undefined) {
 
 export const DEMO_USERS = [
   { email: 'admin@diu.edu.bd', password: 'admin123', role: 'admin', full_name: 'Routine Administrator', department: 'Dept. of Pharmacy' },
-  { email: 'dsharmin@diu.edu.bd', password: 'pharmacy123', role: 'faculty', full_name: 'Dr. Sharmin Rahman', department: 'Pharmacy', facultyInitials: 'DSR' },
+  { email: 'dsharmin@diu.edu.bd', password: 'pharmacy123', role: 'faculty', full_name: 'Prof. Dr. Mohammed Shafikur Rahman', department: 'Pharmacy', facultyInitials: 'DSR' },
   { email: 'student@diu.edu.bd', password: 'student123', role: 'student', full_name: 'Pharmacy Student', department: 'Pharmacy', batch: 34, section: 'A', labGroup: 'A1' },
 ];
 
