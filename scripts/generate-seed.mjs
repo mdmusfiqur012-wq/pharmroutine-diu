@@ -149,7 +149,7 @@ const COURSE_TITLES = {
   '0916-2209': ['Clinical Pathology', 2],
   '0916-2211': ['Oral Assessment-II', 1],
   '0223-111':  ['Art of Living', 3],
-  /* ---- Level 3 Term 1 (5th semester, Batch 32) — INFERRED ---- */
+  /* ---- Level 3 Term 1 (5th semester, Batch 32) — portal list (verified) ---- */
   '0916-3101': ['Pharmaceutical Analysis & Quality Control-II', 3],
   '0916-3102': ['Pharmaceutical Analysis & Quality Control-II Practical', 1],
   '0916-3103': ['Pharmaceutical Technology-I', 3],
@@ -188,7 +188,7 @@ const COURSE_TITLES = {
   '0916-4209': ['Pharmaceutical Regulatory Affairs', 2],
   '0916-4211': ['Pharmacotherapeutics & Disease Management', 2],
 };
-const INFERRED = new Set(['0531-2101', '0531-2103', '0512-2107', '0512-2108', '0511-2109', '0511-2110', '0222-113', '0916-3101', '0916-3102', '0916-3103', '0916-3104', '0916-3105', '0916-3106', '0916-3107', '0916-3108', '0916-3109', '0916-1103']);
+const INFERRED = new Set(['0531-2101', '0531-2103', '0512-2107', '0512-2108', '0511-2109', '0511-2110', '0222-113', '0916-1103']);
 
 const courses = [];
 const missingTitles = [];
