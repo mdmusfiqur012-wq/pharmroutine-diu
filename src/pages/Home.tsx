@@ -50,6 +50,15 @@ export default function Home() {
               {settings.universityName} · {settings.departmentName}. Every batch has its own class days, off days
               and weekly structure — the routine is generated dynamically for your semester, batch, section and lab group.
             </p>
+            <div className="mt-4 inline-flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-amber-300/40 bg-black/15 px-4 py-2.5 backdrop-blur">
+              <span className="text-2xl">🏅</span>
+              <span className="text-sm">
+                <span className="font-extrabold">Prepared by Md Musfiqur Rahaman</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-amber-200">
+                  Research &amp; Academic Affairs Secretary
+                </span>
+              </span>
+            </div>
             <div className="mt-5 flex flex-wrap gap-2.5">
               <Link to="/routine" className="btn bg-white text-brand-800 shadow hover:bg-brand-50">
                 <Icon name="calendar" /> Generate My Routine

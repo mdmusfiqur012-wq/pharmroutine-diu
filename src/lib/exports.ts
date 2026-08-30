@@ -231,6 +231,16 @@ export async function exportRoutinePdf(info: ExportInfo, fileName = 'routine.pdf
   doc.text('This is a system-generated routine. Please report discrepancies to the department office.', margin, ly);
   doc.text(`Routine ID ${now.toString(36).toUpperCase()} · ${settings.universityName}`, margin, ly + 11);
 
+  /* credit line — everyone sees who prepared the routine */
+  doc.setFontSize(8);
+  doc.setTextColor(30, 64, 120);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Prepared by Md Musfiqur Rahaman', margin, ly + 24);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(90, 90, 90);
+  doc.text('Research & Academic Affairs Secretary · Department of Pharmacy, Daffodil International University', margin, ly + 32);
+
   doc.save(fileName);
 }
 

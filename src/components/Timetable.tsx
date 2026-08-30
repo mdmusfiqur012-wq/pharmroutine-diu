@@ -348,6 +348,10 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
         <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: settings.colors.agriculture }} /> Agriculture</span>
         <span>Duration: each class = 1 hour 30 minutes</span>
       </div>
+      <div className="border-t border-slate-300 p-2.5 text-center text-[9px]">
+        <span className="font-extrabold text-slate-700">Prepared by Md Musfiqur Rahaman</span>
+        <span className="text-slate-500"> · Research &amp; Academic Affairs Secretary · Dept. of Pharmacy, DIU</span>
+      </div>
     </div>
   );
 }

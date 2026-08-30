@@ -219,8 +219,16 @@ export default function Layout() {
           className="no-print mx-auto max-w-7xl cursor-default select-none px-6 pb-8 pt-4 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-600"
           title=""
         >
+          <div className="mb-3 inline-flex flex-col items-center gap-1 rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 via-white to-brand-50 px-6 py-3 shadow-sm dark:border-brand-800 dark:from-brand-950 dark:via-slate-900 dark:to-brand-950">
+            <span className="text-[13px] font-extrabold text-brand-800 dark:text-brand-300">
+              🏅 Prepared by Md Musfiqur Rahaman
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+              Research &amp; Academic Affairs Secretary
+            </span>
+          </div>
           🎓 PharmRoutine DIU · Daffodil International University · Department of Pharmacy · Class & Laboratory Routine Portal —
-          Batch 29–38 · Sections A/B · Lab Groups A1, A2, B1, B2
+          Batch 29–36 · Sections A/B · Lab Groups A1, A2, B1, B2
         </footer>
       </main>
     </div>
