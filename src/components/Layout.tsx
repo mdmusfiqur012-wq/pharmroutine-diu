@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { Icon, Logo, type IconName } from '../lib/ui';
@@ -6,6 +6,38 @@ import { useApp } from '../lib/store';
 import { api, isSupabaseMode, DEMO_USERS } from '../lib/db';
 import { useData } from '../lib/data';
 import { useToast } from '../lib/ui';
+
+/* ============================================================
+ * Secret admin access.
+ * Students never see a login button anywhere. Staff reach the
+ * sign-in page only via:
+ *   1. Direct URL  →  /login
+ *   2. Keyboard    →  Ctrl+Shift+L  (desktop)
+ *   3. Mobile      →  tap the footer brand 5 times quickly
+ * ============================================================ */
+function useSecretLogin() {
+  const navigate = useNavigate();
+  const taps = useRef<number[]>([]);
+  const onTap = () => {
+    const now = Date.now();
+    taps.current = [...taps.current.filter((t) => now - t < 3500), now];
+    if (taps.current.length >= 5) {
+      taps.current = [];
+      navigate('/login');
+    }
+  };
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+        e.preventDefault();
+        navigate('/login');
+      }
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [navigate]);
+  return onTap;
+}
 
 const NAV: { to: string; icon: IconName; label: string; admin?: boolean }[] = [
   { to: '/', icon: 'home', label: 'Home' },
@@ -47,6 +79,7 @@ export default function Layout() {
   }
 
   const role = user?.role;
+  const secretTap = useSecretLogin();
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -95,7 +128,9 @@ export default function Layout() {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="btn-primary w-full">Sign in</Link>
+            <p className="px-1 text-center text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
+              Routine access is open for everyone — no account needed.
+            </p>
           )}
           <p className="px-1 text-center text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
             {isSupabaseMode ? 'Connected to Supabase' : 'Demo mode · local dataset'}
@@ -151,9 +186,7 @@ export default function Layout() {
                   </div>
                   <button onClick={signOut} className="btn-secondary !px-2.5 !py-1.5 text-xs">Sign out</button>
                 </div>
-              ) : (
-                <Link to="/login" className="btn-primary w-full">Sign in</Link>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -181,7 +214,11 @@ export default function Layout() {
           <Outlet />
         </div>
 
-        <footer className="no-print mx-auto max-w-7xl px-6 pb-8 pt-4 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-600">
+        <footer
+          onClick={secretTap}
+          className="no-print mx-auto max-w-7xl cursor-default select-none px-6 pb-8 pt-4 text-center text-[11px] leading-relaxed text-slate-400 dark:text-slate-600"
+          title=""
+        >
           🎓 PharmRoutine DIU · Daffodil International University · Department of Pharmacy · Class & Laboratory Routine Portal —
           Batch 29–38 · Sections A/B · Lab Groups A1, A2, B1, B2
         </footer>

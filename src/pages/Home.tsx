@@ -18,7 +18,7 @@ const QUICK: { to: string; icon: IconName; title: string; desc: string; tone: st
 
 export default function Home() {
   const { db, loading } = useData();
-  const { settings, user } = useApp();
+  const { settings } = useApp();
   const navigate = useNavigate();
 
   const activeSemester = useMemo(() => db?.semesters.find((s) => s.is_active) ?? db?.semesters[0], [db]);
@@ -57,11 +57,6 @@ export default function Home() {
               <Link to="/faculty" className="btn border border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20">
                 <Icon name="users" /> Faculty Routine
               </Link>
-              {!user && (
-                <Link to="/login" className="btn border border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20">
-                  Admin / Staff sign in
-                </Link>
-              )}
             </div>
           </div>
           <div className="hidden lg:block">
