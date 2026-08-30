@@ -61,6 +61,10 @@ src/
 
 ---
 
+## 🤖 Fully automated deploy (Supabase + Vercel)
+
+See **[`DEPLOY-AUTOMATED.md`](DEPLOY-AUTOMATED.md)** — one command creates the Supabase project, applies the schema, seeds Batches 29–38, creates the admin account and deploys to Vercel (`scripts/deploy.mjs`).
+
 ## 🚀 Run it
 
 ```bash

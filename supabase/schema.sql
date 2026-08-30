@@ -8,8 +8,8 @@
 -- ============================================================================
 
 -- ---------------------------------------------------------------- extensions
-create extension if not exists "uuid-ossp";
-create extension if not exists pgcrypto;
+-- gen_random_uuid() is built into PostgreSQL 13+ (Supabase runs PG15)
+-- pgcrypto not required: gen_random_uuid() is core
 
 -- ---------------------------------------------------------------- enums
 do $$ begin
@@ -39,7 +39,7 @@ exception when duplicate_object then null; end $$;
 
 -- ---------------------------------------------------------------- semesters
 create table if not exists semesters (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   name        text not null,                    -- "Fall 2026"
   code        text not null unique,             -- "FA26"
   is_active   boolean not null default false,
@@ -49,7 +49,7 @@ create table if not exists semesters (
 
 -- ---------------------------------------------------------------- batches
 create table if not exists batches (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   batch_no        int  not null unique check (batch_no between 1 and 999),
   name            text not null,                -- "Batch 34"
   admission_year  int  not null,
@@ -59,7 +59,7 @@ create table if not exists batches (
 
 -- ---------------------------------------------------------------- sections
 create table if not exists sections (
-  id        uuid primary key default uuid_generate_v4(),
+  id        uuid primary key default gen_random_uuid(),
   name      text not null check (name in ('A','B')),
   batch_id  uuid not null references batches(id) on delete cascade,
   unique (batch_id, name)
@@ -67,7 +67,7 @@ create table if not exists sections (
 
 -- ---------------------------------------------------------------- lab groups (A1, A2, B1, B2)
 create table if not exists lab_groups (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   name        text not null check (name in ('A1','A2','B1','B2')),
   section_id  uuid not null references sections(id) on delete cascade,
   unique (section_id, name)
@@ -75,7 +75,7 @@ create table if not exists lab_groups (
 
 -- ---------------------------------------------------------------- faculty
 create table if not exists faculty (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   name          text not null,
   initials      text not null,
   designation   text,
@@ -87,7 +87,7 @@ create table if not exists faculty (
 
 -- ---------------------------------------------------------------- courses
 create table if not exists courses (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   code          text not null unique,
   title         text not null,
   credit        numeric(3,1) not null default 3 check (credit > 0),
@@ -99,7 +99,7 @@ create table if not exists courses (
 
 -- ---------------------------------------------------------------- rooms
 create table if not exists rooms (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   code        text not null unique,
   name        text not null,
   building    text,
@@ -110,7 +110,7 @@ create table if not exists rooms (
 
 -- ---------------------------------------------------------------- time slots (all classes = 1h 30m)
 create table if not exists time_slots (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   label       text not null,                    -- "8:30 AM – 10:00 AM"
   start_time  time not null,
   end_time    time not null,
@@ -121,7 +121,7 @@ create table if not exists time_slots (
 
 -- ---------------------------------------------------------------- class days
 create table if not exists class_days (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   name        text not null unique,             -- "Saturday"
   short_name  text not null,                    -- "Sat"
   sequence    int  not null unique,
@@ -131,7 +131,7 @@ create table if not exists class_days (
 -- ---------------------------------------------------------------- routine entries
 -- Theory classes have lab_group_id = NULL; laboratory classes MUST have one.
 create table if not exists routine_entries (
-  id            uuid primary key default uuid_generate_v4(),
+  id            uuid primary key default gen_random_uuid(),
   semester_id   uuid not null references semesters(id) on delete cascade,
   batch_id      uuid not null references batches(id) on delete cascade,
   section_id    uuid not null references sections(id) on delete cascade,
@@ -157,7 +157,7 @@ create table if not exists routine_entries (
 
 -- ---------------------------------------------------------------- batch off days (Semester + Batch + Day — independent per batch)
 create table if not exists batch_off_days (
-  id           uuid primary key default uuid_generate_v4(),
+  id           uuid primary key default gen_random_uuid(),
   semester_id  uuid not null references semesters(id) on delete cascade,
   batch_id     uuid not null references batches(id) on delete cascade,
   day_id       uuid not null references class_days(id) on delete cascade,
@@ -168,7 +168,7 @@ create table if not exists batch_off_days (
 
 -- ---------------------------------------------------------------- announcements
 create table if not exists announcements (
-  id              uuid primary key default uuid_generate_v4(),
+  id              uuid primary key default gen_random_uuid(),
   title           text not null,
   body            text not null,
   category        announcement_category not null default 'notice',
