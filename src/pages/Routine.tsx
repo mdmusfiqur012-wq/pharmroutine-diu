@@ -20,7 +20,10 @@ export default function Routine() {
   const [generating, setGenerating] = useState(false);
   const [filter, setFilter] = useState<ClassFilterKey>('all');
   const [showOffDays, setShowOffDays] = useState(true);
+  const [pngLayout, setPngLayout] = useState<'grid' | 'list'>('grid');
+  const [pngMenu, setPngMenu] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMemo(() => typeof window !== 'undefined' && window.innerWidth < 768, []);
 
   const studentPrefill = useMemo(() => {
     if (user?.role !== 'student' || !db) return null;
@@ -104,23 +107,28 @@ export default function Routine() {
     }
   }
 
-  async function handlePng() {
+  async function handlePng(layout: 'grid' | 'list' = pngLayout) {
     if (!printRef.current) return;
+    const el = printRef.current;
+    const prev = { display: el.style.display, position: el.style.position, left: el.style.left, width: el.style.width };
     try {
-      const el = printRef.current;
-      const prev = { display: el.style.display, position: el.style.position, left: el.style.left };
+      setPngLayout(layout);
       el.style.display = 'block';
       el.style.position = 'fixed';
       el.style.left = '-10000px';
       el.style.top = '0';
-      await new Promise((r) => setTimeout(r, 60));
-      await exportRoutinePng(el, ROUTINE_PDF_FILENAME((label[1] ?? 'routine').replace(/\s+/g, '-')));
+      if (layout === 'list') el.style.width = '420px'; /* portrait — fits phone screens */
+      await new Promise((r) => setTimeout(r, 120)); /* let React re-render the layout */
+      const seed = (label[1] ?? 'routine').replace(/\s+/g, '-');
+      await exportRoutinePng(el, `DIU-Pharmacy-${seed}-${layout === 'list' ? 'Daily-List' : 'Weekly-Grid'}.png`);
+      toast.push('success', layout === 'list' ? 'Daily-list image downloaded — fits your phone screen.' : 'Weekly-grid image downloaded.');
+    } catch (e: any) {
+      toast.push('error', 'Image export failed: ' + (e?.message ?? 'unknown error'));
+    } finally {
       el.style.display = prev.display;
       el.style.position = prev.position;
       el.style.left = prev.left;
-      toast.push('success', 'Image downloaded successfully.');
-    } catch (e: any) {
-      toast.push('error', 'Image export failed: ' + (e?.message ?? 'unknown error'));
+      el.style.width = prev.width;
     }
   }
 
@@ -169,7 +177,38 @@ export default function Routine() {
               <Toggle checked={showOffDays} onChange={setShowOffDays} label="Show off days" />
               <div className="flex gap-1.5">
                 <button className="btn-primary !px-3 !py-1.5 text-xs" onClick={handlePdf}><Icon name="download" className="h-3.5 w-3.5" /> PDF</button>
-                <button className="btn-secondary !px-3 !py-1.5 text-xs" onClick={handlePng}><Icon name="image" className="h-3.5 w-3.5" /> PNG</button>
+                <div className="relative">
+                  <button className="btn-secondary !px-3 !py-1.5 text-xs" onClick={() => setPngMenu((v) => !v)}>
+                    <Icon name="image" className="h-3.5 w-3.5" /> PNG <span className="ml-0.5 text-[8px] text-slate-400">▾</span>
+                  </button>
+                  {pngMenu && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setPngMenu(false)} />
+                      <div className="absolute right-0 z-40 mt-1.5 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                        <button
+                          className="flex w-full items-start gap-2.5 px-3.5 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-700/60"
+                          onClick={() => { setPngMenu(false); void handlePng('list'); }}
+                        >
+                          <Icon name="phone" className="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
+                          <span>
+                            <span className="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Daily list — phone-friendly</span>
+                            <span className="mt-0.5 block text-[10px] leading-snug text-slate-500 dark:text-slate-400">Portrait image, one day per block, big readable text. {isMobile ? 'Recommended for your screen. ✓' : 'Best when viewing on a phone.'}</span>
+                          </span>
+                        </button>
+                        <button
+                          className="flex w-full items-start gap-2.5 border-t border-slate-100 px-3.5 py-2.5 text-left transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700/60"
+                          onClick={() => { setPngMenu(false); void handlePng('grid'); }}
+                        >
+                          <Icon name="calendar" className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                          <span>
+                            <span className="block text-xs font-extrabold text-slate-800 dark:text-slate-100">Weekly grid — landscape</span>
+                            <span className="mt-0.5 block text-[10px] leading-snug text-slate-500 dark:text-slate-400">Full week at a glance (days × 6 slots). Wide image — best on a computer / desktop print.</span>
+                          </span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
                 <button className="btn-secondary !px-3 !py-1.5 text-xs" onClick={() => printElement()}><Icon name="printer" className="h-3.5 w-3.5" /> Print</button>
               </div>
             </div>
@@ -205,6 +244,7 @@ export default function Routine() {
               offDayMap={offDayMap}
               selectionLabel={label}
               settings={settings}
+              layout={pngLayout}
             />
           </div>
         </div>

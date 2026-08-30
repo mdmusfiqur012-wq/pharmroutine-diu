@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import clsx from 'clsx';
 import type { ClassDay, JoinedEntry, TimeSlot } from '../lib/types';
-import { entriesInSlot, STATUS_META } from '../lib/routine';
+import { entriesInSlot, STATUS_META, classColor } from '../lib/routine';
 import { Segmented, Icon, LegendChip } from '../lib/ui';
 import { MiniClassCard, MobileClassCard, useClassModal, ClassModalHost } from './ClassCard';
 import { useApp } from '../lib/store';
@@ -276,9 +276,11 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
   );
 }
 
-/* Dense printable/exportable variant: single class per cell, no interactivity */
-export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel, settings }: {
-  entries: JoinedEntry[]; days: ClassDay[]; slots: TimeSlot[]; offDayMap: Map<string, { reason?: string | null }>; selectionLabel: string[]; settings: any;
+/* Dense printable/exportable variant: single class per cell, no interactivity.
+   layout='grid'  → weekly grid (day rows × class-slot columns), wide landscape
+   layout='list'  → portrait day-by-day list, fits phone screens when exported */
+export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel, settings, layout = 'grid' }: {
+  entries: JoinedEntry[]; days: ClassDay[]; slots: TimeSlot[]; offDayMap: Map<string, { reason?: string | null }>; selectionLabel: string[]; settings: any; layout?: 'grid' | 'list';
 }) {
   const sortedDays = [...days].sort((a, b) => a.sequence - b.sequence);
   return (
@@ -296,6 +298,7 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
           </div>
         </div>
       </div>
+      {layout === 'grid' ? (
       <table className="w-full border-collapse text-[10px]">
         <thead>
           <tr>
@@ -339,6 +342,51 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
           })}
         </tbody>
       </table>
+      ) : (
+        /* ---- portrait daily list — made for phone-width exports ---- */
+        <div className="divide-y divide-slate-200">
+          {sortedDays.map((day) => {
+            const off = offDayMap.get(day.id);
+            const dayEntries = entries
+              .filter((e) => e.day_id === day.id)
+              .sort((a, b) => (a.timeSlot?.sequence ?? 0) - (b.timeSlot?.sequence ?? 0));
+            return (
+              <div key={day.id} className="p-2.5">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <h3 className="text-[12px] font-extrabold uppercase tracking-wide text-slate-800">{day.name}</h3>
+                  <span className="text-[9px] font-semibold text-slate-400">{dayEntries.length} class{dayEntries.length === 1 ? '' : 'es'}</span>
+                </div>
+                {off ? (
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-center text-[10px] font-extrabold uppercase tracking-wide text-amber-700">
+                    OFF DAY — No Classes Scheduled{off.reason ? ` (${off.reason})` : ''}
+                  </div>
+                ) : dayEntries.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-center text-[10px] font-semibold text-slate-400">No classes scheduled</div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {dayEntries.map((e) => (
+                      <div key={e.id} className="flex items-stretch gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2">
+                        <div className="flex w-[74px] shrink-0 flex-col items-center justify-center rounded-md border border-slate-200 bg-white px-1 py-1 text-center">
+                          <p className="text-[9px] font-extrabold leading-tight text-slate-800">{e.timeSlot?.label.split('–')[0]?.trim()}</p>
+                          <p className="text-[8.5px] leading-tight text-slate-500">{e.timeSlot?.label.split('–')[1]?.trim()}</p>
+                        </div>
+                        <div className="min-w-0 flex-1 border-l-[3px] pl-2" style={{ borderLeftColor: classColor(e, settings.colors) }}>
+                          <p className="text-[11px] font-extrabold leading-tight text-slate-900">
+                            {e.course?.code}{e.labGroup ? <span className="ml-1 rounded bg-slate-200 px-1 py-px text-[8.5px] font-bold text-slate-700">Group {e.labGroup.name}</span> : null}
+                            {e.status !== 'active' ? <span className="ml-1 rounded bg-amber-100 px-1 py-px text-[8.5px] font-bold text-amber-700">{STATUS_META[e.status].label.toUpperCase()}</span> : null}
+                          </p>
+                          <p className="text-[11px] font-semibold leading-tight text-slate-700">{e.course?.title}</p>
+                          <p className="text-[9.5px] text-slate-500">{e.faculty?.name} ({e.faculty?.initials}) · Room {e.room?.code}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-3 border-t border-slate-300 p-3 text-[9px] font-medium text-slate-500">
         <span className="font-extrabold text-slate-700">Legend:</span>
         <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: settings.colors.theory }} /> Theory</span>
