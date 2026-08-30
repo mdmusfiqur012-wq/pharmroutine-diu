@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
-import type { Database, RoutineSelection } from '../lib/types';
+import { COMBINED_LAB, NO_LAB, type Database, type RoutineSelection } from '../lib/types';
 import { Select } from '../lib/ui';
 
 /* ============================================================
  * SelectionPanel — Semester → Batch → Section → Lab Group.
  * Sections & lab groups are derived from the selected batch,
- * never assumed. "No lab" = theory-only routine.
+ * never assumed. "No lab" = theory-only routine; "B1 + B2"
+ * (combined) shows both lab groups of the section at once.
  * ============================================================ */
 
-export const NO_LAB = 'none';
+export { NO_LAB, COMBINED_LAB };
 
 export function labGroupsFor(db: Database, sectionId: string) {
   return db.labGroups.filter((g) => g.section_id === sectionId);
@@ -82,6 +83,7 @@ export function SelectionPanel({
             options={[
               { value: NO_LAB, label: 'Theory Only (no labs)' },
               ...groups.map((g) => ({ value: g.id, label: `Group ${g.name}` })),
+              ...(section && groups.length ? [{ value: COMBINED_LAB, label: `Group ${section.name}1 + ${section.name}2 (both groups)` }] : []),
             ]}
             placeholder={!showLabGroup ? 'N/A for this section' : 'Select lab group'}
             className={showLabGroup ? '' : 'opacity-50'}

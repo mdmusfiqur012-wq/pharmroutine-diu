@@ -49,6 +49,23 @@ const a1labs = r34.entries.filter((e) => e.class_type === 'lab');
 const a2labs = r34b.entries.filter((e) => e.class_type === 'lab');
 ok(a1labs.length > 0, 'Batch 34/A1: has lab sessions');
 ok(!a1labs.some((e) => e.labGroup?.name === 'A2') && a2labs.every((e) => e.labGroup?.name === 'A2'), 'A1 routine excludes A2 labs and vice versa');
+/* combined mode: both groups of the section */
+const r34both = buildStudentRoutine(db, { semester_id: sem.id, batch_id: b34.id, section_id: secA.id, lab_group_id: 'combined' as any }, { showOffDays: true });
+const bothLabs = r34both.entries.filter((e) => e.class_type === 'lab');
+ok(bothLabs.length === a1labs.length + a2labs.length, `combined A1+A2 shows every lab of the section (${bothLabs.length} = ${a1labs.length} + ${a2labs.length})`);
+ok(bothLabs.every((e) => e.labGroup && (e.labGroup.name === 'A1' || e.labGroup.name === 'A2')), "combined mode contains ONLY this section's lab groups");
+const onlyA1 = new Set(a1labs.map((e) => e.id));
+const onlyA2 = new Set(a2labs.map((e) => e.id));
+ok(bothLabs.every((e) => onlyA1.has(e.id) || onlyA2.has(e.id)), 'combined = exact union of A1 + A2');
+/* B section combined (the one requested) */
+const secB = db.sections.find((s) => s.batch_id === b34.id && s.name === 'B')!;
+const gB1 = db.labGroups.find((g) => g.section_id === secB.id && g.name === 'B1')!;
+const rB1 = buildStudentRoutine(db, { semester_id: sem.id, batch_id: b34.id, section_id: secB.id, lab_group_id: gB1.id }, { showOffDays: true });
+const rBoth = buildStudentRoutine(db, { semester_id: sem.id, batch_id: b34.id, section_id: secB.id, lab_group_id: 'combined' as any }, { showOffDays: true });
+const b1Labs = rB1.entries.filter((e) => e.class_type === 'lab');
+const bothB = rBoth.entries.filter((e) => e.class_type === 'lab');
+ok(bothB.length >= b1Labs.length && bothB.every((e) => e.labGroup && e.labGroup.name.startsWith('B')), 'B-section combined mode shows all B-group labs');
+ok(rBoth.entries.filter((e) => e.class_type === 'theory').length === rB1.entries.filter((e) => e.class_type === 'theory').length, 'combined mode never duplicates theory classes');
 const tOnly = new Set(r34.entries.filter((e) => e.class_type === 'theory').map((e) => `${e.day_id}|${e.time_slot_id}`));
 ok(!a1labs.some((e) => tOnly.has(`${e.day_id}|${e.time_slot_id}`)), 'labs never collide with the section’s theory slots');
 

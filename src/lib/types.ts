@@ -5,6 +5,10 @@
 
 export type ID = string;
 
+/* special lab-group selections used by the student routine panel */
+export const NO_LAB = 'none';            /* theory only — no lab sessions */
+export const COMBINED_LAB = 'combined';  /* both lab groups of the section (e.g. B1 + B2) */
+
 export type FacultyType = 'regular' | 'guest' | 'ged' | 'nfe' | 'external';
 export type ClassType = 'theory' | 'lab';
 export type EntryStatus = 'active' | 'cancelled' | 'rescheduled';
@@ -170,7 +174,7 @@ export interface RoutineSelection {
   semester_id: ID;
   batch_id: ID;
   section_id: ID;
-  lab_group_id: ID;
+  lab_group_id: ID | typeof NO_LAB | typeof COMBINED_LAB;
 }
 
 /** A fully joined routine entry (denormalized for rendering) */

@@ -132,7 +132,7 @@ export default function LabRoutine() {
           <EmptyState
             icon="flask"
             title="No laboratory sessions"
-            hint={selection.lab_group_id === NO_LAB ? 'Select a lab group (A1/A2/B1/B2) in the panel above to see lab sessions.' : 'No laboratory sessions are scheduled for this selection yet.'}
+            hint={selection.lab_group_id === NO_LAB ? 'Select a lab group (A1/A2/B1/B2) — or the combined option to see both groups — in the panel above.' : 'No laboratory sessions are scheduled for this selection yet.'}
             action={!selection.lab_group_id || selection.lab_group_id === NO_LAB ? (
               <button className="btn-primary" onClick={() => navigate('/routine')}><Icon name="calendar" /> Open full routine</button>
             ) : undefined}

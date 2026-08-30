@@ -5,7 +5,7 @@ import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
 import { buildStudentRoutine, filterClasses, offDaysFor, type ClassFilterKey } from '../lib/routine';
 import { exportRoutinePdf, exportRoutinePng, printElement, ROUTINE_PDF_FILENAME } from '../lib/exports';
-import { SelectionPanel, NO_LAB } from '../components/SelectionPanel';
+import { SelectionPanel, COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
 import Timetable, { PrintTimetable } from '../components/Timetable';
 import { EmptyState, Icon, PageHeader, Segmented, Toggle, useToast } from '../lib/ui';
 
@@ -69,7 +69,11 @@ export default function Routine() {
         db.semesters.find((s) => s.id === selection.semester_id)?.name ?? '',
         db.batches.find((b) => b.id === selection.batch_id)?.name ?? '',
         `Section ${db.sections.find((s) => s.id === selection.section_id)?.name ?? ''}`,
-        selection.lab_group_id !== NO_LAB ? `Group ${db.labGroups.find((g) => g.id === selection.lab_group_id)?.name ?? ''}` : '',
+        selection.lab_group_id !== NO_LAB
+          ? selection.lab_group_id === COMBINED_LAB
+            ? `Group ${db.sections.find((s) => s.id === selection.section_id)?.name ?? ''}1 + ${db.sections.find((s) => s.id === selection.section_id)?.name ?? ''}2`
+            : `Group ${db.labGroups.find((g) => g.id === selection.lab_group_id)?.name ?? ''}`
+          : '',
       ].filter(Boolean)
     : [];
 
@@ -82,7 +86,12 @@ export default function Routine() {
         semesterName: label[0] ?? '',
         batchName: label[1] ?? '',
         sectionName: label[2]?.replace('Section ', '') ?? '',
-        labGroupName: selection?.lab_group_id !== NO_LAB && selection ? db!.labGroups.find((g) => g.id === selection.lab_group_id)?.name ?? null : null,
+        labGroupName:
+          selection && selection.lab_group_id !== NO_LAB
+            ? selection.lab_group_id === COMBINED_LAB
+              ? `${db!.sections.find((s) => s.id === selection.section_id)?.name ?? ''}1 + ${db!.sections.find((s) => s.id === selection.section_id)?.name ?? ''}2`
+              : db!.labGroups.find((g) => g.id === selection.lab_group_id)?.name ?? null
+            : null,
         days: result.days,
         slots: result.slots,
         entries: filtered,

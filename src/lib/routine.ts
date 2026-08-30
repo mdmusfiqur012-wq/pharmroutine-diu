@@ -1,6 +1,7 @@
-import type {
-  Database, JoinedEntry, RoutineSelection, ClassDay, TimeSlot,
-  RoutineEntry, BatchOffDay, ClassColors, EntryStatus, ClassType,
+import {
+  COMBINED_LAB,
+  type Database, type JoinedEntry, type RoutineSelection, type ClassDay, type TimeSlot,
+  type RoutineEntry, type BatchOffDay, type ClassColors, type EntryStatus, type ClassType,
 } from './types';
 import { joinEntries, joinAll } from './conflicts';
 
@@ -49,9 +50,19 @@ export function buildStudentRoutine(
   const offs = offDaysFor(db, sel.semester_id, sel.batch_id);
   const offDayIds = new Set(offs.map((o) => o.day_id));
 
+  /* combined mode (e.g. "Group B1 + B2"): all lab groups of the section */
+  const combinedGroupIds =
+    sel.lab_group_id === COMBINED_LAB
+      ? new Set(db.labGroups.filter((g) => g.section_id === sel.section_id).map((g) => g.id))
+      : null;
+
   const entries = db.routineEntries
     .filter((e) => e.semester_id === sel.semester_id && e.batch_id === sel.batch_id && e.section_id === sel.section_id)
-    .filter((e) => (e.lab_group_id ? e.lab_group_id === sel.lab_group_id : true))
+    .filter((e) => {
+      if (!e.lab_group_id) return true; /* theory — always included */
+      if (combinedGroupIds) return combinedGroupIds.has(e.lab_group_id);
+      return e.lab_group_id === sel.lab_group_id;
+    })
     .map((e) => joinEntries(db, e));
 
   const allDays = [...db.classDays].filter((d) => d.is_active).sort((a, b) => a.sequence - b.sequence);
