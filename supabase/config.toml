@@ -1,0 +1,5 @@
+# Minimal config for the supabase CLI (functions deploy uses --project-ref).
+project_id = "pharmroutine-diu"
+
+[functions.magic-admin]
+verify_jwt = false

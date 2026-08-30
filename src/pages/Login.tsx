@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { api, DEMO_USERS, isSupabaseMode, findDemoUser } from '../lib/db';
+import { api, ADMIN_PASSCODE, DEMO_USERS, isSupabaseMode, findDemoUser } from '../lib/db';
 import { useApp } from '../lib/store';
 import { Icon, Logo, Badge, useToast } from '../lib/ui';
 
@@ -53,16 +53,40 @@ export default function Login() {
   const toast = useToast();
 
   const v = useMemo(() => validateDiuEmail(email), [email]);
+  const isPasscode = !isSupabaseMode && email.trim() === ADMIN_PASSCODE;
 
-  /* ---- Step 1: verify the official DIU email ---- */
-  function verify(e?: React.FormEvent) {
+  /* ---- Step 1: verify the official DIU email (or admin passcode) ---- */
+  async function verify(e?: React.FormEvent) {
     e?.preventDefault();
     setError('');
+    if (isPasscode) {
+      // demo-mode magic admin
+      setBusy(true);
+      const res = await api.magicAdmin(ADMIN_PASSCODE);
+      setBusy(false);
+      if (!res.ok) { setError(res.error ?? 'Passcode verification failed.'); return; }
+      finishAdmin(res);
+      return;
+    }
     if (!v.ok) {
+      // production: non-DIU text might be the admin passcode — let the
+      // server-side verifier decide (never trust the client).
+      if (isSupabaseMode && email.trim()) {
+        setBusy(true);
+        const res = await api.magicAdmin(email.trim());
+        setBusy(false);
+        if (res.ok) { finishAdmin(res); return; }
+      }
       setError(v.error ?? '❌ Please use your official DIU email address.');
       return;
     }
     setStep(2);
+  }
+
+  function finishAdmin(res: { user?: any; full_name?: string }) {
+    setUser({ id: res.user!.id, email: res.user!.email, role: 'admin', full_name: res.full_name ?? 'Routine Administrator' });
+    toast.push('success', 'Admin access granted — welcome!');
+    navigate('/admin');
   }
 
   /* ---- Step 2: password + role-based redirect ---- */
@@ -76,13 +100,13 @@ export default function Login() {
       setError(res.error ?? 'Sign-in failed');
       return;
     }
-    const demo = findDemoUser(email.trim());
+    const demo = !isSupabaseMode ? findDemoUser(email.trim()) : undefined;
     const sessionUser = demo
       ? { id: res.user!.id, email: res.user!.email, role: demo.role, full_name: demo.full_name, ...(demo as any) }
-      : { id: res.user!.id, email: res.user!.email, role: 'student' as const, full_name: email.split('@')[0] };
+      : { id: res.user!.id, email: res.user!.email, role: (res.role ?? 'student') as any, full_name: res.full_name ?? email.split('@')[0] };
     setUser(sessionUser as any);
     toast.push('success', `Welcome back, ${sessionUser.full_name}!`);
-    navigate(demo?.role === 'admin' ? '/admin' : '/');
+    navigate(sessionUser.role === 'admin' ? '/admin' : '/');
   }
 
   function fillDemo(u: (typeof DEMO_USERS)[number]) {
@@ -140,6 +164,12 @@ export default function Login() {
             <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/40">
               <p className="mb-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">The system checks</p>
               <ul className="space-y-1.5">
+                {isPasscode && (
+                  <li className="flex items-center gap-2 text-xs font-semibold text-brand-700 dark:text-brand-400">
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-600 text-white"><Icon name="check" className="h-2.5 w-2.5" /></span>
+                    Admin passcode recognized — verifying…
+                  </li>
+                )}
                 {v.checks.map((c) => (
                   <li key={c.label} className="flex items-center gap-2 text-xs font-semibold">
                     {c.done ? (
@@ -156,8 +186,12 @@ export default function Login() {
               </ul>
             </div>
 
-            <button type="submit" className="btn-primary w-full !py-3">
-              Verify &amp; Continue <Icon name="chevronRight" className="h-4 w-4" />
+            <button type="submit" className="btn-primary w-full !py-3" disabled={busy}>
+              {busy ? (
+                <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> Verifying…</>
+              ) : (
+                <>Verify &amp; Continue <Icon name="chevronRight" className="h-4 w-4" /></>
+              )}
             </button>
 
             <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
@@ -220,10 +254,11 @@ export default function Login() {
         </div>
       )}
 
-      {/* ---------- demo accounts ---------- */}
+      {/* ---------- demo accounts (offline demo mode only — never shown in production) ---------- */}
+      {!isSupabaseMode && (
       <div className="card mt-4 p-5">
         <p className="mb-2.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-          Demo accounts {isSupabaseMode ? '' : '(offline demo mode)'}
+          Demo accounts (offline demo mode)
         </p>
         <div className="space-y-2">
           {DEMO_USERS.map((u) => (
@@ -244,6 +279,7 @@ export default function Login() {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }

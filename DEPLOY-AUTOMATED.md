@@ -9,8 +9,18 @@ Batches 29–38 dataset, creates the **admin account**, then creates and deploys
 | Token | Where to get it | Permissions |
 |---|---|---|
 | **Supabase** (`sbp_…`) | https://supabase.com/dashboard/account/tokens | `ALL` (Management API) |
-| **Vercel** (created in account settings) | https://vercel.com/account/tokens | Full access |
+| **Vercel** | https://vercel.com/account/tokens | Full access |
 | **GitHub** (optional — pushes repo updates) | fine-grained PAT | Contents: read/write |
+
+## Admin access (as requested — no visible admin login)
+
+There is **no admin login section** shown anywhere. On the login page, typing the
+**admin passcode** (default `adminlogin7766`, override with `ADMIN_PASSCODE=…`) into the
+**email field** and pressing **Verify & Continue** signs you straight into the admin
+dashboard. The passcode is verified **server-side** by the `magic-admin` Edge Function
+(`supabase/functions/magic-admin`, deployed automatically, `verify_jwt = false`) against
+the `FUNCTIONS_ADMIN_PASSCODE` secret — it then issues a one-time session token for the
+`role='admin'` profile. The demo-accounts card is hidden whenever Supabase is connected.
 
 ## Run it
 

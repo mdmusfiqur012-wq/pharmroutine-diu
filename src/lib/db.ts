@@ -52,6 +52,11 @@ function delay(ms = 140) {
 /* Public API (identical shape in both modes)                         */
 /* ------------------------------------------------------------------ */
 
+/** Magic admin passcode: enter it in the email field on the login page
+ *  to sign straight into the admin dashboard (configurable via env). */
+export const ADMIN_PASSCODE: string =
+  ((import.meta as any).env?.VITE_ADMIN_PASSCODE as string | undefined) ?? 'adminlogin7766';
+
 export const api = {
   async fetchAll(): Promise<DB> {
     if (supabase) {
@@ -219,16 +224,47 @@ export const api = {
   },
 
   /* ---- auth ---- */
-  async signIn(email: string, password: string): Promise<{ ok: boolean; user?: any; error?: string }> {
+  async signIn(email: string, password: string): Promise<{ ok: boolean; user?: any; role?: string; full_name?: string; error?: string }> {
     if (supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return { ok: false, error: error.message };
-      return { ok: true, user: { id: data.user?.id, email: data.user?.email } };
+      const profile = await fetchProfile(data.user?.id);
+      return {
+        ok: true,
+        user: { id: data.user?.id, email: data.user?.email },
+        role: profile?.role ?? 'student',
+        full_name: profile?.full_name ?? data.user?.email?.split('@')[0] ?? 'Student',
+      };
     }
     await delay(350);
     const user = DEMO_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
     if (!user || user.password !== password) return { ok: false, error: 'Invalid email or password. Try one of the demo accounts below.' };
-    return { ok: true, user: { id: user.email, email: user.email } };
+    return { ok: true, user: { id: user.email, email: user.email }, role: user.role, full_name: user.full_name };
+  },
+
+  /** Magic admin sign-in via the server-side passcode verifier
+   *  (Supabase Edge Function in production, demo admin offline). */
+  async magicAdmin(passcode: string): Promise<{ ok: boolean; user?: any; role?: string; full_name?: string; error?: string }> {
+    if (!supabase) {
+      await delay(350);
+      if (passcode !== ADMIN_PASSCODE) return { ok: false, error: 'Invalid passcode.' };
+      const admin = DEMO_USERS[0];
+      return { ok: true, user: { id: admin.email, email: admin.email }, role: 'admin', full_name: admin.full_name };
+    }
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/magic-admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY! },
+      body: JSON.stringify({ passcode }),
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      return { ok: false, error: j.error ?? 'Passcode verification failed (is the magic-admin function deployed?).' };
+    }
+    const { token_hash } = await res.json();
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash, type: 'magiclink' });
+    if (error || !data.user) return { ok: false, error: error?.message ?? 'Could not start admin session.' };
+    const profile = await fetchProfile(data.user.id);
+    return { ok: true, user: { id: data.user.id, email: data.user.email }, role: 'admin', full_name: profile?.full_name ?? 'Routine Administrator' };
   },
 
   async signOut(): Promise<void> {
@@ -243,6 +279,14 @@ export const api = {
     return null;
   },
 };
+
+async function fetchProfile(id: string | undefined) {
+  if (!supabase || !id) return null;
+  try {
+    const { data } = await supabase.from('profiles').select('*').eq('id', id).maybeSingle();
+    return data as any;
+  } catch { return null; }
+}
 
 export const DEMO_USERS = [
   { email: 'admin@diu.edu.bd', password: 'admin123', role: 'admin', full_name: 'Routine Administrator', department: 'Dept. of Pharmacy' },

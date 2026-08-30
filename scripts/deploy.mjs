@@ -31,6 +31,7 @@ const GH = process.env.GITHUB_TOKEN;
 const REGION = process.env.SUPABASE_REGION ?? 'ap-southeast-1';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@diu.edu.bd';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? `Admin@${randomBytes(6).toString('hex')}`;
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? 'adminlogin7766';
 
 if (!SB || !VC) {
   console.error('Required: SUPABASE_TOKEN (sbp_…) and VERCEL_TOKEN. Optional: GITHUB_TOKEN (to push repo updates), ADMIN_EMAIL, ADMIN_PASSWORD.');
@@ -116,6 +117,27 @@ if (authRes.status >= 400) {
 }
 console.log(`   admin ready: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
 
+/* ---- 5b · edge function: server-side passcode verifier ---- */
+console.log('⑤ Deploying magic-admin edge function (server-side passcode verification)…');
+const supabaseCli = (args) => {
+  try {
+    return execSync(`npx --yes supabase@latest ${args}`, {
+      stdio: 'pipe', encoding: 'utf8',
+      env: { ...process.env, SUPABASE_ACCESS_TOKEN: SB },
+    });
+  } catch (e) { return e.stdout ?? ''; }
+};
+const fnOut = supabaseCli(`functions deploy magic-admin --project-ref ${ref}`);
+if (fnOut.includes('Success') || /deployed/i.test(fnOut)) {
+  console.log('   function deployed ✓');
+  supabaseCli(`secrets set FUNCTIONS_ADMIN_PASSCODE=${JSON.stringify(ADMIN_PASSCODE).slice(1, -1)} FUNCTIONS_ADMIN_EMAIL=${JSON.stringify(ADMIN_EMAIL).slice(1, -1)} --project-ref ${ref}`);
+  console.log('   secrets set ✓');
+} else {
+  console.log('   ⚠ function deploy unresolved — deploy manually later:');
+  console.log(`     npx supabase functions deploy magic-admin --project-ref ${ref}`);
+  console.log(`     npx supabase secrets set FUNCTIONS_ADMIN_PASSCODE=… FUNCTIONS_ADMIN_EMAIL=${ADMIN_EMAIL} --project-ref ${ref}`);
+}
+
 /* ---- 6 · Vercel ---- */
 console.log('⑤ Deploying to Vercel…');
 const vercel = (args, input) => {
@@ -136,12 +158,14 @@ for (const [k, v] of [['VITE_SUPABASE_URL', sbUrl], ['VITE_SUPABASE_ANON_KEY', a
 // production deploy
 const deployOut = vercel('deploy --prod');
 const urlMatch = deployOut.match(/https:\/\/[^\s]+/);
-console.log('⑥ DONE');
+console.log('⑦ DONE');
 console.log('----------------------------------------');
 console.log(`Supabase project: https://supabase.com/dashboard/project/${ref}`);
 console.log(`Supabase URL   : ${sbUrl}`);
 console.log(`Anon key       : ${anonKey.slice(0, 24)}…`);
-console.log(`Admin login    : ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+console.log(`Admin email    : ${ADMIN_EMAIL}`);
+console.log(`Admin password : ${ADMIN_PASSWORD}`);
+console.log(`Admin passcode : ${ADMIN_PASSCODE}   (type it in the email field on /login → straight to admin)`);
 console.log(`Vercel app     : ${urlMatch ? urlMatch[0] : '(see deploy output above)'}`);
 console.log('----------------------------------------');
 
