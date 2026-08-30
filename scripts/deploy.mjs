@@ -76,7 +76,7 @@ if (!String(proj.status ?? '').includes('HEALTHY')) console.warn('   project sti
 /* ---- 3 · schema ---- */
 console.log('② Applying schema via session pooler…');
 const pooler = `aws-0-${REGION}.pooler.supabase.com`;
-const conn = `postgresql://postgres.${ref}:${encodeURIComponent(dbPass)}@${pooler}:5432/postgres?sslmode=require`;
+const conn = `postgresql://postgres.${ref}:${encodeURIComponent(dbPass)}@${pooler}:5432/postgres`;
 const schema = readFileSync(path.join(process.cwd(), 'supabase', 'schema.sql'), 'utf8');
 {
   const c = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false } });

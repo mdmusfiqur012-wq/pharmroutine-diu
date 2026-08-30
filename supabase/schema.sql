@@ -148,7 +148,7 @@ create table if not exists routine_entries (
   updated_at    timestamptz not null default now(),
   -- integrity: theory ⇔ no group, lab ⇔ group
   constraint chk_theory_no_group check (class_type = 'lab' OR lab_group_id is null),
-  constraint chk_lab_has_group  check (class_type = 'lab' XOR lab_group_id is null),
+  constraint chk_lab_has_group  check ((class_type = 'lab') <> (lab_group_id is null)),
   -- the lab group must belong to the entry's section
   constraint chk_group_belongs_to_section
     foreign key (lab_group_id) references lab_groups(id)
@@ -248,18 +248,15 @@ create trigger trg_group_section before insert or update on routine_entries
 create or replace function enforce_routine_conflicts() returns trigger as $$
 declare
   clash record;
-  who text;
 begin
-  if new.status = 'cancelled' and tg_op = 'UPDATE' then
-    return new; -- cancelled rows may overlap
-  end if;
-
-  if tg_op = 'UPDATE' and new.status = 'cancelled' then
+  -- cancelled rows may overlap anything (they are not taught)
+  if new.status = 'cancelled' then
     return new;
   end if;
 
-  -- 1. faculty
-  select e.id, c.title, f.name, b.name as bname, s.name as sname, g.name as gname, r.code as rcode, d.short_name as dname, ts.label as tlabel
+  -- 1. faculty double-booking
+  select e.id, c.title cl, f.name fn, b.name bn, s.name sn, coalesce(g.name, '-') gn,
+         r.code rc, d.short_name dn, ts.label tl
     into clash
     from routine_entries e
     join courses c on c.id = e.course_id
@@ -277,12 +274,12 @@ begin
      and e.id is distinct from new.id
    limit 1;
   if found then
-    raise exception 'CONFLICT [faculty]: % is already teaching "%" (% Section %%) in % on % (%) — faculty double-booking is not allowed.',
-      clash.name, clash.title, clash.bname, clash.sname, coalesce(clash.gname,''), clash.rcode, clash.dname, clash.tlabel;
+    raise exception 'CONFLICT [faculty]: % is already teaching "%" (Batch % Section % group %) in % on %, %',
+      clash.fn, clash.cl, clash.bn, clash.sn, clash.gn, clash.rc, clash.dn, clash.tl;
   end if;
 
-  -- 2. room
-  select e.id, c.title, f.name, b.name as bname, s.name as sname, g.name as gname, r.code as rcode, d.short_name as dname, ts.label as tlabel
+  -- 2. room double-booking
+  select e.id, c.title cl, f.name fn, b.name bn, s.name sn, coalesce(g.name, '-') gn, r.code rc
     into clash
     from routine_entries e
     join courses c on c.id = e.course_id
@@ -291,8 +288,6 @@ begin
     join sections s on s.id = e.section_id
     left join lab_groups g on g.id = e.lab_group_id
     join rooms r on r.id = e.room_id
-    join class_days d on d.id = e.day_id
-    join time_slots ts on ts.id = e.time_slot_id
    where e.room_id = new.room_id
      and e.day_id = new.day_id
      and e.time_slot_id = new.time_slot_id
@@ -300,19 +295,20 @@ begin
      and e.id is distinct from new.id
    limit 1;
   if found then
-    raise exception 'CONFLICT [room]: % is already occupied by "%" (% Section %%) with % — room double-booking is not allowed.',
-      clash.rcode, clash.title, clash.bname, clash.sname, coalesce(clash.gname,''), clash.name;
+    raise exception 'CONFLICT [room]: % is already occupied by "%" (Batch % Section % group %) with %',
+      clash.rc, clash.cl, clash.bn, clash.sn, clash.gn, clash.fn;
   end if;
 
-  -- 3. section (any class of the same batch+section)
-  select e.id, c.title, b.name as bname, s.name as sname, g.name as gname, f.name as fname, d.short_name as dname, ts.label as tlabel
+  -- 3. section overlap (a section cannot have two classes at the same time)
+  select e.id, c.title cl, f.name fn, b.name bn, s.name sn, coalesce(g.name, '-') gn,
+         d.short_name dn, ts.label tl
     into clash
     from routine_entries e
     join courses c on c.id = e.course_id
+    join faculty f on f.id = e.faculty_id
     join batches b on b.id = e.batch_id
     join sections s on s.id = e.section_id
     left join lab_groups g on g.id = e.lab_group_id
-    join faculty f on f.id = e.faculty_id
     join class_days d on d.id = e.day_id
     join time_slots ts on ts.id = e.time_slot_id
    where e.batch_id = new.batch_id
@@ -323,13 +319,13 @@ begin
      and e.id is distinct from new.id
    limit 1;
   if found then
-    raise exception 'CONFLICT [section]: % Section % already has "%"% on % (%) with % — a section cannot have two classes at the same time.',
-      clash.bname, clash.sname, clash.title, coalesce(' (Group '||clash.gname||')',''), clash.fname, clash.dname, clash.tlabel;
+    raise exception 'CONFLICT [section]: Batch % Section % already has "%" (group %) with % on %, %',
+      clash.bn, clash.sn, clash.cl, clash.gn, clash.fn, clash.dn, clash.tl;
   end if;
 
-  -- 4. lab group
+  -- 4. lab-group overlap
   if new.lab_group_id is not null then
-    select e.id, c.title, g.name as gname, b.name as bname, s.name as sname, d.short_name as dname, ts.label as tlabel
+    select e.id, c.title cl, g.name gn, b.name bn, s.name sn, d.short_name dn, ts.label tl
       into clash
       from routine_entries e
       join courses c on c.id = e.course_id
@@ -345,8 +341,8 @@ begin
        and e.id is distinct from new.id
      limit 1;
     if found then
-      raise exception 'CONFLICT [lab_group]: Group % (% Section %) already has "%" on % (%) — a lab group cannot attend two sessions at once.',
-        clash.gname, clash.bname, clash.sname, clash.title, clash.dname, clash.tlabel;
+      raise exception 'CONFLICT [lab_group]: Group % (Batch % Section %) already has "%" on %, %',
+        clash.gn, clash.bn, clash.sn, clash.cl, clash.dn, clash.tl;
     end if;
   end if;
 
@@ -433,6 +429,7 @@ create policy "public read class_days"      on class_days      for select using 
 create policy "public read routine"         on routine_entries for select using (true);
 create policy "public read off days"        on batch_off_days  for select using (true);
 create policy "public read announcements"   on announcements   for select using (is_active = true);
+create policy "admin read announcements"    on announcements   for select using (is_admin());
 create policy "public read settings"        on settings        for select using (true);
 
 -- admin write
@@ -465,3 +462,8 @@ create policy "faculty edit own profile" on profiles
 --  where id = '<the-admin-uuid>';
 -- (Insert any catalog/seed rows here — see scripts/generate-seed.mjs for a
 --  ready-made deterministic dataset you can replay against this schema.)
+
+-- ---------------------------------------------------------------- explicit grants
+grant usage on schema public to anon, authenticated, service_role;
+grant select on all tables in schema public to anon, authenticated;
+grant insert, update, delete on all tables in schema public to authenticated;

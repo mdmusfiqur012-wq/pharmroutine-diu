@@ -35,13 +35,16 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
-    // find the admin user + profile
-    const { data: user, error: uErr } = await admin.auth.admin.getUserByEmail(ADMIN_EMAIL);
-    if (uErr || !user?.user) return json({ error: 'Admin account not found. Create it first (see DEPLOY.md).' }, 404);
-
-    const { data: prof } = await admin
-      .from('profiles').select('role').eq('id', user.user.id).maybeSingle();
-    if (prof?.role !== 'admin') {
+    // find the admin profile (service-role client can read profiles.table directly)
+    const { data: prof, error: profErr } = await admin
+      .from('profiles')
+      .select('id, role, full_name, email')
+      .eq('email', ADMIN_EMAIL)
+      .maybeSingle();
+    if (profErr || !prof) {
+      return json({ error: 'Admin account not found. Create it first (see DEPLOY.md step 1).' }, 404);
+    }
+    if (prof.role !== 'admin') {
       return json({ error: 'The admin account is not promoted to role=admin.' }, 403);
     }
 

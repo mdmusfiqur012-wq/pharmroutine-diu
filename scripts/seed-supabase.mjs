@@ -21,7 +21,8 @@ const seed = JSON.parse(
   readFileSync(path.join(process.cwd(), 'src', 'lib', 'seed.json'), 'utf8'),
 );
 
-const DB_URL = process.env.SUPABASE_DB_URL;
+const DB_URL = (process.env.SUPABASE_DB_URL ?? '').replace(/\?sslmode=[^&]*/, '');
+
 if (!DB_URL) {
   console.error('Missing SUPABASE_DB_URL (session pooler connection string).');
   process.exit(1);
@@ -36,19 +37,20 @@ function uuidFrom(text) {
 const id = (v) => (v == null ? null : uuidFrom(String(v)));
 
 /* table -> { columns with special mapping } */
+/* jsonKey in seed.json -> sql table name */
 const TABLES = [
-  { t: 'semesters', map: { id: id } },
-  { t: 'batches', map: { id: id } },
-  { t: 'sections', map: { id: id, batch_id: id } },
-  { t: 'lab_groups', map: { id: id, section_id: id } },
-  { t: 'faculty', map: { id: id } },
-  { t: 'courses', map: { id: id } },
-  { t: 'rooms', map: { id: id } },
-  { t: 'time_slots', map: { id: id } },
-  { t: 'class_days', map: { id: id } },
-  { t: 'routine_entries', map: { id: id, semester_id: id, batch_id: id, section_id: id, lab_group_id: id, course_id: id, faculty_id: id, room_id: id, day_id: id, time_slot_id: id } },
-  { t: 'batch_off_days', map: { id: id, semester_id: id, batch_id: id, day_id: id } },
-  { t: 'announcements', map: { id: id, semester_id: id, batch_id: id } },
+  { k: 'semesters', t: 'semesters', map: { id: id } },
+  { k: 'batches', t: 'batches', map: { id: id } },
+  { k: 'sections', t: 'sections', map: { id: id, batch_id: id } },
+  { k: 'labGroups', t: 'lab_groups', map: { id: id, section_id: id } },
+  { k: 'faculty', t: 'faculty', map: { id: id } },
+  { k: 'courses', t: 'courses', map: { id: id } },
+  { k: 'rooms', t: 'rooms', map: { id: id } },
+  { k: 'timeSlots', t: 'time_slots', map: { id: id } },
+  { k: 'classDays', t: 'class_days', map: { id: id } },
+  { k: 'routineEntries', t: 'routine_entries', map: { id: id, semester_id: id, batch_id: id, section_id: id, lab_group_id: id, course_id: id, faculty_id: id, room_id: id, day_id: id, time_slot_id: id } },
+  { k: 'batchOffDays', t: 'batch_off_days', map: { id: id, semester_id: id, batch_id: id, day_id: id } },
+  { k: 'announcements', t: 'announcements', map: { id: id, semester_id: id, batch_id: id } },
 ];
 
 const client = new pg.Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
@@ -58,8 +60,8 @@ async function main() {
   console.log('✓ connected to Supabase database');
 
   const counts = {};
-  for (const { t, map } of TABLES) {
-    const rows = seed[t] ?? [];
+  for (const { k, t, map } of TABLES) {
+    const rows = seed[k] ?? [];
     const mapped = rows.map((r) => {
       const out = {};
       for (const [k, v] of Object.entries(r)) {
