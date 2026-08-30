@@ -5,6 +5,7 @@ import { entriesInSlot, STATUS_META } from '../lib/routine';
 import { Segmented, Icon, LegendChip } from '../lib/ui';
 import { MiniClassCard, MobileClassCard, useClassModal, ClassModalHost } from './ClassCard';
 import { useApp } from '../lib/store';
+import diuLogo from '../assets/diu-logo.png';
 
 /* ============================================================
  * Timetable — time slots as COLUMNS, days as ROWS.
@@ -282,8 +283,9 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
   const sortedDays = [...days].sort((a, b) => a.sequence - b.sequence);
   return (
     <div className="print-area overflow-hidden rounded-xl border border-slate-300 bg-white" id="print-routine">
-      <div className="border-b-4 bg-white p-5" style={{ borderColor: settings.colors.theory }}>
-        <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-4 border-b-4 bg-white p-5" style={{ borderColor: settings.colors.theory }}>
+        <img src={diuLogo} alt="DIU" className="h-16 w-auto shrink-0" draggable={false} />
+        <div className="flex flex-1 items-center justify-between gap-4">
           <div>
             <h1 className="text-lg font-extrabold text-slate-900">{settings.universityName}</h1>
             <p className="text-sm font-semibold text-slate-600">{settings.departmentName} · Class Routine</p>

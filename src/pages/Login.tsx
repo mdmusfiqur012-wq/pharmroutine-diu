@@ -126,8 +126,8 @@ export default function Login() {
             <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-14 -left-10 h-44 w-44 rounded-full bg-amber-400/20 blur-3xl" />
             <div className="relative">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/25">
-                <Logo size={42} />
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white/95 p-1.5 shadow-lg ring-1 ring-white/40">
+                <Logo size={64} />
               </div>
               <h1 className="mt-3 flex items-center justify-center gap-2 text-xl font-extrabold">
                 <span aria-hidden>🎓</span> PharmRoutine DIU
@@ -206,7 +206,7 @@ export default function Login() {
       {step === 2 && (
         <div className="card overflow-hidden animate-scale-in">
           <div className="bg-gradient-to-br from-brand-800 to-emerald-800 px-6 py-6 text-center text-white">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/25"><Logo size={30} /></div>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-white/95 p-1 shadow ring-1 ring-white/40"><Logo size={44} /></div>
             <h1 className="mt-2 text-lg font-extrabold">Enter your password</h1>
           </div>
           <form onSubmit={signIn} className="space-y-4 p-6">

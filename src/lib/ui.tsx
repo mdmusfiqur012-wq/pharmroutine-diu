@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import clsx from 'clsx';
+import diuLogo from '../assets/diu-logo.png';
 
 /* ============================================================
  * Reusable UI primitives: icons, modal, toasts, tabs, empty
@@ -59,17 +60,19 @@ export function Icon({ name, className = 'h-4 w-4' }: { name: IconName; classNam
   );
 }
 
-/* ---------------- Logo ---------------- */
+/* ---------------- Logo (official DIU emblem) ---------------- */
 
-export function Logo({ size = 38 }: { size?: number }) {
+export function Logo({ size = 38, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="7" fill="#15803d" />
-      <path d="M16 6c2 3 2 8-1.5 11.5S6.5 22 6.5 22s.5-5.5 4-9S14.5 9 16 6z" fill="#fbbf24" />
-      <path d="M16 6c-2 3-2 8 1.5 11.5S25.5 22 25.5 22s-.5-5.5-4-9S17.5 9 16 6z" fill="#fcd34d" />
-      <circle cx="16" cy="10.5" r="2.2" fill="#fff" />
-      <path d="M13.5 26h5M10 28h12" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
+    <img
+      src={diuLogo}
+      alt="Daffodil International University"
+      width={size}
+      height={size}
+      className={clsx('shrink-0 object-contain', className)}
+      style={{ height: size, width: size }}
+      draggable={false}
+    />
   );
 }
 

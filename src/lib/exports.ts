@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { Database, JoinedEntry, ClassDay, TimeSlot, AppSettings } from './types';
 import { classColor } from './routine';
+import diuLogo from '../assets/diu-logo.png?inline';
 
 /* ============================================================
  * PDF / PNG / print export.
@@ -75,13 +76,14 @@ export async function exportRoutinePdf(info: ExportInfo, fileName = 'routine.pdf
   // ---- header band ----
   doc.setFillColor(...hexToRgb(settings.colors.theory));
   doc.rect(0, 0, pageW, 56, 'F');
+  doc.addImage(diuLogo, 'PNG', margin + 4, 6.5, 43, 42);
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
-  doc.text(settings.universityName, margin, 26);
+  doc.text(settings.universityName, margin + 56, 26);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${settings.departmentName}  ·  ${title}`, margin, 42);
+  doc.text(`${settings.departmentName}  ·  ${title}`, margin + 56, 42);
 
   // ---- meta line ----
   doc.setTextColor(60, 60, 60);

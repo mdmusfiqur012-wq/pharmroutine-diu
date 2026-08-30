@@ -66,8 +66,10 @@ export default function Home() {
           </div>
           <div className="hidden lg:block">
             <div className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <Logo size={44} />
+            <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-md ring-1 ring-black/5 dark:ring-white/10">
+                  <Logo size={48} />
+                </div>
                 <div>
                   <p className="text-sm font-extrabold">{settings.departmentName}</p>
                   <p className="text-[11px] text-white/75">{activeSemester?.name ?? '—'} · Dynamic weekly scheduler</p>
