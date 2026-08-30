@@ -111,6 +111,9 @@ ok(searchRoutine(db, sem.id, 'DSR').length > 0, 'search by initials works');
 ok(searchRoutine(db, sem.id, 'AB-1 403').length > 0, 'search by room works');
 ok(searchRoutine(db, sem.id, '0916-4101').length > 0, 'search by official course code works');
 ok(searchRoutine(db, sem.id, 'MUA').length > 0, 'search by guest/regular faculty works');
+ok(searchRoutine(db, sem.id, 'Pharmacology').length > 0, 'search by course title works');
+ok(searchRoutine(db, sem.id, 'Pharmacognosy').length > 0, 'search by course title (L1) works');
+ok(db.courses.every((c) => c.title !== c.code || ['AGS', 'NFE', 'CQI'].includes(c.code)), 'all real courses have official titles');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

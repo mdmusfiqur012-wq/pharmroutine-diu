@@ -88,7 +88,7 @@ const PSEUDO_FACULTY = [
 const FACULTY = [...DEPT_FACULTY, ...GUEST_FACULTY, ...GED_FACULTY, ...PSEUDO_FACULTY];
 
 /* ---------------- courses ---------------- */
-const GED_PREFIXES = new Set(['0231', '0541', '0611', '0222', '0223', '0511', '0512']);
+const GED_PREFIXES = new Set(['0231', '0541', '0611', '0222', '0223']); /* GED subject-groups only */
 const levelOfBatch = Object.fromEntries(BATCHES.map((b) => [b.no, b.level]));
 
 const courseStat = new Map();
@@ -100,15 +100,112 @@ for (const c of OFF.cells) {
   courseStat.set(c.code, s);
 }
 
+/* ============================================================
+ * OFFICIAL course titles — from the department's own lists:
+ *  - user-provided Level 1 codes (text message)
+ *  - DIU portal course lists (screenshots: L2T1/L2T2, L3T1/L3T2,
+ *    L4T1/L4T2 registered-course pages)
+ * Inferred (no screenshot): L2T1 + L3T1 theory/practical pairing
+ * by subject-group prefix & old B.Pharm sequence — FLAGGED in
+ * the console output for department verification.
+ * ============================================================ */
+const COURSE_TITLES = {
+  /* ---- Level 1 Term 1 (1st semester, Batch 36) ---- */
+  '0916-1101': ['Inorganic Pharmacy-I', 3],
+  '0531-1102': ['Inorganic Pharmacy-I Practical', 1],
+  '0917-1103': ['Pharmacognosy-I', 3],
+  '0917-1104': ['Pharmacognosy-I Practical', 1],
+  '0912-1105': ['Basic Anatomy', 3],
+  '0231-111':  ['English Language', 3],
+  '0611-111':  ['Computer Fundamentals', 3],
+  '0541-111':  ['Basic Mathematics', 3],
+  '0916-1103': ['Pharmacognosy-I', 3], /* sheet typo for 0917-1103 (Wed C3, 36A) */
+  /* ---- Level 1 Term 2 (2nd semester, Batch 35) ---- */
+  '0531-1201': ['Inorganic Pharmacy-II', 3],
+  '0917-1203': ['Pharmacognosy-II', 3],
+  '0531-1205': ['Organic Pharmacy-I', 3],
+  '0531-1206': ['Organic Pharmacy-I Practical', 1],
+  '0531-1207': ['Physical Pharmacy', 3],
+  '0531-1208': ['Physical Pharmacy Practical', 1],
+  '0912-1209': ['Physiology-I', 3],
+  '0912-1210': ['Physiology-I Practical', 1],
+  '0916-1211': ['Oral Assessment-I', 1],
+  /* ---- Level 2 Term 1 (3rd semester, Batch 34) — INFERRED ---- */
+  '0531-2101': ['Organic Pharmacy-II', 3],
+  '0531-2103': ['Physical Pharmacy-II', 3],
+  '0512-2107': ['Biochemistry & Molecular Biology', 3],
+  '0512-2108': ['Biochemistry & Molecular Biology Practical', 1],
+  '0511-2109': ['Pharmaceutical Microbiology-I', 3],
+  '0511-2110': ['Pharmaceutical Microbiology-I Practical', 1],
+  '0912-2105': ['Physiology-II', 3],
+  '0222-113':  ['Art of Living', 3],
+  /* ---- Level 2 Term 2 (4th semester, Batch 33) — portal list ---- */
+  '0916-2201': ['Pharmaceutical Analysis & Quality Control-I', 3],
+  '0916-2202': ['Pharmaceutical Analysis & Quality Control-I Practical', 1],
+  '0511-2203': ['Pharmaceutical Microbiology-II', 3],
+  '0916-2205': ['Basic Pharmaceutics', 3],
+  '0916-2207': ['Pharmacology-I', 3],
+  '0916-2208': ['Pharmacology-I Practical', 1],
+  '0916-2209': ['Clinical Pathology', 2],
+  '0916-2211': ['Oral Assessment-II', 1],
+  '0223-111':  ['Art of Living', 3],
+  /* ---- Level 3 Term 1 (5th semester, Batch 32) — INFERRED ---- */
+  '0916-3101': ['Pharmaceutical Analysis & Quality Control-II', 3],
+  '0916-3102': ['Pharmaceutical Analysis & Quality Control-II Practical', 1],
+  '0916-3103': ['Pharmaceutical Technology-I', 3],
+  '0916-3104': ['Pharmaceutical Technology-I Practical', 1],
+  '0916-3105': ['Pharmacology-II', 3],
+  '0916-3106': ['Pharmacology-II Practical', 1],
+  '0916-3107': ['Medicinal Chemistry-I', 3],
+  '0916-3108': ['Medicinal Chemistry-I Practical', 1],
+  '0916-3109': ['Hospital & Community Pharmacy', 3],
+  /* ---- Level 3 Term 2 (6th semester, Batch 31) — portal list ---- */
+  '0916-3201': ['Medicinal Chemistry-II', 3],
+  '0916-3202': ['Medicinal Chemistry-II Practical', 1],
+  '0916-3203': ['Pharmaceutical Technology-II', 3],
+  '0916-3204': ['Pharmaceutical Technology-II Practical', 1],
+  '0916-3205': ['Biopharmaceutics & Pharmacokinetics-I', 3],
+  '0916-3206': ['Biopharmaceutics & Pharmacokinetics-I Practical', 1],
+  '0916-3207': ['Pharmacology-III', 3],
+  '0414-3209': ['Pharmaceutical Marketing', 2, 'ged'],
+  /* ---- Level 4 Term 1 (7th semester, Batch 30) — portal list ---- */
+  '0916-4101': ['Medicinal Chemistry-III', 3],
+  '0916-4102': ['Medicinal Chemistry-III Practical', 1],
+  '0916-4103': ['Pharmaceutical Technology-III', 3],
+  '0916-4104': ['Pharmaceutical Technology-III Practical', 1],
+  '0916-4105': ['Biopharmaceutics & Pharmacokinetics-II', 3],
+  '0916-4106': ['Biopharmaceutics & Pharmacokinetics-II Practical', 1],
+  '0916-4107': ['Advanced Pharmaceutical Analysis & Validation', 3],
+  '0916-4108': ['Advanced Pharmaceutical Analysis & Validation Practical', 1],
+  '0413-4113': ['Pharmaceutical Management', 2],
+  '0031-411':  ['Employability 360', 3, 'ged'],
+  /* ---- Level 4 Term 2 (8th semester, Batch 29) — portal list ---- */
+  '0916-4201': ['Pharmaceutical Biotechnology', 3],
+  '0916-4203': ['Pharmaceutical Engineering', 3],
+  '0916-4205': ['Cosmetology', 3],
+  '0916-4206': ['Cosmetology Practical', 1],
+  '0917-4207': ['Nutraceuticals, Dietary Supplements & Herbal Products', 3],
+  '0916-4209': ['Pharmaceutical Regulatory Affairs', 2],
+  '0916-4211': ['Pharmacotherapeutics & Disease Management', 2],
+};
+const INFERRED = new Set(['0531-2101', '0531-2103', '0512-2107', '0512-2108', '0511-2109', '0511-2110', '0222-113', '0916-3101', '0916-3102', '0916-3103', '0916-3104', '0916-3105', '0916-3106', '0916-3107', '0916-3108', '0916-3109', '0916-1103']);
+
 const courses = [];
+const missingTitles = [];
 for (const [code, st] of [...courseStat.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
   const level = Math.min(...[...st.batches].map((b) => levelOfBatch[b] ?? 1));
   const mode = st.theory && st.lab ? 'theory_lab' : st.lab ? 'lab' : 'theory';
+  const def = COURSE_TITLES[code];
+  if (!def) { missingTitles.push(code); continue; }
+  const [title, credit, deptOverride] = def;
   const prefix = code.split('-')[0];
-  const dept = GED_PREFIXES.has(prefix) ? 'ged' : 'pharmacy';
-  /* NOTE: titles are the official DIU course codes for now — the
-     department's code→title list is applied in a follow-up pass. */
-  courses.push({ id: `c-${code}`, code, title: code, credit: 3, course_mode: mode, department: dept, level, is_active: true });
+  const dept = deptOverride ?? (GED_PREFIXES.has(prefix) ? 'ged' : 'pharmacy');
+  courses.push({ id: `c-${code}`, code, title, credit, course_mode: mode, department: dept, level, is_active: true });
+  if (INFERRED.has(code)) console.log(`  [inferred title] ${code} → ${title}`);
+}
+if (missingTitles.length) {
+  console.error('  !! MISSING TITLES FOR:', missingTitles.join(' '));
+  process.exitCode = 1;
 }
 /* pseudo courses for rooms reserved by other departments / meetings */
 courses.push(

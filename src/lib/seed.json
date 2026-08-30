@@ -693,17 +693,17 @@
     {
       "id": "c-0031-411",
       "code": "0031-411",
-      "title": "0031-411",
+      "title": "Employability 360",
       "credit": 3,
       "course_mode": "theory",
-      "department": "pharmacy",
+      "department": "ged",
       "level": 7,
       "is_active": true
     },
     {
       "id": "c-0222-113",
       "code": "0222-113",
-      "title": "0222-113",
+      "title": "Art of Living",
       "credit": 3,
       "course_mode": "theory",
       "department": "ged",
@@ -713,7 +713,7 @@
     {
       "id": "c-0223-111",
       "code": "0223-111",
-      "title": "0223-111",
+      "title": "Art of Living",
       "credit": 3,
       "course_mode": "theory",
       "department": "ged",
@@ -723,7 +723,7 @@
     {
       "id": "c-0231-111",
       "code": "0231-111",
-      "title": "0231-111",
+      "title": "English Language",
       "credit": 3,
       "course_mode": "theory",
       "department": "ged",
@@ -733,8 +733,8 @@
     {
       "id": "c-0413-4113",
       "code": "0413-4113",
-      "title": "0413-4113",
-      "credit": 3,
+      "title": "Pharmaceutical Management",
+      "credit": 2,
       "course_mode": "theory",
       "department": "pharmacy",
       "level": 7,
@@ -743,68 +743,68 @@
     {
       "id": "c-0414-3209",
       "code": "0414-3209",
-      "title": "0414-3209",
-      "credit": 3,
+      "title": "Pharmaceutical Marketing",
+      "credit": 2,
       "course_mode": "theory",
-      "department": "pharmacy",
+      "department": "ged",
       "level": 6,
       "is_active": true
     },
     {
       "id": "c-0511-2109",
       "code": "0511-2109",
-      "title": "0511-2109",
+      "title": "Pharmaceutical Microbiology-I",
       "credit": 3,
       "course_mode": "theory",
-      "department": "ged",
+      "department": "pharmacy",
       "level": 3,
       "is_active": true
     },
     {
       "id": "c-0511-2110",
       "code": "0511-2110",
-      "title": "0511-2110",
-      "credit": 3,
+      "title": "Pharmaceutical Microbiology-I Practical",
+      "credit": 1,
       "course_mode": "lab",
-      "department": "ged",
+      "department": "pharmacy",
       "level": 3,
       "is_active": true
     },
     {
       "id": "c-0511-2203",
       "code": "0511-2203",
-      "title": "0511-2203",
+      "title": "Pharmaceutical Microbiology-II",
       "credit": 3,
       "course_mode": "theory",
-      "department": "ged",
+      "department": "pharmacy",
       "level": 4,
       "is_active": true
     },
     {
       "id": "c-0512-2107",
       "code": "0512-2107",
-      "title": "0512-2107",
+      "title": "Biochemistry & Molecular Biology",
       "credit": 3,
       "course_mode": "theory",
-      "department": "ged",
+      "department": "pharmacy",
       "level": 3,
       "is_active": true
     },
     {
       "id": "c-0512-2108",
       "code": "0512-2108",
-      "title": "0512-2108",
-      "credit": 3,
+      "title": "Biochemistry & Molecular Biology Practical",
+      "credit": 1,
       "course_mode": "lab",
-      "department": "ged",
+      "department": "pharmacy",
       "level": 3,
       "is_active": true
     },
     {
       "id": "c-0531-1102",
       "code": "0531-1102",
-      "title": "0531-1102",
-      "credit": 3,
+      "title": "Inorganic Pharmacy-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 1,
@@ -813,7 +813,7 @@
     {
       "id": "c-0531-1201",
       "code": "0531-1201",
-      "title": "0531-1201",
+      "title": "Inorganic Pharmacy-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -823,7 +823,7 @@
     {
       "id": "c-0531-1205",
       "code": "0531-1205",
-      "title": "0531-1205",
+      "title": "Organic Pharmacy-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -833,8 +833,8 @@
     {
       "id": "c-0531-1206",
       "code": "0531-1206",
-      "title": "0531-1206",
-      "credit": 3,
+      "title": "Organic Pharmacy-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 2,
@@ -843,7 +843,7 @@
     {
       "id": "c-0531-1207",
       "code": "0531-1207",
-      "title": "0531-1207",
+      "title": "Physical Pharmacy",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -853,8 +853,8 @@
     {
       "id": "c-0531-1208",
       "code": "0531-1208",
-      "title": "0531-1208",
-      "credit": 3,
+      "title": "Physical Pharmacy Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 2,
@@ -863,7 +863,7 @@
     {
       "id": "c-0531-2101",
       "code": "0531-2101",
-      "title": "0531-2101",
+      "title": "Organic Pharmacy-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -873,7 +873,7 @@
     {
       "id": "c-0531-2103",
       "code": "0531-2103",
-      "title": "0531-2103",
+      "title": "Physical Pharmacy-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -883,7 +883,7 @@
     {
       "id": "c-0541-111",
       "code": "0541-111",
-      "title": "0541-111",
+      "title": "Basic Mathematics",
       "credit": 3,
       "course_mode": "theory",
       "department": "ged",
@@ -893,7 +893,7 @@
     {
       "id": "c-0611-111",
       "code": "0611-111",
-      "title": "0611-111",
+      "title": "Computer Fundamentals",
       "credit": 3,
       "course_mode": "theory",
       "department": "ged",
@@ -903,7 +903,7 @@
     {
       "id": "c-0912-1105",
       "code": "0912-1105",
-      "title": "0912-1105",
+      "title": "Basic Anatomy",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -913,7 +913,7 @@
     {
       "id": "c-0912-1209",
       "code": "0912-1209",
-      "title": "0912-1209",
+      "title": "Physiology-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -923,8 +923,8 @@
     {
       "id": "c-0912-1210",
       "code": "0912-1210",
-      "title": "0912-1210",
-      "credit": 3,
+      "title": "Physiology-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 2,
@@ -933,7 +933,7 @@
     {
       "id": "c-0912-2105",
       "code": "0912-2105",
-      "title": "0912-2105",
+      "title": "Physiology-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -943,7 +943,7 @@
     {
       "id": "c-0916-1101",
       "code": "0916-1101",
-      "title": "0916-1101",
+      "title": "Inorganic Pharmacy-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -953,7 +953,7 @@
     {
       "id": "c-0916-1103",
       "code": "0916-1103",
-      "title": "0916-1103",
+      "title": "Pharmacognosy-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -963,7 +963,7 @@
     {
       "id": "c-0916-2201",
       "code": "0916-2201",
-      "title": "0916-2201",
+      "title": "Pharmaceutical Analysis & Quality Control-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -973,8 +973,8 @@
     {
       "id": "c-0916-2202",
       "code": "0916-2202",
-      "title": "0916-2202",
-      "credit": 3,
+      "title": "Pharmaceutical Analysis & Quality Control-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 4,
@@ -983,7 +983,7 @@
     {
       "id": "c-0916-2205",
       "code": "0916-2205",
-      "title": "0916-2205",
+      "title": "Basic Pharmaceutics",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -993,7 +993,7 @@
     {
       "id": "c-0916-2207",
       "code": "0916-2207",
-      "title": "0916-2207",
+      "title": "Pharmacology-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1003,8 +1003,8 @@
     {
       "id": "c-0916-2208",
       "code": "0916-2208",
-      "title": "0916-2208",
-      "credit": 3,
+      "title": "Pharmacology-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 4,
@@ -1013,8 +1013,8 @@
     {
       "id": "c-0916-2209",
       "code": "0916-2209",
-      "title": "0916-2209",
-      "credit": 3,
+      "title": "Clinical Pathology",
+      "credit": 2,
       "course_mode": "theory",
       "department": "pharmacy",
       "level": 4,
@@ -1023,7 +1023,7 @@
     {
       "id": "c-0916-3101",
       "code": "0916-3101",
-      "title": "0916-3101",
+      "title": "Pharmaceutical Analysis & Quality Control-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1033,8 +1033,8 @@
     {
       "id": "c-0916-3102",
       "code": "0916-3102",
-      "title": "0916-3102",
-      "credit": 3,
+      "title": "Pharmaceutical Analysis & Quality Control-II Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 5,
@@ -1043,7 +1043,7 @@
     {
       "id": "c-0916-3103",
       "code": "0916-3103",
-      "title": "0916-3103",
+      "title": "Pharmaceutical Technology-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1053,8 +1053,8 @@
     {
       "id": "c-0916-3104",
       "code": "0916-3104",
-      "title": "0916-3104",
-      "credit": 3,
+      "title": "Pharmaceutical Technology-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 5,
@@ -1063,7 +1063,7 @@
     {
       "id": "c-0916-3105",
       "code": "0916-3105",
-      "title": "0916-3105",
+      "title": "Pharmacology-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1073,8 +1073,8 @@
     {
       "id": "c-0916-3106",
       "code": "0916-3106",
-      "title": "0916-3106",
-      "credit": 3,
+      "title": "Pharmacology-II Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 5,
@@ -1083,7 +1083,7 @@
     {
       "id": "c-0916-3107",
       "code": "0916-3107",
-      "title": "0916-3107",
+      "title": "Medicinal Chemistry-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1093,8 +1093,8 @@
     {
       "id": "c-0916-3108",
       "code": "0916-3108",
-      "title": "0916-3108",
-      "credit": 3,
+      "title": "Medicinal Chemistry-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 5,
@@ -1103,7 +1103,7 @@
     {
       "id": "c-0916-3109",
       "code": "0916-3109",
-      "title": "0916-3109",
+      "title": "Hospital & Community Pharmacy",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1113,7 +1113,7 @@
     {
       "id": "c-0916-3201",
       "code": "0916-3201",
-      "title": "0916-3201",
+      "title": "Medicinal Chemistry-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1123,8 +1123,8 @@
     {
       "id": "c-0916-3202",
       "code": "0916-3202",
-      "title": "0916-3202",
-      "credit": 3,
+      "title": "Medicinal Chemistry-II Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 6,
@@ -1133,7 +1133,7 @@
     {
       "id": "c-0916-3203",
       "code": "0916-3203",
-      "title": "0916-3203",
+      "title": "Pharmaceutical Technology-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1143,8 +1143,8 @@
     {
       "id": "c-0916-3204",
       "code": "0916-3204",
-      "title": "0916-3204",
-      "credit": 3,
+      "title": "Pharmaceutical Technology-II Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 6,
@@ -1153,7 +1153,7 @@
     {
       "id": "c-0916-3205",
       "code": "0916-3205",
-      "title": "0916-3205",
+      "title": "Biopharmaceutics & Pharmacokinetics-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1163,8 +1163,8 @@
     {
       "id": "c-0916-3206",
       "code": "0916-3206",
-      "title": "0916-3206",
-      "credit": 3,
+      "title": "Biopharmaceutics & Pharmacokinetics-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 6,
@@ -1173,7 +1173,7 @@
     {
       "id": "c-0916-3207",
       "code": "0916-3207",
-      "title": "0916-3207",
+      "title": "Pharmacology-III",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1183,7 +1183,7 @@
     {
       "id": "c-0916-4101",
       "code": "0916-4101",
-      "title": "0916-4101",
+      "title": "Medicinal Chemistry-III",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1193,8 +1193,8 @@
     {
       "id": "c-0916-4102",
       "code": "0916-4102",
-      "title": "0916-4102",
-      "credit": 3,
+      "title": "Medicinal Chemistry-III Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 7,
@@ -1203,7 +1203,7 @@
     {
       "id": "c-0916-4103",
       "code": "0916-4103",
-      "title": "0916-4103",
+      "title": "Pharmaceutical Technology-III",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1213,8 +1213,8 @@
     {
       "id": "c-0916-4104",
       "code": "0916-4104",
-      "title": "0916-4104",
-      "credit": 3,
+      "title": "Pharmaceutical Technology-III Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 7,
@@ -1223,7 +1223,7 @@
     {
       "id": "c-0916-4105",
       "code": "0916-4105",
-      "title": "0916-4105",
+      "title": "Biopharmaceutics & Pharmacokinetics-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1233,8 +1233,8 @@
     {
       "id": "c-0916-4106",
       "code": "0916-4106",
-      "title": "0916-4106",
-      "credit": 3,
+      "title": "Biopharmaceutics & Pharmacokinetics-II Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 7,
@@ -1243,7 +1243,7 @@
     {
       "id": "c-0916-4107",
       "code": "0916-4107",
-      "title": "0916-4107",
+      "title": "Advanced Pharmaceutical Analysis & Validation",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1253,8 +1253,8 @@
     {
       "id": "c-0916-4108",
       "code": "0916-4108",
-      "title": "0916-4108",
-      "credit": 3,
+      "title": "Advanced Pharmaceutical Analysis & Validation Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 7,
@@ -1263,7 +1263,7 @@
     {
       "id": "c-0916-4201",
       "code": "0916-4201",
-      "title": "0916-4201",
+      "title": "Pharmaceutical Biotechnology",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1273,7 +1273,7 @@
     {
       "id": "c-0916-4203",
       "code": "0916-4203",
-      "title": "0916-4203",
+      "title": "Pharmaceutical Engineering",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1283,7 +1283,7 @@
     {
       "id": "c-0916-4205",
       "code": "0916-4205",
-      "title": "0916-4205",
+      "title": "Cosmetology",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1293,8 +1293,8 @@
     {
       "id": "c-0916-4206",
       "code": "0916-4206",
-      "title": "0916-4206",
-      "credit": 3,
+      "title": "Cosmetology Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 8,
@@ -1303,8 +1303,8 @@
     {
       "id": "c-0916-4209",
       "code": "0916-4209",
-      "title": "0916-4209",
-      "credit": 3,
+      "title": "Pharmaceutical Regulatory Affairs",
+      "credit": 2,
       "course_mode": "theory",
       "department": "pharmacy",
       "level": 8,
@@ -1313,8 +1313,8 @@
     {
       "id": "c-0916-4211",
       "code": "0916-4211",
-      "title": "0916-4211",
-      "credit": 3,
+      "title": "Pharmacotherapeutics & Disease Management",
+      "credit": 2,
       "course_mode": "theory",
       "department": "pharmacy",
       "level": 8,
@@ -1323,7 +1323,7 @@
     {
       "id": "c-0917-1103",
       "code": "0917-1103",
-      "title": "0917-1103",
+      "title": "Pharmacognosy-I",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1333,8 +1333,8 @@
     {
       "id": "c-0917-1104",
       "code": "0917-1104",
-      "title": "0917-1104",
-      "credit": 3,
+      "title": "Pharmacognosy-I Practical",
+      "credit": 1,
       "course_mode": "lab",
       "department": "pharmacy",
       "level": 1,
@@ -1343,7 +1343,7 @@
     {
       "id": "c-0917-1203",
       "code": "0917-1203",
-      "title": "0917-1203",
+      "title": "Pharmacognosy-II",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
@@ -1353,7 +1353,7 @@
     {
       "id": "c-0917-4207",
       "code": "0917-4207",
-      "title": "0917-4207",
+      "title": "Nutraceuticals, Dietary Supplements & Herbal Products",
       "credit": 3,
       "course_mode": "theory",
       "department": "pharmacy",
