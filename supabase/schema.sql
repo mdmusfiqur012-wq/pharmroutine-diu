@@ -82,6 +82,7 @@ create table if not exists faculty (
   department    text not null default 'Pharmacy',
   faculty_type  faculty_type not null default 'regular',
   email         text,
+  phone         text,
   is_active     boolean not null default true
 );
 

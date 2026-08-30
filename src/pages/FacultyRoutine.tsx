@@ -116,6 +116,7 @@ export default function FacultyRoutine() {
                   {selected.designation} · {selected.department} · <span className="capitalize">{selected.faculty_type}</span>
                 </p>
                 {selected.email && <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400"><Icon name="mail" className="h-3 w-3" />{selected.email}</p>}
+                {selected.phone && <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400"><Icon name="phone" className="h-3 w-3" />{selected.phone}</p>}
               </div>
               <div className="ml-2 hidden gap-4 border-l border-slate-100 pl-4 sm:flex dark:border-slate-800">
                 <div><p className="text-[10px] font-bold uppercase text-slate-400">Classes</p><p className="text-lg font-extrabold text-slate-800 dark:text-slate-100">{result.entries.length}</p></div>

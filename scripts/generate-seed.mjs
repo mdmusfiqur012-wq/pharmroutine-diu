@@ -45,16 +45,49 @@ const BATCHES = [
   { no: 38, admission: 2026, level: 1, active: false },
 ];
 
-const DEPT_FACULTY = OFF.faculty.map((f, i) => ({
-  id: `f-${f.initials}`,
-  name: f.name,
-  initials: f.initials,
-  designation: f.designation,
-  department: 'Pharmacy',
-  faculty_type: 'regular',
-  email: `${f.initials.toLowerCase().replace(/\s+/g, '')}@diu.edu.bd`,
-  is_active: true,
-}));
+/* Official contact details scraped from faculty.daffodilvarsity.edu.bd
+   (profile pages, "E-mail" / "Phone" / "Cell-Phone" rows). Mobiles are
+   normalized to the local 0-prefix format. */
+const CONTACTS = {
+  MUA: { email: 'drmuniruddin.ph@diu.edu.bd',                    phone: '01847334841, 01755587204' },
+  DSS: { email: 'sharifa@daffodilvarsity.edu.bd',                phone: '01847334978' },
+  DSR: { email: 'shafikur.ph@diu.edu.bd',                        phone: '01737825356' },
+  DSH: { email: 'sarowar.ph@diu.edu.bd',                         phone: '01777845198' },
+  DMS: { email: 'rahman.pharm@diu.edu.bd',                       phone: '01304780185' },
+  DMR: { email: 'mizanur.ph@diu.edu.bd',                         phone: '01811458818, 01556346870' },
+  AKA: { email: 'azad.ph@diu.edu.bd',                            phone: '01759012389' },
+  MTA: { email: 'tahmina.ph@diu.edu.bd',                         phone: '01763766132' },
+  NAS: { email: 'nazneen.ph@diu.edu.bd',                         phone: '01795709361' },
+  SJM: { email: 'sultana.ph2835.c@diu.edu.bd',                   phone: '01717101111' },
+  MSK: { email: 'shajib.ph@diu.edu.bd',                          phone: '01762528203' },
+  MSH: { email: 'sadman.phar@diu.edu.bd',                        phone: '01755110399' },
+  SKM: { email: 'shadhan.phar@diu.edu.bd',                       phone: '01723840157' },
+  SKB: { email: 'subrato.phar@diu.edu.bd',                       phone: '01792579706' },
+  MAP: { email: 'anwar.pharm@diu.edu.bd',                        phone: '01703054123' },
+  NJN: { email: 'najibah.pharm@diu.edu.bd',                      phone: '01612532646' },
+  MHL: { email: 'mahadi.pharm@diu.edu.bd',                       phone: '+8809617901233 (office)' },
+  BSS: { email: 'bristi.pharm@diu.edu.bd',                       phone: '+8809617901233 (office)' },
+  SAF: { email: 'shahina.pharm@diu.edu.bd',                      phone: '+8809617901233 (office)' },
+  BTS: { email: 'bithe.pharm@diu.edu.bd',                        phone: '01826363428' },
+};
+
+const DEPT_FACULTY = OFF.faculty.map((f, i) => {
+  const c = CONTACTS[f.initials] ?? {
+    email: `${f.initials.toLowerCase().replace(/\s+/g, '')}@diu.edu.bd`,
+    phone: null,
+  };
+  return {
+    id: `f-${f.initials}`,
+    name: f.name,
+    initials: f.initials,
+    designation: f.designation,
+    department: 'Pharmacy',
+    faculty_type: 'regular',
+    email: c.email,
+    phone: c.phone,
+    is_active: true,
+  };
+});
 
 const GUEST_FACULTY = OFF.guests.map((g) => ({
   id: `f-${g.initials}`,

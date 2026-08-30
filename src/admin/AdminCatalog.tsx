@@ -165,6 +165,7 @@ export function AdminFaculty() {
           </Field>
           <Field label="Department"><input className="input" value={modal?.department ?? 'Pharmacy'} onChange={(e) => setModal((m) => ({ ...m!, department: e.target.value }))} /></Field>
           <Field label="Email"><input className="input" type="email" value={modal?.email ?? ''} onChange={(e) => setModal((m) => ({ ...m!, email: e.target.value }))} /></Field>
+          <Field label="Contact number"><input className="input" value={modal?.phone ?? ''} onChange={(e) => setModal((m) => ({ ...m!, phone: e.target.value }))} placeholder="01XXXXXXXXX" /></Field>
           <div className="col-span-2"><SaveBar busy={busy} /></div>
         </form>
       </AdminModal>
