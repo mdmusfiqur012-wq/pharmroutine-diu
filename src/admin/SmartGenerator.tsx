@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useData } from '../lib/data';
@@ -10,7 +10,7 @@ import {
   type ConflictIssue, type OfferType, DEFAULT_CONFIG,
 } from './generator/types';
 import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers } from './generator/parser';
-import { generateRoutine, verifySchedule, probeMove } from './generator/engine';
+import { generateRoutine, verifySchedule, verifyFrequency, frequencyRows, probeMove } from './generator/engine';
 import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, type PublishSummary } from './generator/store';
 import { COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
 
@@ -75,6 +75,14 @@ export default function SmartGenerator() {
   const issues = useMemo(() => (ctx ? inspectOffers(offers, ctx, knownFaculty) : []), [offers, ctx, knownFaculty]);
   const labCourses = useMemo(() => [...new Set(offers.filter((o) => o.type === 'lab').map((o) => o.code))], [offers]);
   const allFaculty = useMemo(() => [...new Set(offers.map((o) => o.faculty).filter(Boolean))].sort(), [offers]);
+  /* credit-based frequency: required vs scheduled, per course & section */
+  const freq = useMemo(() => (ctx ? frequencyRows(ctx, offers, result?.classes ?? [], config) : []), [ctx, offers, result, config]);
+  const freqOk = useMemo(() => freq.every((r) => r.ok), [freq]);
+  const freqByBatch = useMemo(() => {
+    const m = new Map<number, typeof freq>();
+    for (const r of freq) { const arr = m.get(r.batchNo) ?? []; arr.push(r); m.set(r.batchNo, arr); }
+    return [...m.entries()].sort((a, b) => a[0] - b[0]);
+  }, [freq]);
 
   const patchOffer = (id: string, patch: Partial<OfferRow>) => setOffers((os) => os.map((o) => (o.id === id ? { ...o, ...patch } : o)));
   const patchConfig = (patch: Partial<GenConfig>) => setConfig((c) => ({ ...c, ...patch }));
@@ -142,7 +150,7 @@ export default function SmartGenerator() {
   function applyEdit(updated: GenClass, lock: boolean) {
     if (!result) return;
     const classes = result.classes.map((c) => (c.uid === updated.uid ? { ...c, ...updated, locked: lock } : c));
-    const issues = verifySchedule(ctx!, classes, config, offers);
+    const issues = [...verifySchedule(ctx!, classes, config, offers), ...verifyFrequency(ctx!, offers, classes, config)];
     const report = { issues, scheduled: classes.length, failed: issues.filter((i) => i.severity === 'error').length, ok: !issues.some((i) => i.severity === 'error') };
     setResult({ ...result, classes, report, stats: result.stats });
     const lab = classes.filter((c) => c.uid === updated.uid && c.groupId);
@@ -528,6 +536,74 @@ export default function SmartGenerator() {
             <MiniStat label="Conflict-free" value={result.report.ok ? '✓' : '!'} icon={result.report.ok ? 'check' : 'alert'} tone={result.report.ok ? 'green' : 'red'} />
           </div>
 
+          {/* credit-based frequency validation */}
+          <div className="card p-5">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="grad-icon-tile flex h-8 w-8 items-center justify-center rounded-xl"><Icon name="list" className="h-4 w-4" /></span>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Credit-based weekly frequency — required vs scheduled</h3>
+                <p className="text-[10px] text-slate-400">Derived automatically from the course offer: 3-credit theory = 2 classes/week · 2-credit theory = 1 class/week · 1-credit GED/PRJ = 1 class/week · practicals = one paired laboratory session (A1/A2 · B1/B2), each group in its own lab.</p>
+              </div>
+              <span className={clsx('rounded-full px-3 py-1 text-[11px] font-extrabold', freqOk ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300')}>
+                {freq.filter((r) => r.ok).length}/{freq.length} courses ✓
+              </span>
+            </div>
+            <div className="max-h-72 overflow-auto scroll-thin rounded-xl border border-slate-100 dark:border-slate-800">
+              <table className="w-full min-w-[680px] text-left text-[11px]">
+                <thead className="sticky top-0 z-10 bg-slate-50/95 text-[9px] uppercase tracking-wider text-slate-400 backdrop-blur dark:bg-slate-900/95">
+                  <tr>
+                    <th className="px-3 py-2">Course</th>
+                    <th className="px-3 py-2">Sec</th>
+                    <th className="px-3 py-2">Credit &amp; type</th>
+                    <th className="px-3 py-2">Required</th>
+                    <th className="px-3 py-2">Scheduled</th>
+                    <th className="px-3 py-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  {freqByBatch.map(([bn, rows]) => (
+                    <Fragment key={bn}>
+                      <tr className="bg-brand-50/60 dark:bg-brand-950/20">
+                        <td colSpan={6} className="px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide text-brand-700 dark:text-brand-300">Batch {bn}</td>
+                      </tr>
+                      {rows.map((r, i) => (
+                        <tr key={i} className={clsx(!r.ok && 'bg-red-50/40 dark:bg-red-950/20')}>
+                          <td className="px-3 py-1.5">
+                            <span className="font-mono text-[11px] font-bold text-slate-700 dark:text-slate-200">{r.code}</span>
+                            <span className="ml-2 hidden text-slate-400 lg:inline">{r.title && r.title.length > 42 ? r.title.slice(0, 42) + '…' : r.title}</span>
+                          </td>
+                          <td className="px-3 py-1.5 font-bold text-slate-500 dark:text-slate-400">{r.batchNo}{r.section}</td>
+                          <td className="px-3 py-1.5">
+                            <span className="mr-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-extrabold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{r.credits} cr</span>
+                            <span className={clsx('rounded px-1.5 py-0.5 text-[9px] font-extrabold', TYPE_META[r.type].cls)}>{TYPE_META[r.type].label}</span>
+                          </td>
+                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.map((g) => g.name).join(' + ') || 'paired groups') : `${r.required} class${r.required === 1 ? '' : 'es'}/week`}</td>
+                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.filter((g) => g.scheduled).map((g) => g.name).join(' + ') || 'none') : `${r.scheduled} class${r.scheduled === 1 ? '' : 'es'}/week`}</td>
+                          <td className="px-3 py-1.5">
+                            {r.type === 'lab' ? (
+                              <span className="flex flex-wrap gap-1">
+                                {r.groups.map((g) => (
+                                  <span key={g.name} title={`${g.name}${g.roomCode ? ` · ${g.roomCode}` : ''}${g.scheduled ? '' : ' — not scheduled'}`}
+                                    className={clsx('inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-extrabold', g.scheduled ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300')}>
+                                    {g.name}{' '}{g.scheduled ? '✓' : '✗'}
+                                  </span>
+                                ))}
+                              </span>
+                            ) : (
+                              <span className={clsx('rounded px-1.5 py-0.5 text-[9px] font-extrabold', r.ok ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300')}>
+                                {r.ok ? '✓ matches requirement' : `✗ ${r.required - r.scheduled} session(s) short`}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* conflict report */}
           {result.report.issues.length > 0 && (
             <div className={clsx('card p-5', result.report.ok ? '' : 'border-red-200/70 dark:border-red-900/60')}>
@@ -645,11 +721,22 @@ export default function SmartGenerator() {
                 <Toggle checked={pubReplace} onChange={setPubReplace} />
               </div>
             </div>
-            <button className="btn-primary mt-4 w-full !py-3" onClick={onPublish} disabled={busy || !result.report.ok}>
+            <div className={clsx('mt-4 rounded-xl px-4 py-3', freqOk ? 'border border-emerald-200/60 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20' : 'border border-red-200/70 bg-red-50/60 dark:border-red-900/60 dark:bg-red-950/20')}>
+              <p className={clsx('flex items-center gap-2 text-xs font-extrabold', freqOk ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300')}>
+                <Icon name={freqOk ? 'check' : 'alert'} className="h-4 w-4" />
+                Credit-based frequency: {freq.filter((r) => r.ok).length}/{freq.length} courses meet their required weekly sessions
+              </p>
+              {!freqOk && (
+                <p className="mt-1 text-[11px] leading-relaxed text-red-500/90 dark:text-red-400/90">
+                  Some courses are missing required sessions (faculty conflict, room availability, batch off-day or lab capacity). Fix them in Review &amp; Lock (step 5) — publishing stays blocked until every course matches its credit-based requirement.
+                </p>
+              )}
+            </div>
+            <button className="btn-primary mt-4 w-full !py-3" onClick={onPublish} disabled={busy || !result.report.ok || !freqOk}>
               {busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Icon name="check" className="h-4 w-4" />}
               {busy ? 'Publishing…' : `Publish ${pubBatches.length || batchNos.length} batch(es) — ${result.classes.length} class rows`}
             </button>
-            {!result.report.ok && <p className="mt-2 text-center text-[11px] font-bold text-red-500">Resolve the Conflict Report first — invalid routines are never published.</p>}
+            {(!result.report.ok || !freqOk) && <p className="mt-2 text-center text-[11px] font-bold text-red-500">Resolve the Conflict Report / frequency gaps first — incomplete routines are never published.</p>}
           </div>
 
           {publishInfo && (

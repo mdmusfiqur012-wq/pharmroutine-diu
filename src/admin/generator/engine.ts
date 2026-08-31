@@ -17,7 +17,7 @@
  * ============================================================ */
 import type {
   OfferRow, GenCtx, GenConfig, ClassLock, RotationState, GenClass,
-  ConflictIssue, ConflictReport, GenStats, GenResult,
+  ConflictIssue, ConflictReport, GenStats, GenResult, OfferType,
 } from './types';
 
 export interface GenOptions {
@@ -272,7 +272,17 @@ export async function generateRoutine(
         let score = 0;
         score += dayLoad(unit.offer.batchNo, unit.offer.section, day.id) * 10;
         score += facDayLoad(unit.offer.faculty, day.id) * 8;
-        if (classes.some((c) => c.code === unit.offer.code && c.batchNo === unit.offer.batchNo && c.section === unit.offer.section && c.dayId === day.id)) score += 6; // spread same course
+        /* credit-based frequency preference: a course's sessions belong on
+           DIFFERENT days, and not unnecessarily close together */
+        const ownSessions = classes.filter((c) => c.code === unit.offer.code && c.batchNo === unit.offer.batchNo && c.section === unit.offer.section);
+        if (ownSessions.length) {
+          for (const os of ownSessions) {
+            const gap = Math.abs((dayById.get(os.dayId)?.seq ?? 0) - (dayById.get(day.id)?.seq ?? 0));
+            if (os.dayId === day.id) score += 30;      // same day as the course's other session
+            else if (gap <= 1) score += 6;             // back-to-back days
+            else if (gap <= 2) score += 2;             // one day in between
+          }
+        }
         const prevSlot = slotBySeq(slot.seq - 1), nextSlot = slotBySeq(slot.seq + 1);
         const prevBusy = prevSlot && classes.some((c) => c.batchNo === unit.offer.batchNo && c.section === unit.offer.section && c.dayId === day.id && c.slotId === prevSlot.id);
         const nextBusy = nextSlot && classes.some((c) => c.batchNo === unit.offer.batchNo && c.section === unit.offer.section && c.dayId === day.id && c.slotId === nextSlot.id);
@@ -304,7 +314,7 @@ export async function generateRoutine(
 
   /* ---------- 4) independent verification ---------- */
   await phase('Checking faculty, classroom & lab conflicts');
-  const reportIssues = [...issues, ...verifySchedule(ctx, classes, cfg, offers)];
+  const reportIssues = [...issues, ...verifySchedule(ctx, classes, cfg, offers), ...verifyFrequency(ctx, offers, classes, cfg)];
 
   const sectionsUsed = new Set(classes.map((c) => `${c.batchNo}${c.section}`)).size;
   const stats: GenStats = {
@@ -327,6 +337,102 @@ export async function generateRoutine(
 /* ================================================================== */
 /* Independent verification — also used after manual overrides         */
 /* ================================================================== */
+
+/* ==================================================================
+ * Credit-Based Class Frequency System
+ * ------------------------------------------------------------------
+ * The OFFICIAL course offer is the single source of truth: every row
+ * carries its credit value + theory/lab type. From those numbers the
+ * generator derives the required weekly frequency — 3-credit theory
+ * → 2 classes/week, 2-credit theory → 1 class/week, 1-credit GED/PRJ
+ * → 1 class/week, practicals → one paired laboratory session (A1/A2
+ * or B1/B2 groups together) — and every scheduled class is matched
+ * back against the requirement before anything can be published.
+ * ================================================================== */
+
+export interface FreqGroup {
+  name: string;          // A1 / A2 / B1 / B2
+  scheduled: boolean;
+  dayId?: string;
+  slotId?: string;
+  roomCode?: string;
+}
+
+export interface FreqRow {
+  code: string;
+  title: string;
+  credits: number;
+  type: OfferType;
+  batchNo: number;
+  section: string;
+  faculty: string;
+  required: number;      // weekly sessions required (0 for practicals)
+  scheduled: number;     // weekly sessions actually scheduled
+  groups: FreqGroup[];   // practicals only: per-group session status
+  ok: boolean;
+}
+
+export function frequencyRows(ctx: GenCtx, offers: OfferRow[], classes: GenClass[], cfg: GenConfig): FreqRow[] {
+  const dayName = new Map(ctx.days.map((d) => [d.id, d.short]));
+  const roomCode = new Map(ctx.rooms.map((r) => [r.id, r.code]));
+  const groupsBySection = new Map<string, { id: string; name: string }[]>();
+  for (const g of ctx.groups) {
+    const arr = groupsBySection.get(g.sectionId) ?? [];
+    arr.push(g); groupsBySection.set(g.sectionId, arr);
+  }
+  const sectionsByBatch = new Map<number, { id: string; name: string }[]>();
+  for (const sec of ctx.sections) {
+    const b = ctx.batches.find((x) => x.id === sec.batchId);
+    if (!b) continue;
+    const arr = sectionsByBatch.get(b.batchNo) ?? [];
+    arr.push(sec); sectionsByBatch.set(b.batchNo, arr);
+  }
+  const rows: FreqRow[] = [];
+  for (const o of offers) {
+    const sec = (sectionsByBatch.get(o.batchNo) ?? []).find((x) => x.name === o.section);
+    if (o.type === 'lab') {
+      const groups = (sec ? groupsBySection.get(sec.id) ?? [] : []).slice();
+      const groupRows = classes.filter((c) => c.code === o.code && c.batchNo === o.batchNo && c.section === o.section && c.groupId);
+      const g: FreqGroup[] = groups.map((gr) => {
+        const row = groupRows.find((c) => c.groupId === gr.id);
+        return { name: gr.name, scheduled: !!row, dayId: row?.dayId, slotId: row?.slotId, roomCode: row ? roomCode.get(row.roomId) : undefined };
+      });
+      rows.push({
+        code: o.code, title: o.title, credits: o.credits, type: 'lab', batchNo: o.batchNo, section: o.section, faculty: o.faculty,
+        required: 0, scheduled: groupRows.length, groups: g, ok: g.length > 0 && g.every((x) => x.scheduled),
+      });
+    } else {
+      const mine = classes.filter((c) => c.code === o.code && c.batchNo === o.batchNo && c.section === o.section && !c.groupId);
+      const required = sessionsFor(o, cfg);
+      rows.push({
+        code: o.code, title: o.title, credits: o.credits, type: o.type, batchNo: o.batchNo, section: o.section, faculty: o.faculty,
+        required, scheduled: mine.length, groups: [], ok: mine.length === required,
+      });
+    }
+  }
+  return rows;
+}
+
+/** Every course must meet its credit-based weekly frequency — otherwise the
+ *  routine is incomplete and must never be published. */
+export function verifyFrequency(ctx: GenCtx, offers: OfferRow[], classes: GenClass[], cfg: GenConfig): ConflictIssue[] {
+  const issues: ConflictIssue[] = [];
+  for (const row of frequencyRows(ctx, offers, classes, cfg)) {
+    if (row.type === 'lab') {
+      const missing = row.groups.filter((g) => !g.scheduled);
+      if (missing.length) issues.push({
+        severity: 'error', kind: 'lab',
+        message: `${row.code} practical (Batch ${row.batchNo}${row.section}) — group ${missing.map((x) => x.name).join(', ')} has NO laboratory session scheduled.`,
+      });
+    } else if (row.scheduled !== row.required) {
+      issues.push({
+        severity: 'error', kind: 'data',
+        message: `${row.code} — ${row.title || 'untitled'} (${row.batchNo}${row.section}) — ${row.credits}-credit ${row.type}: requires ${row.required} class(es)/week, scheduled ${row.scheduled}.`,
+      });
+    }
+  }
+  return issues;
+}
 
 export function verifySchedule(ctx: GenCtx, classes: GenClass[], cfg: GenConfig, offers: OfferRow[]): ConflictIssue[] {
   const issues: ConflictIssue[] = [];
