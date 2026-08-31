@@ -94,26 +94,26 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
             ]}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-brand-600" /> {entries.length} classes</span>
-          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" /> {offDayMap.size} off day{offDayMap.size === 1 ? '' : 's'}</span>
-          {selectionLabel.length > 0 && <span className="hidden sm:inline">· {selectionLabel.join(' · ')}</span>}
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300">
+          <span className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-brand-600 shadow-glow-blue" /> {entries.length} classes</span>
+          <span className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"><span className="h-2 w-2 rounded-full bg-amber-500" /> {offDayMap.size} off day{offDayMap.size === 1 ? '' : 's'}</span>
+          {selectionLabel.length > 0 && <span className="hidden rounded-full bg-white/60 px-2.5 py-1 text-slate-400 sm:inline">· {selectionLabel.join(' · ')}</span>}
         </div>
       </div>
 
       {/* ============ WEEKLY GRID (desktop) ============ */}
       {view === 'grid' && (
-        <div className="card overflow-hidden print-page">
+        <div className="card overflow-hidden print-page !rounded-2xl">
           <div className="hidden overflow-x-auto scroll-thin md:block">
             <table className="w-full border-collapse text-left">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-800/40">
-                  <th className="table-th sticky left-0 z-10 w-20 bg-slate-50 px-3 py-3 dark:bg-slate-800/90">Day</th>
+                <tr className="border-b border-slate-200/80 bg-gradient-to-r from-brand-50/90 via-white/70 to-emerald-50/90 dark:border-slate-800 dark:from-brand-950/60 dark:via-slate-900/50 dark:to-emerald-950/60">
+                  <th className="table-th sticky left-0 z-10 w-20 bg-white/90 px-3 py-3 backdrop-blur dark:bg-slate-900/90">Day</th>
                   {slots.map((s) => (
                     <th key={s.id} className="table-th px-2 py-3 text-center">
-                      <span className="text-slate-400">{s.label.split('–')[0].trim()}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{s.label.split('–')[0].trim()}</span>
                       <span className="mx-1 text-slate-300 dark:text-slate-600">–</span>
-                      <span className="text-slate-400">{s.label.split('–')[1]?.trim()}</span>
+                      <span className="text-slate-500 dark:text-slate-400">{s.label.split('–')[1]?.trim()}</span>
                     </th>
                   ))}
                 </tr>
@@ -123,15 +123,18 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
                   const off = offDayMap.get(day.id);
                   const noClasses = emptyIds.has(day.id);
                   return (
-                    <tr key={day.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800/70">
-                      <td className="table-td sticky left-0 z-10 bg-white px-3 align-top font-extrabold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                        <span className="block text-xs">{day.name}</span>
+                    <tr key={day.id} className="border-b border-slate-100/80 transition-colors last:border-0 hover:bg-brand-50/30 dark:border-slate-800/70 dark:hover:bg-slate-800/20">
+                      <td className="table-td sticky left-0 z-10 bg-white/95 px-3 align-top backdrop-blur dark:bg-slate-900/95">
+                        <span className="mb-1 block h-1 w-6 rounded-full" style={{ backgroundImage: 'var(--grad-diu)' }} />
+                        <span className="block text-xs font-extrabold text-slate-700 dark:text-slate-200">{day.name}</span>
                         <span className="text-[10px] font-semibold text-slate-400">{day.short_name}</span>
                       </td>
                       {off ? (
                         <td colSpan={slots.length}>
-                          <div className="m-1.5 flex h-[104px] items-center gap-3 rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/80 px-4 dark:border-amber-700/60 dark:bg-amber-950/30">
-                            <Icon name="calendar" className="h-5 w-5 text-amber-500" />
+                          <div className="m-1.5 flex h-[104px] items-center gap-3 rounded-xl border-2 border-dashed border-amber-300 bg-gradient-to-r from-amber-50/90 to-orange-50/60 px-4 shadow-sm dark:border-amber-700/60 dark:from-amber-950/30 dark:to-amber-950/10">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-glow-blue animate-float">
+                              <Icon name="calendar" className="h-4 w-4" />
+                            </span>
                             <div>
                               <p className="text-sm font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400">OFF DAY — No Classes Scheduled</p>
                               {off.reason && <p className="text-xs font-medium text-amber-600/90 dark:text-amber-500/80">{off.reason}</p>}
@@ -140,7 +143,7 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
                         </td>
                       ) : noClasses ? (
                         <td colSpan={slots.length}>
-                          <div className="m-1.5 flex h-[104px] items-center justify-center rounded-lg border border-slate-100 text-xs font-medium text-slate-300 dark:border-slate-800 dark:text-slate-600">
+                          <div className="m-1.5 flex h-[104px] items-center justify-center rounded-xl border border-slate-100/90 bg-white/40 text-xs font-medium text-slate-300 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-600">
                             No classes scheduled
                           </div>
                         </td>
@@ -148,7 +151,7 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
                         slots.map((slot) => {
                           const cell = entriesInSlot(entries, day.id, slot.id);
                           return (
-                            <td key={slot.id} className="table-td w-[12.5%] min-w-[150px] border-l border-slate-100 p-1 align-top dark:border-slate-800/70">
+                            <td key={slot.id} className="table-td w-[12.5%] min-w-[150px] border-l border-slate-100/90 p-1 align-top dark:border-slate-800/70">
                               <div className="flex min-h-[104px] flex-col gap-1">
                                 {cell.map((e) => (
                                   <MiniClassCard key={e.id} entry={e} onClick={() => open(e)} />
@@ -167,7 +170,7 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
 
           {/* ============ WEEKLY GRID (mobile → day tabs) ============ */}
           <div className="md:hidden">
-            <div className="scroll-thin flex gap-1.5 overflow-x-auto border-b border-slate-100 bg-slate-50/60 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-800/30">
+            <div className="scroll-thin flex gap-1.5 overflow-x-auto border-b border-slate-100/80 bg-gradient-to-r from-brand-50/60 via-white/50 to-emerald-50/60 px-3 py-2.5 backdrop-blur dark:border-slate-800 dark:from-brand-950/40 dark:via-slate-900/30 dark:to-emerald-950/40">
               {sortedDays.map((d) => {
                 const isOff = offDayMap.has(d.id);
                 return (
@@ -175,13 +178,14 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
                     key={d.id}
                     onClick={() => setMobileDay(d.id)}
                     className={clsx(
-                      'shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all',
+                      'shrink-0 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all duration-200',
                       mobileDay === d.id
-                        ? 'bg-brand-700 text-white shadow'
+                        ? 'text-white shadow-glow-blue'
                         : isOff
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400'
-                          : 'bg-white text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700',
+                          ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-950 dark:text-amber-400'
+                          : 'bg-white/80 text-slate-600 ring-1 ring-slate-200 hover:-translate-y-0.5 hover:shadow-card-hover dark:bg-slate-900/80 dark:text-slate-300 dark:ring-slate-700',
                     )}
+                    style={mobileDay === d.id ? { backgroundImage: 'var(--grad-diu)' } : undefined}
                   >
                     {d.name}
                     {isOff && <span className="ml-1 text-[9px] font-extrabold uppercase">off</span>}
@@ -195,8 +199,10 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
                 if (!day) return null;
                 if (offDayMap.has(day.id)) {
                   return (
-                    <div className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/80 px-4 py-8 text-center dark:border-amber-700/60 dark:bg-amber-950/30">
-                      <Icon name="calendar" className="h-6 w-6 text-amber-500" />
+                    <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-amber-300 bg-gradient-to-b from-amber-50/90 to-orange-50/50 px-4 py-8 text-center dark:border-amber-700/60 dark:from-amber-950/30 dark:to-amber-950/10">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-glow-blue animate-float">
+                        <Icon name="calendar" className="h-5 w-5" />
+                      </span>
                       <p className="text-sm font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400">OFF DAY — No Classes Scheduled</p>
                       {offDayMap.get(day.id)?.reason && (
                         <p className="text-xs text-amber-600/90">{offDayMap.get(day.id)?.reason}</p>
@@ -222,13 +228,14 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
             const off = offDayMap.get(day.id);
             const dayEntries = entries.filter((e) => e.day_id === day.id);
             return (
-              <div key={day.id} className="card overflow-hidden">
+              <div key={day.id} className="card overflow-hidden transition-all duration-300 hover:shadow-glass-hover">
                 <div className={clsx(
                   'flex items-center justify-between border-b px-4 py-3',
-                  off ? 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20' : 'border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/30',
+                  off ? 'border-amber-200 bg-gradient-to-r from-amber-50/90 to-amber-100/60 dark:border-amber-900/50 dark:from-amber-950/30 dark:to-amber-950/20' : 'border-slate-100/80 bg-gradient-to-r from-brand-50/70 via-white/60 to-emerald-50/70 dark:border-slate-800 dark:from-brand-950/40 dark:via-slate-900/40 dark:to-emerald-950/40',
                 )}>
                   <div className="flex items-center gap-2.5">
-                    <span className={clsx('flex h-9 w-9 items-center justify-center rounded-lg text-xs font-extrabold', off ? 'bg-amber-500 text-white' : 'bg-brand-700 text-white')}>
+                    <span className={clsx('flex h-10 w-10 items-center justify-center rounded-xl text-xs font-extrabold text-white shadow-glow-blue', off ? 'bg-gradient-to-br from-amber-400 to-orange-500' : '')}
+                      style={off ? undefined : { backgroundImage: 'var(--grad-diu)' }}>
                       {day.short_name}
                     </span>
                     <div>
@@ -265,7 +272,7 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
       )}
 
       {showLegend && view === 'grid' && (
-        <div className="mt-4 flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+        <div className="glass mt-4 flex flex-wrap items-center gap-1.5 rounded-2xl p-3">
           <span className="mr-1 text-[11px] font-extrabold uppercase tracking-wide text-slate-400">Legend</span>
           <RoutineLegend />
         </div>

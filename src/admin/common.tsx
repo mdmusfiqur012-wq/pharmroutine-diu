@@ -32,7 +32,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="animate-fade-in">
       <div className="mb-5 flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-700 text-white"><Icon name="shield" /></span>
+        <span className="grad-icon-tile flex h-9 w-9 items-center justify-center rounded-xl"><Icon name="shield" /></span>
         <div>
           <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">Administrator Dashboard</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">Manage semesters, batches, routines, off days, faculty, courses, rooms & announcements.</p>
@@ -47,7 +47,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             className={({ isActive }) =>
               clsx(
                 'flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold transition-colors',
-                isActive ? 'bg-brand-700 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800',
+                isActive ? 'grad-pill text-white shadow-glow-blue' : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800',
               )
             }
           >

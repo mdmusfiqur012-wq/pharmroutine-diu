@@ -2,13 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --diu-blue: #1d4ed8;
+  --diu-blue-deep: #1e40af;
+  --diu-cyan: #0ea5e9;
+  --daffodil: #16a34a;
+  --daffodil-deep: #15803d;
+  /* the DIU blue → daffodil-green gradient used on buttons, highlights, nav */
+  --grad-diu: linear-gradient(135deg, #1e40af 0%, #2563eb 34%, #0ea5e9 62%, #16a34a 100%);
+  --grad-diu-soft: linear-gradient(135deg, #dbeafe 0%, #ecfeff 45%, #dcfce7 100%);
+  --grad-diu-text: linear-gradient(92deg, #1e3a8a 0%, #1d4ed8 40%, #0891b2 68%, #15803d 100%);
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200;
+    @apply bg-[#f5f9fd] text-slate-800 dark:bg-slate-950 dark:text-slate-200;
   }
   ::selection {
     @apply bg-brand-600/20;
@@ -16,26 +28,56 @@
 }
 
 @layer components {
+  /* ---------- glass card (the base surface of the whole app) ---------- */
   .card {
-    @apply rounded-xl border border-slate-200/80 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900;
+    @apply relative rounded-2xl border border-white/70 bg-white/75 shadow-glass backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70;
+    background-image: linear-gradient(160deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.55) 100%);
   }
+  .dark .card {
+    background-image: linear-gradient(160deg, rgba(30,41,59,.85) 0%, rgba(15,23,42,.75) 100%);
+  }
+  /* subtle top sheen — makes the glass feel "3D" */
+  .card::before {
+    content: '';
+    @apply pointer-events-none absolute inset-x-4 top-0 h-px rounded-full;
+    background: linear-gradient(90deg, transparent, rgba(219,234,254,.9), rgba(255,255,255,.95), rgba(220,252,231,.9), transparent);
+    display: block;
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-brand-700 text-white shadow-sm hover:bg-brand-800 active:scale-[.98];
+    @apply btn border-0 text-white;
+    background-image: var(--grad-diu);
+    background-size: 160% 160%;
+    box-shadow: 0 8px 22px -8px rgb(29 78 216 / 0.55), 0 3px 10px -4px rgb(22 163 74 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.18) inset;
+  }
+  .btn-primary:hover {
+    background-position: 90% 50%;
+    box-shadow: 0 14px 34px -10px rgb(29 78 216 / 0.65), 0 5px 14px -5px rgb(22 163 74 / 0.5);
+    transform: translateY(-1px);
   }
   .btn-secondary {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+    @apply btn border border-slate-200/80 bg-white/70 text-slate-700 backdrop-blur hover:border-brand-300 hover:bg-white/90 hover:text-brand-800 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-200 dark:hover:border-brand-600 dark:hover:bg-slate-800 dark:hover:text-brand-300;
+    box-shadow: 0 1px 2px rgb(30 58 138 / 0.06), 0 0 0 1px rgb(255 255 255 / 0.5) inset;
+  }
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px -10px rgb(29 78 216 / 0.25);
   }
   .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800;
+    @apply btn text-slate-600 hover:bg-brand-50 hover:text-brand-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-300;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply btn bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-sm hover:from-rose-700 hover:to-red-700;
   }
+
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 shadow-sm transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500;
+    @apply w-full rounded-xl border border-slate-200/90 bg-white/80 px-3 py-2 text-sm text-slate-800 shadow-sm backdrop-blur transition-all placeholder-slate-400 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100 dark:placeholder-slate-500;
+  }
+  .input:focus {
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.10), 0 8px 20px -10px rgb(29 78 216 / 0.25);
   }
   .label {
     @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
@@ -43,18 +85,108 @@
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
+
+  /* ---------- floating glass navbar ---------- */
+  .nav-floating {
+    @apply relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 transition-all duration-200 dark:text-slate-300;
+  }
+  .nav-floating::after {
+    content: '';
+    @apply absolute inset-x-3 -bottom-0.5 h-0.5 origin-left scale-x-0 rounded-full transition-transform duration-300;
+    background: var(--grad-diu);
+  }
+  .nav-floating:hover {
+    @apply text-brand-700 dark:text-brand-300;
+    text-shadow: 0 0 18px rgb(37 99 235 / 0.35);
+  }
+  .nav-floating:hover::after {
+    @apply scale-x-100;
+  }
+  .nav-floating-active {
+    @apply text-white;
+    background-image: var(--grad-diu);
+    background-size: 150% 150%;
+    box-shadow: 0 8px 20px -8px rgb(37 99 235 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.25) inset;
+  }
+  .nav-floating-active::after {
+    @apply scale-x-100 opacity-0;
+  }
+  .nav-floating-active:hover {
+    @apply text-white;
+    text-shadow: none;
+  }
+
+  /* legacy sidebar links (admin drawer etc.) styled to match */
   .nav-link {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-brand-50 hover:text-brand-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-300;
+    @apply flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-600 transition-all hover:border-brand-100 hover:bg-brand-50/70 hover:text-brand-800 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800/70 dark:hover:text-brand-300;
   }
   .nav-link-active {
-    @apply bg-brand-700 text-white shadow-sm hover:bg-brand-700 hover:text-white dark:bg-brand-700 dark:hover:bg-brand-700 dark:hover:text-white;
+    @apply border-white/20 bg-gradient-to-r from-brand-700 to-emerald-700 text-white shadow-md hover:border-white/20 hover:text-white dark:hover:border-white/20 dark:hover:text-white;
   }
+
   .table-th {
     @apply px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400;
   }
   .table-td {
     @apply px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300;
   }
+
+  /* ---------- glass + gradient helpers ---------- */
+  .glass {
+    @apply border border-white/70 bg-white/70 shadow-glass backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/70;
+  }
+  .glass-strong {
+    @apply border border-white/80 bg-white/80 shadow-glass backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/85;
+  }
+  .gradient-text {
+    background-image: var(--grad-diu-text);
+    background-size: 200% 200%;
+    animation: gradient-x 8s ease infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .grad-border {
+    border: 1px solid transparent;
+    background-image: linear-gradient(160deg, rgba(255,255,255,.92), rgba(255,255,255,.6)), var(--grad-diu-soft);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+  .grad-pill {
+    background-image: var(--grad-diu);
+    background-size: 160% 160%;
+  }
+  .grad-icon-tile {
+    background-image: var(--grad-diu);
+    @apply text-white shadow-glow-blue;
+  }
+}
+
+/* ---------- ambient page background (fixed, subtle) ---------- */
+.bg-ambient {
+  background:
+    radial-gradient(1100px 520px at 12% -8%, rgb(37 99 235 / 0.10), transparent 60%),
+    radial-gradient(900px 460px at 88% 12%, rgb(22 163 74 / 0.10), transparent 60%),
+    radial-gradient(1000px 600px at 50% 108%, rgb(14 165 233 / 0.07), transparent 60%),
+    linear-gradient(180deg, #f5f9fd 0%, #eef5fc 100%);
+}
+.dark .bg-ambient {
+  background:
+    radial-gradient(1100px 520px at 12% -8%, rgb(37 99 235 / 0.16), transparent 60%),
+    radial-gradient(900px 460px at 88% 12%, rgb(22 163 74 / 0.12), transparent 60%),
+    radial-gradient(1000px 600px at 50% 108%, rgb(14 165 233 / 0.10), transparent 60%),
+    linear-gradient(180deg, #060d1f 0%, #0b1220 100%);
+}
+/* faint scientific grid overlay */
+.bg-science::before {
+  content: '';
+  @apply pointer-events-none absolute inset-0 opacity-[0.5] dark:opacity-[0.14];
+  background-image:
+    linear-gradient(rgb(37 99 235 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(37 99 235 / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(680px 420px at 30% 10%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(680px 420px at 30% 10%, black, transparent 75%);
 }
 
 /* thin scrollbars for the timetable panes */
@@ -98,6 +230,10 @@
   .print-page {
     box-shadow: none !important;
     border: none !important;
+    background: white !important;
+  }
+  .print-page::before {
+    display: none !important;
   }
   main {
     padding: 0 !important;

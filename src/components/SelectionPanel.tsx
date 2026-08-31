@@ -49,7 +49,9 @@ export function SelectionPanel({
   return (
     <div className="card relative p-4 sm:p-5">
       <div className="mb-3 flex items-center gap-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-700 text-white"><span className="text-sm font-extrabold">1</span></span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-glow-blue" style={{ backgroundImage: 'var(--grad-diu)' }}>
+          <span className="text-sm font-extrabold">1</span>
+        </span>
         <h2 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Select your academic information</h2>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

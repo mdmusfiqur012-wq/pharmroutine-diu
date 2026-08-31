@@ -74,7 +74,7 @@ export default function SearchRoutine() {
               onClick={() => setCategory(c)}
               className={clsx(
                 'rounded-full px-3 py-1 text-xs font-bold capitalize transition-colors',
-                category === c ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700',
+                category === c ? 'grad-pill text-white shadow-glow-blue' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700',
               )}
             >
               {c === 'all' ? 'All categories' : c}

@@ -160,7 +160,7 @@ export function colorForType(type: ClassType, db: Database): string {
   const settings = db.settings.find((s) => s.key === 'app');
   const colors: ClassColors = settings
     ? (JSON.parse(settings.value) as any).colors
-    : { theory: '#15803d', lab: '#7c3aed', guest: '#db2777', ged: '#0369a1', nfe: '#b45309', agriculture: '#0d9488', cancelled: '#dc2626', rescheduled: '#d97706' };
+    : { theory: '#1d4ed8', lab: '#16a34a', guest: '#7c3aed', ged: '#0e7490', nfe: '#0f766e', agriculture: '#65a30d', cancelled: '#dc2626', rescheduled: '#d97706' };
   return type === 'lab' ? colors.lab : colors.theory;
 }
 

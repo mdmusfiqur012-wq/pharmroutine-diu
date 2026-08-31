@@ -109,7 +109,7 @@ export default function AdminOffDays() {
                 )}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <span className={clsx('flex h-9 w-9 items-center justify-center rounded-lg text-xs font-extrabold text-white', on ? 'bg-amber-500' : 'bg-brand-700')}>
+                      <span className={clsx('flex h-9 w-9 items-center justify-center rounded-lg text-xs font-extrabold text-white', on ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-glow-blue' : 'grad-pill shadow-glow-blue')}>
                         {d.short_name}
                       </span>
                       <div>

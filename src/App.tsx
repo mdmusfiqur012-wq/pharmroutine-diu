@@ -9,6 +9,7 @@ import RoomSchedule from './pages/RoomSchedule';
 import LabRoutine from './pages/LabRoutine';
 import SearchRoutine from './pages/SearchRoutine';
 import Announcements from './pages/Announcements';
+import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminRoutines from './admin/AdminRoutines';
@@ -29,6 +30,7 @@ export default function App() {
               <Route path="/lab" element={<LabRoutine />} />
               <Route path="/search" element={<SearchRoutine />} />
               <Route path="/announcements" element={<Announcements />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/routines" element={<AdminRoutines />} />

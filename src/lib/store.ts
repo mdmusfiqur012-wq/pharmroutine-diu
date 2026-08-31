@@ -5,28 +5,42 @@ import type { AppSettings, ClassColors, Role, RoutineSelection, SessionUser } fr
  * Global UI state — theme, settings, auth & routine selection.
  * ============================================================ */
 
-const DEFAULT_COLORS: ClassColors = {
-  theory: '#15803d',
-  lab: '#7c3aed',
-  guest: '#db2777',
-  ged: '#0369a1',
-  nfe: '#b45309',
-  agriculture: '#0d9488',
+const NEW_COLORS: ClassColors = {
+  theory: '#1d4ed8',
+  lab: '#16a34a',
+  guest: '#7c3aed',
+  ged: '#0e7490',
+  nfe: '#0f766e',
+  agriculture: '#65a30d',
   cancelled: '#dc2626',
   rescheduled: '#d97706',
+};
+
+/* legacy palette from before the 2026 redesign — migrated in place */
+const LEGACY_COLORS: Record<string, string> = {
+  theory: '#15803d', lab: '#7c3aed', guest: '#db2777', ged: '#0369a1',
+  nfe: '#b45309', agriculture: '#0d9488', cancelled: '#dc2626', rescheduled: '#d97706',
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
   universityName: 'Daffodil International University',
   departmentName: 'Department of Pharmacy',
   universityTagline: 'Liberal Arts College · Savar, Dhaka',
-  colors: DEFAULT_COLORS,
+  colors: NEW_COLORS,
 };
 
 function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem('diu.app.settings');
-    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+      const c = parsed.colors as Record<string, string>;
+      if (c && Object.keys(LEGACY_COLORS).every((k) => c[k] === LEGACY_COLORS[k])) {
+        parsed.colors = { ...NEW_COLORS };
+        localStorage.setItem('diu.app.settings', JSON.stringify(parsed));
+      }
+      return parsed;
+    }
   } catch { /* noop */ }
   return DEFAULT_SETTINGS;
 }

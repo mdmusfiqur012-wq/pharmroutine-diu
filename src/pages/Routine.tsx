@@ -163,7 +163,7 @@ export default function Routine() {
           <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm">
               <span className="flex items-center gap-2 font-extrabold text-slate-800 dark:text-slate-100">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-700 text-white"><Icon name="award" className="h-4 w-4" /></span>
+                <span className="grad-icon-tile flex h-8 w-8 items-center justify-center rounded-lg"><Icon name="award" className="h-4 w-4" /></span>
                 {label.join('  ·  ')}
               </span>
               <span className="hidden text-slate-400 sm:inline">Generated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

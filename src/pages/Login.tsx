@@ -166,7 +166,7 @@ export default function Login() {
               <ul className="space-y-1.5">
                 {isPasscode && (
                   <li className="flex items-center gap-2 text-xs font-semibold text-brand-700 dark:text-brand-400">
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-600 text-white"><Icon name="check" className="h-2.5 w-2.5" /></span>
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full text-white shadow-glow-blue" style={{ backgroundImage: 'var(--grad-diu)' }}><Icon name="check" className="h-2.5 w-2.5" /></span>
                     Admin passcode recognized — verifying…
                   </li>
                 )}

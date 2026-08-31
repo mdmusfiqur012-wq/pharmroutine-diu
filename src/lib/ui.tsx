@@ -4,7 +4,7 @@ import diuLogo from '../assets/diu-logo.png';
 
 /* ============================================================
  * Reusable UI primitives: icons, modal, toasts, tabs, empty
- * states, skeletons — all hand-rolled, no external deps.
+ * states, skeletons — hand-rolled, glassmorphism, DIU palette.
  * ============================================================ */
 
 /* ---------------- Icons (inline SVG, stroke-based) ---------------- */
@@ -48,6 +48,10 @@ export const icons = {
   layers: <><path d="m12 2 10 6-10 6L2 8l10-6zM2 13l10 6 10-6M2 18l10 6 10-6" /></>,
   phone: <><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.6 2z" /></>,
   mail: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 5L2 7" /></>,
+  atom: <><circle cx="12" cy="12" r="1.6" /><path d="M20.2 8.9c-1.6-3-5-4.6-8.2-4.6s-6.6 1.6-8.2 4.6C2.2 11.9 5.4 14.6 12 17c6.6-2.4 9.8-5.1 8.2-8.1zM20.2 8.9C18.5 8.4 15.7 9.5 12 12s-6.5 3.6-8.2 3.1M20.2 15.1c-1.7.5-4.5-.6-8.2-3.1S5.5 8.4 3.8 8.9" /></>,
+  capsule: <><rect x="3.5" y="9" width="17" height="6" rx="3" transform="rotate(-40 12 12)" /><path d="M9.2 9.4 14.6 14.6" /></>,
+  spark: <><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></>,
+  zap: <><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" /></>,
 };
 
 export type IconName = keyof typeof icons;
@@ -90,17 +94,18 @@ export function Modal({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal>
-      <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px] animate-fade-in" onClick={onClose} />
+      <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-[3px] animate-fade-in" onClick={onClose} />
       <div className={clsx(
-        'relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl animate-scale-in dark:bg-slate-900 sm:rounded-2xl scroll-thin',
+        'relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl shadow-float animate-scale-in sm:rounded-3xl scroll-thin',
+        'border border-white/70 bg-white/90 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/95',
         wide ? 'sm:max-w-3xl' : 'sm:max-w-lg',
       )}>
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-100 bg-white/85 px-5 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
-            {subtitle && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>}
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{title}</h3>
+            {subtitle && <p className="mt-0.5 text-xs font-semibold text-brand-700 dark:text-brand-400">{subtitle}</p>}
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800" aria-label="Close">
+          <button onClick={onClose} className="rounded-xl p-1.5 text-slate-400 transition hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-slate-800" aria-label="Close">
             <Icon name="x" />
           </button>
         </div>
@@ -119,10 +124,13 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={clsx('inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300')}
+      className={clsx('inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300')}
     >
-      <span className={clsx('relative inline-flex h-6 w-11 items-center rounded-full transition-colors', checked ? 'bg-brand-600' : 'bg-slate-300 dark:bg-slate-600')}>
-        <span className={clsx('inline-block h-4.5 w-4.5 transform rounded-full bg-white shadow transition-transform', checked ? 'translate-x-[22px]' : 'translate-x-[3px]')} style={{ height: 18, width: 18 }} />
+      <span
+        className={clsx('relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300', checked ? 'shadow-glow-blue' : 'bg-slate-300 dark:bg-slate-600')}
+        style={checked ? { backgroundImage: 'var(--grad-diu)' } : undefined}
+      >
+        <span className={clsx('inline-block transform rounded-full bg-white shadow transition-transform', checked ? 'translate-x-[22px]' : 'translate-x-[3px]')} style={{ height: 18, width: 18 }} />
       </span>
       {label}
     </button>
@@ -135,18 +143,19 @@ export function Segmented<T extends string>({
   value, onChange, options, size = 'md',
 }: { value: T; onChange: (v: T) => void; options: { value: T; label: React.ReactNode }[]; size?: 'sm' | 'md' }) {
   return (
-    <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 dark:border-slate-700 dark:bg-slate-800">
+    <div className="inline-flex rounded-xl border border-white/80 bg-white/60 p-1 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/70">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
           className={clsx(
-            'rounded-md font-semibold transition-all',
+            'rounded-lg font-semibold transition-all duration-200',
             size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-sm',
             value === o.value
-              ? 'bg-white text-brand-800 shadow-sm dark:bg-slate-700 dark:text-brand-300'
-              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
+              ? 'text-white shadow-glow-blue'
+              : 'text-slate-500 hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300',
           )}
+          style={value === o.value ? { backgroundImage: 'var(--grad-diu)' } : undefined}
         >
           {o.label}
         </button>
@@ -159,8 +168,8 @@ export function Segmented<T extends string>({
 
 export function Badge({ children, tone = 'slate' }: { children: React.ReactNode; tone?: 'slate' | 'green' | 'purple' | 'amber' | 'red' | 'blue' | 'teal' | 'pink' }) {
   const tones: Record<string, string> = {
-    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    green: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
+    slate: 'bg-slate-100/90 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    green: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
     purple: 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300',
     amber: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
     red: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
@@ -176,10 +185,10 @@ export function Badge({ children, tone = 'slate' }: { children: React.ReactNode;
 export function EmptyState({ icon = 'info', title, hint, action }: { icon?: IconName; title: string; hint?: string; action?: React.ReactNode }) {
   return (
     <div className="card flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl grad-icon-tile animate-float">
         <Icon name={icon} className="h-6 w-6" />
       </div>
-      <p className="font-semibold text-slate-700 dark:text-slate-200">{title}</p>
+      <p className="font-extrabold text-slate-700 dark:text-slate-200">{title}</p>
       {hint && <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">{hint}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
@@ -188,11 +197,11 @@ export function EmptyState({ icon = 'info', title, hint, action }: { icon?: Icon
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div className="card flex flex-col items-center gap-2 border-red-200 px-6 py-10 text-center dark:border-red-900">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950">
+    <div className="card flex flex-col items-center gap-2 border-red-200/60 px-6 py-10 text-center dark:border-red-900/60">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-glow-blue">
         <Icon name="alert" className="h-6 w-6" />
       </div>
-      <p className="font-semibold text-red-700 dark:text-red-300">Something went wrong</p>
+      <p className="font-extrabold text-red-700 dark:text-red-300">Something went wrong</p>
       <p className="max-w-md text-sm text-slate-500">{message}</p>
       {onRetry && <button className="btn-secondary mt-3" onClick={onRetry}><Icon name="refresh" /> Retry</button>}
     </div>
@@ -203,7 +212,7 @@ export function SkeletonRows({ n = 4 }: { n?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: n }).map((_, i) => (
-        <div key={i} className="skeleton h-20 w-full" />
+        <div key={i} className="skeleton h-20 w-full rounded-2xl" />
       ))}
     </div>
   );
@@ -231,10 +240,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             className={clsx(
-              'pointer-events-auto flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg animate-fade-in',
-              t.kind === 'success' && 'border-green-200 bg-white text-green-800 dark:border-green-900 dark:bg-slate-900 dark:text-green-300',
-              t.kind === 'error' && 'border-red-200 bg-white text-red-700 dark:border-red-900 dark:bg-slate-900 dark:text-red-300',
-              t.kind === 'info' && 'border-sky-200 bg-white text-sky-800 dark:border-sky-900 dark:bg-slate-900 dark:text-sky-300',
+              'pointer-events-auto flex items-start gap-2.5 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-float backdrop-blur-xl animate-fade-in',
+              t.kind === 'success' && 'border-emerald-200/70 bg-white/90 text-emerald-800 dark:border-emerald-900 dark:bg-slate-900/95 dark:text-emerald-300',
+              t.kind === 'error' && 'border-red-200/70 bg-white/90 text-red-700 dark:border-red-900 dark:bg-slate-900/95 dark:text-red-300',
+              t.kind === 'info' && 'border-sky-200/70 bg-white/90 text-sky-800 dark:border-sky-900 dark:bg-slate-900/95 dark:text-sky-300',
             )}
           >
             <Icon name={t.kind === 'success' ? 'check' : t.kind === 'error' ? 'alert' : 'info'} className="mt-0.5 h-4 w-4 shrink-0" />
@@ -259,7 +268,7 @@ export function Select({
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-brand-500">
         <Icon name="chevronDown" className="h-4 w-4" />
       </span>
     </div>
@@ -270,8 +279,9 @@ export function Select({
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <div>
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div className="relative pl-4">
+        <span className="absolute inset-y-1 left-0 w-1 rounded-full" style={{ backgroundImage: 'var(--grad-diu)' }} />
         <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-2xl">{title}</h1>
         {subtitle && <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
       </div>
@@ -284,21 +294,21 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function StatCard({ icon, label, value, tone = 'green' }: { icon: IconName; label: string; value: React.ReactNode; tone?: 'green' | 'purple' | 'blue' | 'amber' | 'teal' | 'pink' | 'slate' }) {
   const tones: Record<string, string> = {
-    green: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400',
-    purple: 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-400',
-    blue: 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-400',
-    amber: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400',
-    teal: 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-400',
-    pink: 'bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-400',
-    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    green: 'from-emerald-500 to-green-600 shadow-glow-green',
+    purple: 'from-violet-500 to-purple-600',
+    blue: 'from-sky-500 to-brand-600 shadow-glow-blue',
+    amber: 'from-amber-400 to-orange-500',
+    teal: 'from-teal-500 to-cyan-600',
+    pink: 'from-pink-500 to-rose-500',
+    slate: 'from-slate-500 to-slate-700',
   };
   return (
-    <div className="card flex items-center gap-3.5 p-4">
-      <div className={clsx('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', tones[tone])}>
+    <div className="card group flex items-center gap-3.5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-glass-hover">
+      <div className={clsx('flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3', tones[tone])}>
         <Icon name={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+        <p className="truncate text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
         <p className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</p>
       </div>
     </div>
@@ -307,10 +317,12 @@ export function StatCard({ icon, label, value, tone = 'green' }: { icon: IconNam
 
 /* ---------------- Legend ---------------- */
 
+const LIGHT_COLORS = ['#1d4ed8', '#0369a1', '#b45309', '#0d9488', '#7c3aed', '#db2777', '#dc2626', '#d97706', '#15803d', '#0e7490', '#65a30d', '#0f766e'];
+
 export function LegendChip({ color, label }: { color: string; label: string }) {
-  const isLight = ['#0369a1', '#b45309', '#0d9488', '#7c3aed', '#db2777', '#dc2626', '#d97706', '#15803d'].includes(color);
+  const isLight = LIGHT_COLORS.includes(color);
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+    <span className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
       <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color, outline: isLight ? 'none' : '1px solid rgba(0,0,0,.15)' }} />
       {label}
     </span>

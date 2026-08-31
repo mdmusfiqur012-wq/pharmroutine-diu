@@ -6596,7 +6596,7 @@
   "settings": [
     {
       "key": "app",
-      "value": "{\"universityName\":\"Daffodil International University\",\"departmentName\":\"Department of Pharmacy\",\"universityTagline\":\"Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002\",\"colors\":{\"theory\":\"#7c3aed\",\"lab\":\"#2563eb\",\"guest\":\"#ea580c\",\"ged\":\"#ca8a04\",\"nfe\":\"#db2777\",\"agriculture\":\"#15803d\",\"cancelled\":\"#dc2626\",\"rescheduled\":\"#d97706\"}}"
+      "value": "{\"universityName\":\"Daffodil International University\",\"departmentName\":\"Department of Pharmacy\",\"universityTagline\":\"Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002\",\"colors\":{\"theory\":\"#1d4ed8\",\"lab\":\"#16a34a\",\"guest\":\"#7c3aed\",\"ged\":\"#0e7490\",\"nfe\":\"#0f766e\",\"agriculture\":\"#65a30d\",\"cancelled\":\"#dc2626\",\"rescheduled\":\"#d97706\"}}"
     }
   ]
 }
