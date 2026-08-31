@@ -46,6 +46,43 @@ interface ManualRow { rid: string; code: string; title: string; credits: number;
 const SRC_LABEL: Record<OfferRow['source'], string> = { official: 'official', xlsx: 'file', paste: 'pasted', manual: 'typed' };
 const SRC_TONE: Record<OfferRow['source'], 'slate' | 'blue' | 'teal' | 'purple'> = { official: 'slate', xlsx: 'blue', paste: 'teal', manual: 'purple' };
 
+/* ---- Section B mirrors Section A (same courses & teachers for every batch) ----
+ * 'auto' : on an A edit — blank B rows fill automatically, in-sync B rows follow,
+ *          customized B rows (the 1–2 exceptional teacher changes) are NEVER touched.
+ * 'fill' : one-click — fill blanks only, exceptions kept.
+ * 'force': overwrite everything from A (only after confirmation). */
+const freshRid = () => `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+const sameCourse = (a: ManualRow, b: ManualRow) =>
+  (a.code ?? '').trim().toLowerCase() === (b.code ?? '').trim().toLowerCase() &&
+  (a.title ?? '').trim() === (b.title ?? '').trim() &&
+  a.credits === b.credits && a.type === b.type &&
+  (a.faculty ?? '').trim() === (b.faculty ?? '').trim();
+const bExceptions = (aRows: ManualRow[], bRows: ManualRow[]) =>
+  bRows.filter((b) => {
+    if (!(b.code ?? '').trim()) return false;
+    const a = aRows.find((x) => (x.code ?? '').trim().toLowerCase() === (b.code ?? '').trim().toLowerCase());
+    return !!a && !sameCourse(a, b);
+  }).length;
+function mirrorBFromA(aPrev: ManualRow[], aNext: ManualRow[], bRows: ManualRow[], mode: 'auto' | 'fill' | 'force'): ManualRow[] {
+  let changed = false;
+  const next = bRows.slice();
+  for (let i = 0; i < aNext.length; i++) {
+    const a = aNext[i];
+    if (!a || !(a.code ?? '').trim()) continue;
+    const b = next[i];
+    if (mode !== 'force' && b && (b.code ?? '').trim()) {
+      const inSync = aPrev[i] ? sameCourse(aPrev[i], b) : sameCourse(a, b);
+      if (mode === 'auto' && !inSync) continue;          // customized — keep the exception
+      if (mode === 'fill' && !sameCourse(a, b)) continue; // exception — keep
+    }
+    if (b && sameCourse(a, b)) continue;                  // already identical
+    changed = true;
+    if (b) next[i] = { ...b, code: a.code, title: a.title, credits: a.credits, type: a.type, faculty: a.faculty, src: a.src };
+    else next[i] = { ...a, rid: freshRid() };
+  }
+  return changed ? next : bRows;
+}
+
 const TYPE_META: Record<OfferType, { label: string; cls: string }> = {
   theory: { label: 'Theory', cls: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' },
   lab: { label: 'Laboratory', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
@@ -117,6 +154,38 @@ export default function SmartGenerator() {
   const blankRow = (): ManualRow => ({ rid: `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`, code: '', title: '', credits: 3, type: 'theory', faculty: '' });
   const rowsFor = (bn: number, sec: 'A' | 'B') => manual[`${bn}|${sec}`] ?? [];
   const setRowsFor = (bn: number, sec: 'A' | 'B', rows: ManualRow[]) => setManual((m) => ({ ...m, [`${bn}|${sec}`]: rows }));
+  /** wraps table edits: A edits auto-mirror into blank/in-sync B rows */
+  const handleTableChange = (bn: number, sec: 'A' | 'B', rows: ManualRow[]) => {
+    if (sec === 'A') {
+      const prev = rowsFor(bn, 'A');
+      const nb = mirrorBFromA(prev, rows, rowsFor(bn, 'B'), 'auto');
+      if (nb !== rowsFor(bn, 'B')) setRowsFor(bn, 'B', nb);
+    }
+    setRowsFor(bn, sec, rows);
+  };
+  const syncB = (bn: number, force: boolean) => {
+    const aRows = rowsFor(bn, 'A');
+    const bRows = rowsFor(bn, 'B');
+    const exc = bExceptions(aRows, bRows);
+    if (force && exc > 0 && !window.confirm(`Batch ${bn}: overwrite ${exc} customized Section-B row(s) with Section A?`)) return;
+    const nb = mirrorBFromA(aRows, aRows, bRows, force ? 'force' : 'fill');
+    const copied = nb.filter((r) => (r.code ?? '').trim()).length - bRows.filter((r) => (r.code ?? '').trim()).length;
+    if (nb !== bRows) setRowsFor(bn, 'B', nb);
+    toast.push(force ? 'success' : 'info', force
+      ? `Batch ${bn}: Section B now equals Section A (${copied} row(s) refreshed, ${exc} exception(s) overwritten).`
+      : `Batch ${bn}: Section B filled from A — ${copied} row(s) copied${exc ? `, ${exc} exceptional row(s) kept (they differ from A)` : ''}.`);
+  };
+  const syncAllB = () => {
+    let copied = 0; let exc = 0;
+    for (const bn of effSel) {
+      const aRows = rowsFor(bn, 'A');
+      const bRows = rowsFor(bn, 'B');
+      const nb = mirrorBFromA(aRows, aRows, bRows, 'fill');
+      if (nb !== bRows) { copied += nb.filter((r) => (r.code ?? '').trim()).length - bRows.filter((r) => (r.code ?? '').trim()).length; setRowsFor(bn, 'B', nb); }
+      exc += bExceptions(aRows, nb);
+    }
+    toast.push('success', `Section B auto-filled from A for all ${effSel.length} selected batch(es) — ${copied} row(s) copied${exc ? ` · ${exc} exceptional row(s) kept` : ''}.`);
+  };
   useEffect(() => {
     setManual((m) => {
       let changed = false; const next = { ...m };
@@ -499,6 +568,12 @@ export default function SmartGenerator() {
           </div>
 
           {/* per-batch entry tables — 10 rows A + 10 rows B, nothing mandatory */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-100 bg-white/60 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/30">
+            <button className="btn-secondary !py-1.5 text-xs" onClick={syncAllB}>
+              <Icon name="layers" className="h-3.5 w-3.5" /> Auto-fill Section B from A — all {effSel.length} selected batches
+            </button>
+            <p className="text-[11px] text-slate-400">Section A &amp; B share the same courses &amp; teachers — type once, Section B fills automatically. Rows you customize in B (1–2 teacher changes) are never overwritten.</p>
+          </div>
           {effSel.map((bn) => (
             <BatchEntryTable
               key={bn}
@@ -508,7 +583,8 @@ export default function SmartGenerator() {
               knownFaculty={knownFaculty}
               titleFor={titleFor}
               isDuplicate={isDuplicate}
-              onChange={(sec, rows) => setRowsFor(bn, sec, rows)}
+              onChange={(sec, rows) => handleTableChange(bn, sec, rows)}
+              onSyncB={(force) => syncB(bn, force)}
             />
           ))}
 
@@ -1177,12 +1253,13 @@ function EntryRow({ sec, r, knownFaculty, titleFor, isDup, onChange, onRemove }:
   );
 }
 
-function BatchEntryTable({ batchNo, rowsA, rowsB, knownFaculty, titleFor, isDuplicate, onChange }: {
+function BatchEntryTable({ batchNo, rowsA, rowsB, knownFaculty, titleFor, isDuplicate, onChange, onSyncB }: {
   batchNo: number; rowsA: ManualRow[]; rowsB: ManualRow[]; knownFaculty: string[];
   titleFor: (code: string) => string | null; isDuplicate: (bn: number, sec: string, code: string) => boolean;
-  onChange: (sec: 'A' | 'B', rows: ManualRow[]) => void;
+  onChange: (sec: 'A' | 'B', rows: ManualRow[]) => void; onSyncB: (force: boolean) => void;
 }) {
   const [open, setOpen] = useState(true);
+  const excN = bExceptions(rowsA, rowsB);
   const patchRow = (sec: 'A' | 'B', rid: string, p: Partial<ManualRow>) => {
     const rows = (sec === 'A' ? rowsA : rowsB).map((r) => (r.rid === rid ? { ...r, ...p } : r));
     onChange(sec, rows);
@@ -1203,6 +1280,9 @@ function BatchEntryTable({ batchNo, rowsA, rowsB, knownFaculty, titleFor, isDupl
         </button>
         <span className="flex items-center gap-2">
           {inComplete && <Badge tone="amber"><Icon name="alert" className="h-3 w-3" /> needs attention</Badge>}
+          {excN > 0
+            ? <Badge tone="purple"><Icon name="spark" className="h-3 w-3" /> {excN} B exception(s)</Badge>
+            : <Badge tone="teal"><Icon name="layers" className="h-3 w-3" /> B mirrors A</Badge>}
           <Badge tone={filled ? 'green' : 'slate'}>{filled} filled</Badge>
           <button onClick={() => setOpen((v) => !v)} className="p-1"><Icon name="chevronDown" className={clsx('h-4 w-4 text-slate-400 transition-transform', !open && '-rotate-90')} /></button>
         </span>
@@ -1229,11 +1309,17 @@ function BatchEntryTable({ batchNo, rowsA, rowsB, knownFaculty, titleFor, isDupl
             </table>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-2 dark:border-slate-800 dark:bg-slate-800/30">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => addRow('A')}><Icon name="plus" className="h-3 w-3" /> Add A row</button>
               <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => addRow('B')}><Icon name="plus" className="h-3 w-3" /> Add B row</button>
+              <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => onSyncB(false)}><Icon name="layers" className="h-3 w-3" /> B ← A (fill)</button>
+              {excN > 0 && (
+                <button className="btn-secondary !px-2.5 !py-1 text-[10px] !border-rose-200 !text-rose-600 dark:!border-rose-900/60 dark:!text-rose-400" onClick={() => onSyncB(true)}>
+                  <Icon name="layers" className="h-3 w-3" /> B = A (overwrite {excN})
+                </button>
+              )}
             </div>
-            <p className="text-[10px] text-slate-400">Blank rows are ignored · typed codes auto-fill titles · nothing here is mandatory.</p>
+            <p className="text-[10px] text-slate-400">Section B mirrors Section A automatically — change a B row's teacher to set the 1–2 exceptions; they are never overwritten.</p>
           </div>
         </>
       )}
