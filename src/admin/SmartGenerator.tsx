@@ -140,7 +140,10 @@ export default function SmartGenerator() {
         });
       }
     }
-    setOffers((prev) => [...prev.filter((o) => o.source !== 'manual'), ...rows]);
+    setOffers((prev) => [
+      ...prev.filter((o) => o.source !== 'manual' && effSel.includes(o.batchNo)),
+      ...rows.filter((o) => effSel.includes(o.batchNo)),
+    ]);
   }
   /** offers → manual tables (when returning to step 1 so edits never get lost) */
   function rebuildManualFromOffers() {
@@ -158,6 +161,8 @@ export default function SmartGenerator() {
   }
   const goReview = () => { syncManualToOffers(); setStep(2); };
   const [syncing, setSyncing] = useState(false);
+  const [newBatch, setNewBatch] = useState<{ bn: number; level: number } | null>(null);
+  const [creatingBatch, setCreatingBatch] = useState(false);
   async function createMissingBatch(bn: number) {
     if (!db) return;
     setSyncing(true);
@@ -168,6 +173,21 @@ export default function SmartGenerator() {
       await refresh();
       toast.push('success', `Batch ${bn} created with sections A/B and lab groups A1/A2/B1/B2 — it is now available in the generator and on the Batches & Groups page.`);
     } finally { setSyncing(false); }
+  }
+  /** unlimited batches: create any new batch number from inside the generator
+   *  (batch + sections A/B + lab groups A1/A2/B1/B2) and select it right away. */
+  async function createBatchInline() {
+    if (!newBatch || !db) return;
+    if (db.batches.some((b) => b.batch_no === newBatch.bn)) { toast.push('error', `Batch ${newBatch.bn} already exists — pick another number.`); return; }
+    setCreatingBatch(true);
+    try {
+      const r = await ensureBatchRows(db, newBatch.bn, newBatch.level);
+      if (!r.ok) { toast.push('error', `Batch ${newBatch.bn}: ${r.error ?? 'could not be created'}`); return; }
+      await refresh();
+      setSelBatches((s) => [...(s ?? allBatchNos.slice(0, 8)).filter((x) => x !== newBatch!.bn), newBatch!.bn].sort((a, b) => a - b));
+      toast.push('success', `Batch ${newBatch.bn} created (sections A/B + lab groups A1/A2/B1/B2) and selected for this routine.`);
+      setNewBatch(null);
+    } finally { setCreatingBatch(false); }
   }
   function removeOfferRow(id: string) {
     setOffers((os) => os.filter((o) => o.id !== id));
@@ -204,8 +224,9 @@ export default function SmartGenerator() {
     try {
       const { offers: rows, errors } = await parseWorkbookFile(f);
       if (!rows.length) { toast.push('error', errors[0] ?? 'No recognizable rows — use columns: Batch, Section, Course Code, Title, Credits, Type, Faculty.'); return; }
-      setOffers((prev) => [...prev.filter((o) => o.source !== 'xlsx'), ...rows]);
-      toast.push('success', `Imported ${rows.length} course rows from ${f.name}.`);
+      const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
+      setOffers((prev) => [...prev.filter((o) => o.source !== 'xlsx'), ...keep]);
+      toast.push('success', `Imported ${keep.length} course rows from ${f.name}${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
       setStep(2);
     } catch (e: any) {
       toast.push('error', 'Import failed: ' + (e?.message ?? 'unknown error'));
@@ -213,16 +234,19 @@ export default function SmartGenerator() {
   }
   function loadOfficial() {
     const b = loadOfficialOffer();
-    setOffers(b.offers);
+    const rows = effSel.length ? b.offers.filter((o) => effSel.includes(o.batchNo)) : b.offers;
+    setOffers(rows);
     setConfig((c) => ({ ...c, facultyOff: { ...b.facultyOff, ...c.facultyOff } }));
-    toast.push('success', `Loaded the official Fall 2026 course offer — ${b.offers.length} rows (${batchNos.length || 8} batches, sections A/B).`);
+    const skipped = b.offers.length - rows.length;
+    toast.push('success', `Loaded the official Fall 2026 course offer — ${rows.length} rows for the ${effSel.length} selected batch(es)${skipped > 0 ? `; ${skipped} row(s) of unselected batches were skipped` : ''}.`);
     setStep(2);
   }
   function onPaste(text: string) {
     const { offers: rows, errors } = parsePastedText(text);
     if (!rows.length) { toast.push('error', errors[0] ?? 'Nothing recognized — paste the batch × faculty matrix or a full column table.'); return; }
-    setOffers((prev) => [...prev.filter((o) => o.source !== 'paste'), ...rows]);
-    toast.push('success', `Parsed ${rows.length} rows from pasted text.`);
+    const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
+    setOffers((prev) => [...prev.filter((o) => o.source !== 'paste'), ...keep]);
+    toast.push('success', `Parsed ${keep.length} rows from pasted text${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
     setStep(2);
   }
 
@@ -230,6 +254,8 @@ export default function SmartGenerator() {
   async function onGenerate() {
     if (!ctx || !db) { toast.push('error', 'Data source not ready.'); return; }
     if (!offers.length) { toast.push('error', 'Import the course offer first.'); return; }
+    if (!effSel.length) { toast.push('error', 'Select at least one batch in the Import step.'); setStep(1); return; }
+    if (offers.some((o) => !effSel.includes(o.batchNo))) { setOffers((os) => os.filter((o) => effSel.includes(o.batchNo))); toast.push('info', 'Rows of unselected batches were removed — only selected batches contribute to the routine.'); }
     if (issues.some((i) => i.kind === 'missing-title' || i.kind === 'no-faculty')) {
       toast.push('error', 'Unresolved data (missing titles / faculty) — fix in Review before generating.');
       setStep(2); return;
@@ -367,7 +393,9 @@ export default function SmartGenerator() {
             <div className="card p-5">
               <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Choose the batches for this routine</h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Normally a routine is built for <b>8 batches</b> — the first 8 are pre-selected. Pick any combination; only the selected batches get entry tables below.
+                Normally a routine is built for <b>8 batches</b> — the first 8 are pre-selected. Pick any combination:
+                <b> only the selected batches contribute to the routine</b> — everything else stays in the database, untouched.
+                An unlimited number of batches can exist.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {allBatchNos.map((bn) => {
@@ -387,8 +415,12 @@ export default function SmartGenerator() {
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches(allBatchNos.slice(0, 8))}>First 8</button>
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([...allBatchNos])}>All</button>
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([])}>None</button>
-                <Link to="/admin/batches" className="ml-auto text-[11px] font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">+ add a new batch →</Link>
+                <button className="btn-primary !px-3 !py-1.5 text-[11px]" onClick={() => setNewBatch({ bn: (allBatchNos.length ? Math.max(...allBatchNos) + 1 : 39), level: 1 })}>
+                  <Icon name="plus" className="h-3.5 w-3.5" /> New batch (unlimited)
+                </button>
+                <Link to="/admin/batches" className="ml-auto text-[11px] font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">manage all batches →</Link>
               </div>
+              <p className="mt-2 text-[10px] text-slate-400">Unselected batches are ignored by generation &amp; publishing — select 8 (or any number) and only those will form this routine.</p>
             </div>
 
             {/* ② bulk import */}
@@ -953,12 +985,50 @@ export default function SmartGenerator() {
         </div>
       )}
 
+      {/* new batch modal */}
+      {newBatch && (
+        <Modal open onClose={() => setNewBatch(null)} title="Create a new batch" subtitle="Unlimited batches — only the ones selected above contribute to this routine.">
+          <div className="space-y-4 p-5">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Batch number</span>
+                <input type="number" min={1} max={999} className="input mt-1 !py-2 text-sm font-extrabold" value={newBatch.bn}
+                  onChange={(e) => setNewBatch({ ...newBatch, bn: Number(e.target.value) || 1 })} />
+              </label>
+              <label className="block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Curriculum level</span>
+                <select className="input mt-1 !py-2 text-sm" value={newBatch.level} onChange={(e) => setNewBatch({ ...newBatch, level: Number(e.target.value) })}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((l) => <option key={l} value={l}>Level {l}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+              <Icon name="info" className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
+              Creates <b>Batch {newBatch.bn}</b> with sections A/B and lab groups A1, A2, B1, B2 — visible in Batches &amp; Groups,
+              automatically <b>selected</b> for this routine, with its own entry tables below. Set its off-day in the Rules step.
+            </div>
+            {db?.batches.some((b) => b.batch_no === newBatch.bn) && (
+              <p className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                <Icon name="alert" className="h-3.5 w-3.5" /> Batch {newBatch.bn} already exists — choose a different number.
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setNewBatch(null)}>Cancel</button>
+              <button className="btn-primary" disabled={creatingBatch || (db?.batches.some((b) => b.batch_no === newBatch.bn) ?? false)} onClick={() => void createBatchInline()}>
+                {creatingBatch ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Icon name="plus" className="h-4 w-4" />}
+                {creatingBatch ? 'Creating…' : `Create Batch ${newBatch.bn} & select`}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* add-row modal */}
       {addFor && (
         <Modal open onClose={() => setAddFor(null)} title={`Add course — Batch ${addFor.bn} ${addFor.sec}`} subtitle="Manual entry — the code auto-fills the title from the catalog.">
           <div className="p-5">
             <ManualEntry
-              batches={ctx?.batches ?? []}
+              batches={ctx?.batches.filter((b) => effSel.includes(b.batchNo)) ?? []}
               knownFaculty={knownFaculty}
               titleFor={titleFor}
               catalogCodes={catalogCodes}

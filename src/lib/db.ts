@@ -51,6 +51,28 @@ function uuid4(): string {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
+/** Run a PostgREST call; if RLS denies it (42501) because this origin has no
+ *  admin session (fresh preview URL, expired token…), transparently sign in
+ *  with the admin passcode via the magic-admin function and retry once.
+ *  This is what makes "Add batch / New faculty" work everywhere. */
+async function pgRetry(call: () => Promise<{ error: { code?: string; message: string } | null }>): Promise<{ code?: string; message: string } | null> {
+  let res = await call();
+  if (res.error?.code === '42501') {
+    let signedIn = false;
+    try { signedIn = Boolean((await supabase!.auth.getUser()).data.user); } catch { /* noop */ }
+    if (!signedIn) {
+      const ok = await api.magicAdmin(ADMIN_PASSCODE);
+      if (ok) res = await call();
+    }
+  }
+  return res.error ? { code: res.error.code, message: res.error.message } : null;
+}
+
+const rlsMsg = (e: { code?: string; message: string }) =>
+  e.code === '42501'
+    ? 'Permission denied — the admin session could not be restored. Open the site, sign in once with the admin passcode, then retry.'
+    : e.message;
+
 /** UI table key → Supabase table name */
 const SB_TABLE: Record<string, string> = {
   semesters: 'semesters', batches: 'batches', sections: 'sections', labGroups: 'lab_groups',
@@ -109,8 +131,13 @@ export const api = {
   /* ---- routine entries ---- */
   async saveRoutineEntry(entry: any): Promise<{ ok: boolean; error?: string; entry?: any }> {
     if (supabase) {
-      const { data, error } = await supabase.from('routine_entries').insert({ ...entry, id: entry?.id && /^[0-9a-f-]{36}$/i.test(entry.id) ? entry.id : uuid4() }).select().single();
-      if (error) return { ok: false, error: `${error.message} (${error.code})` };
+      const eid = entry?.id && /^[0-9a-f-]{36}$/i.test(entry.id) ? entry.id : uuid4();
+      const err = await pgRetry(async () => {
+        const r = await supabase!.from('routine_entries').insert({ ...entry, id: eid });
+        return { error: r.error };
+      });
+      if (err) return { ok: false, error: rlsMsg(err) };
+      const { data } = await supabase.from('routine_entries').select().eq('id', eid).single();
       return { ok: true, entry: data };
     }
     await delay();
@@ -142,17 +169,19 @@ export const api = {
   /* ---- off days ---- */
   async setOffDays(semesterId: string, batchId: string, rows: { day_id: string; reason: string }[]): Promise<{ ok: boolean; error?: string }> {
     if (supabase) {
-      const { error } = await supabase
-        .from('batch_off_days')
-        .delete()
-        .eq('semester_id', semesterId)
-        .eq('batch_id', batchId);
-      if (error) return { ok: false, error: error.message };
+      const derr = await pgRetry(async () => {
+        const r = await supabase!.from('batch_off_days').delete().eq('semester_id', semesterId).eq('batch_id', batchId);
+        return { error: r.error };
+      });
+      if (derr) return { ok: false, error: rlsMsg(derr) };
       if (rows.length) {
-        const { error: ierr } = await supabase.from('batch_off_days').insert(
-          rows.map((r) => ({ semester_id: semesterId, batch_id: batchId, day_id: r.day_id, reason: r.reason, is_active: true })),
-        );
-        if (ierr) return { ok: false, error: ierr.message };
+        const ierr = await pgRetry(async () => {
+          const r = await supabase!.from('batch_off_days').insert(
+            rows.map((x) => ({ semester_id: semesterId, batch_id: batchId, day_id: x.day_id, reason: x.reason, is_active: true })),
+          );
+          return { error: r.error };
+        });
+        if (ierr) return { ok: false, error: rlsMsg(ierr) };
       }
       return { ok: true };
     }
@@ -167,16 +196,14 @@ export const api = {
   /* ---- generic CRUD for catalog tables ---- */
   async upsertRow(table: keyof DB, row: any): Promise<{ ok: boolean; error?: string; id?: string }> {
     if (supabase) {
-      if (row.id) {
-        const { error } = await supabase.from(SB_TABLE[table] ?? table).update(row).eq('id', row.id);
-        return error ? { ok: false, error: error.message } : { ok: true, id: row.id };
-      }
-      const newId = uuid4();
-      const { error } = await supabase.from(SB_TABLE[table] ?? table).insert({ ...row, id: newId });
-      if (error) {
-        // RLS refusal = no valid admin session on this client (or expired)
-        return { ok: false, error: error.code === '42501' ? 'Permission denied (row-level security) — sign in again with the admin passcode and retry.' : error.message };
-      }
+      const newId = row.id ?? uuid4();
+      const err = await pgRetry(async () => {
+        const r = row.id
+          ? await supabase!.from(SB_TABLE[table] ?? table).update(row).eq('id', row.id)
+          : await supabase!.from(SB_TABLE[table] ?? table).insert({ ...row, id: newId });
+        return { error: r.error };
+      });
+      if (err) return { ok: false, error: rlsMsg(err) };
       return { ok: true, id: newId };
     }
     await delay();
@@ -193,8 +220,11 @@ export const api = {
 
   async deleteRow(table: keyof DB, id: string): Promise<{ ok: boolean; error?: string }> {
     if (supabase) {
-      const { error } = await supabase.from(SB_TABLE[table] ?? table).delete().eq('id', id);
-      return error ? { ok: false, error: error.message } : { ok: true };
+      const err = await pgRetry(async () => {
+        const r = await supabase!.from(SB_TABLE[table] ?? table).delete().eq('id', id);
+        return { error: r.error };
+      });
+      return err ? { ok: false, error: rlsMsg(err) } : { ok: true };
     }
     await delay();
     (store.db[table] as any[]) = (store.db[table] as any[]).filter((r) => r.id !== id);
@@ -205,10 +235,13 @@ export const api = {
   async saveAnnouncement(row: any): Promise<{ ok: boolean; error?: string }> {
     if (supabase) {
       const payload = { ...row, created_by: (await supabase.auth.getUser()).data.user?.id ?? null };
-      const { error } = row.id
-        ? await supabase.from('announcements').update(payload).eq('id', row.id)
-        : await supabase.from('announcements').insert(payload);
-      return error ? { ok: false, error: error.message } : { ok: true };
+      const err = await pgRetry(async () => {
+        const r = row.id
+          ? await supabase!.from('announcements').update(payload).eq('id', row.id)
+          : await supabase!.from('announcements').insert(payload);
+        return { error: r.error };
+      });
+      return err ? { ok: false, error: rlsMsg(err) } : { ok: true };
     }
     await delay();
     if (row.id) {
@@ -222,8 +255,11 @@ export const api = {
 
   async deleteAnnouncement(id: string): Promise<{ ok: boolean; error?: string }> {
     if (supabase) {
-      const { error } = await supabase.from('announcements').delete().eq('id', id);
-      return error ? { ok: false, error: error.message } : { ok: true };
+      const err = await pgRetry(async () => {
+        const r = await supabase!.from('announcements').delete().eq('id', id);
+        return { error: r.error };
+      });
+      return err ? { ok: false, error: rlsMsg(err) } : { ok: true };
     }
     await delay();
     store.db.announcements = store.db.announcements.filter((a) => a.id !== id);

@@ -302,7 +302,7 @@ export function AdminBatches() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {db.batches.length} batches ({Math.min(...db.batches.map((b) => b.batch_no))}–{Math.max(...db.batches.map((b) => b.batch_no))}) · every batch carries its own level, class days, off days and routine.
-          The <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b> reads this list — batches found in the imported offer but missing here are created from Review in one click.
+          The <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b> reads this list — you can add unlimited batches (1–999); only the 8 (or any selection) chosen in its Import step contribute to each routine.
         </p>
         <button className="btn-primary" onClick={() => setModal({ is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch ({Math.max(...db.batches.map((b) => b.batch_no)) + 1 || 39}+)</button>
       </div>
@@ -354,7 +354,7 @@ export function AdminBatches() {
 
       <AdminModal open={Boolean(modal)} onClose={() => setModal(null)} title={modal?.id ? 'Edit batch' : 'Add new batch'}>
         <form onSubmit={save} className="grid grid-cols-2 gap-4">
-          <Field label="Batch number"><input className="input" type="number" min={29} max={99} required value={modal?.batch_no ?? 39} onChange={(e) => setModal((m) => ({ ...m!, batch_no: Number(e.target.value) }))} /></Field>
+          <Field label="Batch number (unlimited)"><input className="input" type="number" min={1} max={999} required value={modal?.batch_no ?? (db.batches.length ? Math.max(...db.batches.map((b) => b.batch_no)) + 1 : 39)} onChange={(e) => setModal((m) => ({ ...m!, batch_no: Number(e.target.value) }))} /></Field>
           <Field label="Admission year"><input className="input" type="number" min={2018} max={2035} value={modal?.admission_year ?? new Date().getFullYear() - 1} onChange={(e) => setModal((m) => ({ ...m!, admission_year: Number(e.target.value) }))} /></Field>
           <Field label="Current curriculum level"><input className="input" type="number" min={1} max={8} value={modal?.current_level ?? 1} onChange={(e) => setModal((m) => ({ ...m!, current_level: Number(e.target.value) }))} /></Field>
           <Field label="Name"><input className="input" value={modal?.name ?? `Batch ${modal?.batch_no ?? ''}`} onChange={(e) => setModal((m) => ({ ...m!, name: e.target.value }))} /></Field>
@@ -367,7 +367,8 @@ export function AdminBatches() {
           </label>
           <div className="col-span-2">
             <p className="rounded-lg bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-              Sections A & B plus lab groups A1, A2, B1, B2 are created automatically. Then add courses, routine entries and its own off-day calendar from the admin tabs.
+              Any number 1–999 is allowed — batches are unlimited. Sections A & B plus lab groups A1, A2, B1, B2 are created automatically.
+              Then add its courses in the Smart Routine Generator; only the batches you select there contribute to a routine.
             </p>
           </div>
           <div className="col-span-2"><SaveBar busy={busy} label="Create batch" /></div>
