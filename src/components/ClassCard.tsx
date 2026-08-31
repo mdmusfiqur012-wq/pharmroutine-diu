@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import type { JoinedEntry } from '../lib/types';
-import { classColor, STATUS_META } from '../lib/routine';
+import { classColor, STATUS_META, advisorFor } from '../lib/routine';
+import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
 import { Badge, Icon, Modal } from '../lib/ui';
 
@@ -26,6 +27,7 @@ export function useClassModal() {
 
 export function ClassModalHost({ entry, onClose }: { entry: JoinedEntry | null; onClose: () => void }) {
   const settings = useApp((s) => s.settings);
+  const { db } = useData();
   if (!entry) return null;
   const color = classColor(entry, settings.colors);
   const status = STATUS_META[entry.status];
@@ -36,6 +38,8 @@ export function ClassModalHost({ entry, onClose }: { entry: JoinedEntry | null; 
   if (entry.labGroup) meta.push({ icon: 'flask', label: 'Laboratory Group', value: `Group ${entry.labGroup.name} (Section ${entry.section?.name})` });
   if (entry.class_type === 'theory') meta.push({ icon: 'book', label: 'Class Type', value: 'Theory — Section class' });
   meta.push({ icon: 'mapPin', label: 'Room', value: `${entry.room?.code ?? '—'} · ${entry.room?.name ?? ''}` });
+  const advisor = entry.batch && entry.section ? advisorFor(db, entry.batch.id, entry.section.id) : null;
+  if (advisor?.faculty) meta.push({ icon: 'users', label: 'Batch Advisor', value: `${advisor.faculty.name} · ${advisor.faculty.designation ?? ''}` });
   meta.push({ icon: 'award', label: 'Faculty', value: `${entry.faculty?.name ?? '—'} (${entry.faculty?.initials ?? ''}) · ${entry.faculty?.designation ?? ''}` });
   meta.push({ icon: 'building', label: 'Department', value: `${entry.course ? entry.course.department.toUpperCase() : '—'} · Faculty type: ${entry.faculty?.faculty_type ?? '—'}` });
   meta.push({ icon: 'clock', label: 'Duration', value: '1 hour 30 minutes' });

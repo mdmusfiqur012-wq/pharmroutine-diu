@@ -540,7 +540,20 @@ export function AdminSettings() {
   const resetSettings = useApp((s) => s.resetSettings);
   const toast = T();
   const [busy, setBusy] = useState(false);
+  const [adv, setAdv] = useState<Record<string, Record<string, string>>>(() => {
+    try {
+      const row = db?.settings?.find((s) => s.key === 'batch_advisors');
+      return row ? JSON.parse(row.value) : {};
+    } catch { return {}; }
+  });
   if (loading || !db) return null;
+
+  const saveAdvisors = async () => {
+    setBusy(true);
+    const res = await api.saveSetting('batch_advisors', JSON.stringify(adv));
+    setBusy(false);
+    toast.push(res.ok ? 'success' : 'error', res.ok ? 'Batch advisors saved — shown on routine pages & exports.' : (res.error ?? 'Save failed'));
+  };
 
   const COLORS: { key: keyof AppSettings['colors']; label: string }[] = [
     { key: 'theory', label: 'Theory (Pharmacy)' },
@@ -586,6 +599,34 @@ export function AdminSettings() {
                 </span>
               </label>
             ))}
+          </div>
+        </section>
+
+        <section className="card p-5">
+          <h3 className="mb-1 text-sm font-extrabold text-slate-800 dark:text-slate-100">Batch advisors</h3>
+          <p className="mb-3 text-[11px] text-slate-400">Official advisor of each batch section — shown on the routine page, class details, and PDF/PNG exports.</p>
+          <div className="space-y-2">
+            {db.batches.filter((b) => b.is_active).sort((a, c) => a.batch_no - c.batch_no).map((b) => (
+              <div key={b.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl border border-slate-100 bg-white/60 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/40">
+                <span className="w-16 text-xs font-extrabold text-slate-700 dark:text-slate-200">{b.name}</span>
+                {(['A', 'B'] as const).map((sec) => (
+                  <label key={sec} className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">{sec}</span>
+                    <select
+                      className="input !w-48 !py-1.5 text-xs"
+                      value={adv[String(b.batch_no)]?.[sec] ?? ''}
+                      onChange={(e) => setAdv((a) => ({ ...a, [String(b.batch_no)]: { ...(a[String(b.batch_no)] ?? {}), [sec]: e.target.value } }))}
+                    >
+                      <option value="">— none —</option>
+                      {db.faculty.filter((f) => f.is_active).map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button className="btn-secondary !py-1.5 text-xs" onClick={saveAdvisors} disabled={busy}><Icon name="check" className="h-3.5 w-3.5" /> Save advisors</button>
           </div>
         </section>
       </div>

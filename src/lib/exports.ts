@@ -36,6 +36,7 @@ export interface ExportInfo {
   entries: JoinedEntry[];
   offDayMap: Map<string, { reason?: string | null }>; // dayId -> off-day reason
   title: string;
+  advisorName?: string | null;
 }
 
 function wrapText(doc: jsPDF, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines = 4): number {
@@ -89,7 +90,7 @@ export async function exportRoutinePdf(info: ExportInfo, fileName = 'routine.pdf
   doc.setTextColor(60, 60, 60);
   doc.setFontSize(9.5);
   doc.setFont('helvetica', 'bold');
-  const meta = `Semester: ${semesterName}    |    ${batchName} — Section ${sectionName}${labGroupName ? ` — Lab Group ${labGroupName}` : ''}`;
+  const meta = `Semester: ${semesterName}    |    ${batchName} — Section ${sectionName}${labGroupName ? ` — Lab Group ${labGroupName}` : ''}${info.advisorName ? `    |    Batch Advisor: ${info.advisorName}` : ''}`;
   doc.text(meta, margin, 78);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);

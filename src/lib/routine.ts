@@ -1,7 +1,7 @@
 import {
   COMBINED_LAB,
   type Database, type JoinedEntry, type RoutineSelection, type ClassDay, type TimeSlot,
-  type RoutineEntry, type BatchOffDay, type ClassColors, type EntryStatus, type ClassType,
+  type RoutineEntry, type BatchOffDay, type ClassColors, type EntryStatus, type ClassType, type Faculty,
 } from './types';
 import { joinEntries, joinAll } from './conflicts';
 
@@ -206,4 +206,35 @@ export function batchStats(db: Database, semesterId: string, batchId: string) {
 
 export function attachDb(entries: JoinedEntry[], db: Database): JoinedEntry[] {
   return joinAll(db, entries.map((e) => e));
+}
+
+/* ---------------- Batch advisors ---------------- */
+
+export interface BatchAdvisorInfo {
+  faculty: Faculty | undefined;
+  batchName: string;
+  batchNo: number;
+  sectionName: string;
+}
+
+/** Official batch-advisor map (settings key `batch_advisors`): batchNo → section → facultyId */
+export function getAdvisorMap(db: Database | null | undefined): Record<string, Record<string, string>> {
+  const row = db?.settings?.find((s) => s.key === 'batch_advisors');
+  if (!row) return {};
+  try {
+    const v = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+    return v ?? {};
+  } catch {
+    return {};
+  }
+}
+
+export function advisorFor(db: Database | null | undefined, batchId?: string, sectionId?: string): BatchAdvisorInfo | null {
+  if (!db || !batchId || !sectionId) return null;
+  const batch = db.batches.find((b) => b.id === batchId);
+  const section = db.sections.find((s) => s.id === sectionId);
+  if (!batch || !section) return null;
+  const fid = getAdvisorMap(db)[String(batch.batch_no)]?.[section.name];
+  if (!fid) return null;
+  return { faculty: db.faculty.find((f) => f.id === fid), batchName: batch.name, batchNo: batch.batch_no, sectionName: section.name };
 }

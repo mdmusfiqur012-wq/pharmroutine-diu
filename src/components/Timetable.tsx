@@ -286,8 +286,8 @@ export default function Timetable({ entries, days, slots, offDayMap, selectionLa
 /* Dense printable/exportable variant: single class per cell, no interactivity.
    layout='grid'  → weekly grid (day rows × class-slot columns), wide landscape
    layout='list'  → portrait day-by-day list, fits phone screens when exported */
-export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel, settings, layout = 'grid' }: {
-  entries: JoinedEntry[]; days: ClassDay[]; slots: TimeSlot[]; offDayMap: Map<string, { reason?: string | null }>; selectionLabel: string[]; settings: any; layout?: 'grid' | 'list';
+export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel, settings, layout = 'grid', advisorName }: {
+  entries: JoinedEntry[]; days: ClassDay[]; slots: TimeSlot[]; offDayMap: Map<string, { reason?: string | null }>; selectionLabel: string[]; settings: any; layout?: 'grid' | 'list'; advisorName?: string | null;
 }) {
   const sortedDays = [...days].sort((a, b) => a.sequence - b.sequence);
   return (
@@ -301,6 +301,7 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
           </div>
           <div className="text-right text-xs font-medium text-slate-500">
             <p className="font-extrabold text-slate-800">{selectionLabel.join(' · ')}</p>
+            {advisorName && <p className="font-bold" style={{ color: settings.colors.theory }}>Batch Advisor: {advisorName}</p>}
             <p>Generated {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
           </div>
         </div>

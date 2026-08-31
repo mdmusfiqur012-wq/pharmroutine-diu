@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { JoinedEntry, RoutineSelection } from '../lib/types';
 import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
-import { buildStudentRoutine, filterClasses, offDaysFor, type ClassFilterKey } from '../lib/routine';
+import { buildStudentRoutine, filterClasses, offDaysFor, advisorFor, type ClassFilterKey } from '../lib/routine';
 import { exportRoutinePdf, exportRoutinePng, printElement, ROUTINE_PDF_FILENAME } from '../lib/exports';
 import { SelectionPanel, COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
 import Timetable, { PrintTimetable } from '../components/Timetable';
@@ -80,6 +80,11 @@ export default function Routine() {
       ].filter(Boolean)
     : [];
 
+  const advisor = useMemo(
+    () => (db && selection ? advisorFor(db, selection.batch_id, selection.section_id) : null),
+    [db, selection],
+  );
+
   async function handlePdf() {
     if (!result) return;
     const seed = [label[1], label[2], label[3]].filter(Boolean).join('-') || 'routine';
@@ -100,6 +105,7 @@ export default function Routine() {
         entries: filtered,
         offDayMap,
         title: 'Personalized Class Routine',
+        advisorName: advisor?.faculty?.name ?? null,
       }, ROUTINE_PDF_FILENAME(seed));
       toast.push('success', 'PDF downloaded successfully.');
     } catch (e: any) {
@@ -225,6 +231,23 @@ export default function Routine() {
             </div>
           )}
 
+          {advisor?.faculty && (
+            <div className="card flex flex-wrap items-center gap-3 p-4">
+              <span className="grad-icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                <Icon name="users" className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Batch Advisor · {advisor.batchName} — Section {advisor.sectionName}</p>
+                <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{advisor.faculty.name}</p>
+                <p className="truncate text-[11px] font-semibold text-slate-500 dark:text-slate-400">{advisor.faculty.designation}</p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                {advisor.faculty.phone && <span className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"><Icon name="phone" className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> {advisor.faculty.phone}</span>}
+                {advisor.faculty.email && <span className="glass inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"><Icon name="mail" className="h-3 w-3 text-brand-600 dark:text-brand-400" /> {advisor.faculty.email}</span>}
+              </div>
+            </div>
+          )}
+
           <div className="print-page no-print">
             <Timetable
               entries={filtered}
@@ -245,6 +268,7 @@ export default function Routine() {
               selectionLabel={label}
               settings={settings}
               layout={pngLayout}
+              advisorName={advisor?.faculty?.name ?? null}
             />
           </div>
         </div>

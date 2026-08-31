@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
 import { Icon, Logo, Badge, StatCard, type IconName } from '../lib/ui';
-import { batchStats } from '../lib/routine';
+import { batchStats, getAdvisorMap } from '../lib/routine';
 import { isSupabaseMode } from '../lib/db';
 import clsx from 'clsx';
 
@@ -269,6 +269,7 @@ export default function Home() {
                   <th className="table-th">Lab groups</th>
                   <th className="table-th">Class days</th>
                   <th className="table-th">Off days</th>
+                  <th className="table-th">Batch Advisor</th>
                   <th className="table-th">Classes</th>
                   <th className="table-th">Courses</th>
                 </tr>
@@ -298,6 +299,17 @@ export default function Home() {
                             {offNames.map((n) => <span key={n} className="chip bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400">{n}</span>)}
                           </span>
                         ) : <span className="text-slate-300">—</span>}
+                      </td>
+                      <td className="table-td">
+                        <span className="flex flex-col gap-1">
+                          {(['A', 'B'] as const).map((sec) => {
+                            const fid = getAdvisorMap(db)[String(b.batch_no)]?.[sec];
+                            const fac = fid ? db?.faculty.find((f) => f.id === fid) : undefined;
+                            return fac
+                              ? <span key={sec} className="chip !bg-brand-50 !text-brand-800 ring-1 ring-brand-100 dark:!bg-brand-950/60 dark:!text-brand-300 dark:ring-slate-700"><span className="font-extrabold">{sec}:</span> {fac.name}</span>
+                              : <span key={sec} className="text-[10px] text-slate-300">—</span>;
+                          })}
+                        </span>
                       </td>
                       <td className="table-td font-extrabold text-slate-700 dark:text-slate-200">{s.classes}</td>
                       <td className="table-td text-slate-500">{s.courses}</td>

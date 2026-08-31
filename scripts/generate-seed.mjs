@@ -346,7 +346,17 @@ const db = {
     { id: 'a5', title: 'Rooms AB-1 103 & AB-1 504 — other departments', category: 'notice', semester_id: SEMESTER.id, batch_id: null, body: 'Per the official routine, Classroom AB-1 103 is reserved for the Agriculture Dept and Classroom AB-1 504 is used by the NFE Dept (Sun–Thu). Pharmacy students should report to their scheduled rooms; these two rooms are not Pharmacy teaching rooms.', pinned: false, is_active: true, created_by: null, created_by_name: 'Dept. of Pharmacy', created_at: '2026-08-31T09:20:00Z' },
   ],
   settings: [
-    { key: 'app', value: JSON.stringify({ universityName: 'Daffodil International University', departmentName: 'Department of Pharmacy', universityTagline: 'Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002', colors: { theory: '#7c3aed', lab: '#2563eb', guest: '#ea580c', ged: '#ca8a04', nfe: '#db2777', agriculture: '#15803d', cancelled: '#dc2626', rescheduled: '#d97706' } }) },
+    { key: 'batch_advisors', value: JSON.stringify({
+    29: { A: 'f-MTA', B: 'f-MAP' },
+    30: { A: 'f-DMS', B: 'f-MSH' },
+    31: { A: 'f-BTS', B: 'f-SKB' },
+    32: { A: 'f-NAS', B: 'f-NJN' },
+    33: { A: 'f-DSR', B: 'f-BSS' },
+    34: { A: 'f-MSK', B: 'f-DMR' },
+    35: { A: 'f-MHL', B: 'f-SAF' },
+    36: { A: 'f-SJM', B: 'f-SKM' },
+  }) },
+    { key: 'app', value: JSON.stringify({ universityName: 'Daffodil International University', departmentName: 'Department of Pharmacy', universityTagline: 'Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002', colors: { theory: '#1d4ed8', lab: '#16a34a', guest: '#7c3aed', ged: '#0e7490', nfe: '#0f766e', agriculture: '#65a30d', cancelled: '#dc2626', rescheduled: '#d97706' } }) },
   ],
 };
 
