@@ -40,8 +40,11 @@ export function ClassModalHost({ entry, onClose }: { entry: JoinedEntry | null; 
   meta.push({ icon: 'mapPin', label: 'Room', value: `${entry.room?.code ?? '—'} · ${entry.room?.name ?? ''}` });
   const advisor = entry.batch && entry.section ? advisorFor(db, entry.batch.id, entry.section.id) : null;
   if (advisor?.faculty) meta.push({ icon: 'users', label: 'Batch Advisor', value: `${advisor.faculty.name} · ${advisor.faculty.designation ?? ''}` });
-  meta.push({ icon: 'award', label: 'Faculty', value: `${entry.faculty?.name ?? '—'} (${entry.faculty?.initials ?? ''}) · ${entry.faculty?.designation ?? ''}` });
-  meta.push({ icon: 'building', label: 'Department', value: `${entry.course ? entry.course.department.toUpperCase() : '—'} · Faculty type: ${entry.faculty?.faculty_type ?? '—'}` });
+  // a PRJ class (Project / Industrial Training / Oral Assessment) is supervised by the
+  // department coordinator row created by the Smart Routine Generator — never a real teacher.
+  const isCoord = entry.faculty?.initials === 'PC';
+  meta.push({ icon: 'award', label: isCoord ? 'Supervision' : 'Faculty', value: isCoord ? 'Department Coordinator — Project / Training / Assessment' : `${entry.faculty?.name ?? '—'} (${entry.faculty?.initials ?? ''}) · ${entry.faculty?.designation ?? ''}` });
+  meta.push({ icon: 'building', label: 'Department', value: `${entry.course ? entry.course.department.toUpperCase() : '—'}${isCoord ? '' : ` · Faculty type: ${entry.faculty?.faculty_type ?? '—'}`}` });
   meta.push({ icon: 'clock', label: 'Duration', value: '1 hour 30 minutes' });
 
   return (
@@ -149,12 +152,12 @@ export function MiniClassCard({ entry, onClick }: { entry: JoinedEntry; onClick?
         {entry.course?.title}
       </p>
       <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-        <span className="font-bold text-slate-700 dark:text-slate-300">{entry.faculty?.initials}</span>
+        <span className="font-bold text-slate-700 dark:text-slate-300">{entry.faculty?.initials === 'PC' ? 'Coordinator' : entry.faculty?.initials}</span>
         <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-2.5 w-2.5" />{entry.room?.code}</span>
       </p>
       {/* hover-reveal extra info: time + faculty name */}
       <p className="max-h-0 overflow-hidden text-[9px] font-semibold text-slate-400 opacity-0 transition-all duration-300 group-hover:max-h-6 group-hover:opacity-100 dark:text-slate-500">
-        {entry.timeSlot?.label} · {entry.faculty?.name}
+        {entry.timeSlot?.label} · {entry.faculty?.initials === 'PC' ? 'Dept. Coordinator' : entry.faculty?.name}
       </p>
     </button>
   );
@@ -194,7 +197,7 @@ export function MobileClassCard({ entry, onClick }: { entry: JoinedEntry; onClic
           {entry.course?.title}
         </p>
         <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-          {entry.timeSlot?.label} · {entry.faculty?.name} ({entry.faculty?.initials}) · <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-3 w-3" />{entry.room?.code}</span>
+          {entry.timeSlot?.label} · {entry.faculty?.initials === 'PC' ? 'Dept. Coordinator' : entry.faculty?.name} ({entry.faculty?.initials}) · <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-3 w-3" />{entry.room?.code}</span>
         </p>
       </div>
     </button>

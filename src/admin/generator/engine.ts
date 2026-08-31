@@ -38,6 +38,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function sessionsFor(offer: OfferRow, cfg: GenConfig): number {
   if (offer.type === 'lab') return 1;
+  if (offer.type === 'prj') return 1;   // Project / Industrial Training / Oral Assessment = one guided session/week
   const c = Math.min(3, Math.max(1, Math.round(offer.credits)));
   return cfg.sessions[c as 1 | 2 | 3] ?? 1;
 }
@@ -128,7 +129,7 @@ export async function generateRoutine(
     const batch = batchByNo.get(o.batchNo);
     if (!batch) return { ok: false, reason: `batch ${o.batchNo} not configured in the database` };
     if (batchOff.get(o.batchNo)?.has(day)) return { ok: false, reason: `${dayById.get(day)?.name} is Batch ${o.batchNo}'s off day` };
-    if (facOff.get(o.faculty)?.has(day)) return { ok: false, reason: `${o.faculty} has ${dayById.get(day)?.name} off` };
+    if (o.faculty && facOff.get(o.faculty)?.has(day)) return { ok: false, reason: `${o.faculty} has ${dayById.get(day)?.name} off` };
     const sec = (sectionsByBatch.get(o.batchNo) ?? []).find((s) => s.name === o.section);
     if (!sec) return { ok: false, reason: `section ${o.batchNo}${o.section} missing` };
 
@@ -139,7 +140,7 @@ export async function generateRoutine(
       const allowed = allowedCodes.map((c) => roomByCode.get(c)).filter((r): r is NonNullable<typeof r> => !!r && r.type !== 'theory');
       if (allowed.length < 2) return { ok: false, reason: `fewer than 2 lab rooms configured for ${o.code}` };
       if (!isSecFree(day, slot, sec.id)) return { ok: false, reason: `Batch ${o.batchNo}${o.section} already has a class in this slot` };
-      if (!isFacFree(day, slot, o.faculty)) return { ok: false, reason: `${o.faculty} is teaching another class in this slot` };
+      if (o.faculty && !isFacFree(day, slot, o.faculty)) return { ok: false, reason: `${o.faculty} is teaching another class in this slot` };
       const rotKey = `${o.code}:${o.section}`;
       const prev = rotation[rotKey];
       const ordered = prev && prev.a !== prev.b ? [prev.b, prev.a] : null;
@@ -162,7 +163,7 @@ export async function generateRoutine(
     }
 
     if (!isSecFree(day, slot, sec.id)) return { ok: false, reason: `Batch ${o.batchNo}${o.section} already busy` };
-    if (!isFacFree(day, slot, o.faculty)) return { ok: false, reason: `${o.faculty} busy` };
+    if (o.faculty && !isFacFree(day, slot, o.faculty)) return { ok: false, reason: `${o.faculty} busy` };
     const forced = cfg.fixedRooms[o.faculty];
     const roomCodes = forced ? [forced] : cfg.theoryRooms;
     for (const code of roomCodes) {
@@ -175,7 +176,7 @@ export async function generateRoutine(
   const commit = (unit: Unit, day: string, slot: string, roomId: string, groupRooms?: Record<string, string>, why: 'lock' | 'auto' = 'auto') => {
     const o = unit.offer;
     const sec = (sectionsByBatch.get(o.batchNo) ?? []).find((s) => s.name === o.section)!;
-    occupySection(day, slot, sec.id); occupyFaculty(day, slot, o.faculty);
+    occupySection(day, slot, sec.id); if (o.faculty) occupyFaculty(day, slot, o.faculty);
     if (groupRooms) {
       const groups = groupsBySection.get(sec.id) ?? [];
       const g1 = groups[0], g2 = groups[1];
@@ -322,7 +323,7 @@ export async function generateRoutine(
     labs: classes.filter((c) => c.type === 'lab').length,
     prj: classes.filter((c) => c.type === 'prj').length,
     batches: new Set(classes.map((c) => c.batchNo)).size,
-    facultyUsed: new Set(classes.map((c) => c.faculty)).size,
+    facultyUsed: new Set(classes.map((c) => c.faculty).filter(Boolean)).size,
     roomsUsed: new Set(classes.map((c) => c.roomId)).size,
     utilization: sectionsUsed ? Math.round((classes.length / (ctx.days.length * ctx.slots.length * sectionsUsed)) * 100) : 0,
   };
@@ -445,7 +446,7 @@ export function verifySchedule(ctx: GenCtx, classes: GenClass[], cfg: GenConfig,
   const byRoom = new Map<string, Map<string, GenClass[]>>();
   for (const c of classes) {
     const key = `${c.dayId}|${c.slotId}`;
-    push(byFaculty, c.faculty, key, c); push(bySection, `${c.batchNo}${c.section}`, key, c); push(byRoom, c.roomId, key, c);
+    if (c.faculty) push(byFaculty, c.faculty, key, c); push(bySection, `${c.batchNo}${c.section}`, key, c); push(byRoom, c.roomId, key, c);
   }
   function push(m: Map<string, Map<string, GenClass[]>>, group: string, key: string, c: GenClass) {
     const inner = m.get(group) ?? new Map<string, GenClass[]>(); const arr = inner.get(key) ?? []; arr.push(c); inner.set(key, arr); m.set(group, inner);
@@ -499,7 +500,7 @@ export function verifySchedule(ctx: GenCtx, classes: GenClass[], cfg: GenConfig,
     const off = cfg.offDays[String(c.batchNo)];
     if (off && c.dayId === off) issues.push({ severity: 'error', kind: 'offday', message: `${c.code} scheduled on Batch ${c.batchNo}'s off day (${dayById.get(off)?.name}).` });
     const dayName = dayById.get(c.dayId)?.name ?? '';
-    if ((cfg.facultyOff[c.faculty] ?? []).some((d) => d.toLowerCase() === dayName.toLowerCase()))
+    if (c.faculty && (cfg.facultyOff[c.faculty] ?? []).some((d) => d.toLowerCase() === dayName.toLowerCase()))
       issues.push({ severity: 'error', kind: 'faculty', message: `${c.faculty} is off on ${dayName} but teaches ${c.code}.` });
   }
   const offerCodes = new Set(offers.map((o) => o.code));

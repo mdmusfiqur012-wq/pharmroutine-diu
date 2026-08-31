@@ -47,6 +47,16 @@ export interface OfficialBundle {
   label: string;
 }
 
+/** Full course catalog embedded with the official offer (code → title/credits/type).
+ *  Used to auto-fill a course title the moment its code is entered. */
+export function officialCatalog(): Record<string, { title: string; credits: number; type: OfferType }> {
+  const out: Record<string, { title: string; credits: number; type: OfferType }> = {};
+  for (const [code, m] of Object.entries(OFFICIAL.courses as unknown as Record<string, [string, number, string]>)) {
+    out[code] = { title: String(m?.[0] ?? ''), credits: Number(m?.[1] ?? 0), type: (m?.[2] ?? 'theory') as OfferType };
+  }
+  return out;
+}
+
 export function loadOfficialOffer(): OfficialBundle {
   const offers: OfferRow[] = [];
   const meta = OFFICIAL.courses as unknown as Record<string, [string, number, string]>;
@@ -191,7 +201,11 @@ export function inspectOffers(offers: OfferRow[], ctx: GenCtx | null, knownFacul
     seen.add(o.code);
     if (!o.title) issues.push({ kind: 'missing-title', offerId: o.id, message: `Course ${o.code} has no title yet — add it or map it in Review.` });
     if (!o.credits) issues.push({ kind: 'no-credits', offerId: o.id, message: `Course ${o.code} has no credits — provide them (they set the weekly session count).` });
-    if (!o.faculty) issues.push({ kind: 'no-faculty', offerId: o.id, message: `No faculty assigned to ${o.code} (${o.batchNo}${o.section}).` });
+    if (!o.faculty) {
+      // PRJ (Project / Industrial Training / Oral Assessment) is supervised by the
+      // department coordinator — no individual faculty is required, so it never blocks.
+      if (o.type !== 'prj') issues.push({ kind: 'no-faculty', offerId: o.id, message: `No faculty assigned to ${o.code} (${o.batchNo}${o.section}).` });
+    }
     else if (!known.has(o.faculty) && !/^[A-Z]{2,4}$/.test(o.faculty)) issues.push({ kind: 'unknown-faculty', offerId: o.id, message: `Unknown faculty "${o.faculty}" for ${o.code} — match to a staff member in Review.` });
     if (o.type === 'lab' && !ctx) issues.push({ kind: 'missing-type', offerId: o.id, message: `${o.code} marked as Laboratory — ensure lab rooms are configured.` });
   }

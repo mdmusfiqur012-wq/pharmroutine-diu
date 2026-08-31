@@ -9,7 +9,7 @@ import {
   type OfferRow, type GenConfig, type ClassLock, type RotationState, type GenResult, type GenClass,
   type ConflictIssue, type OfferType, DEFAULT_CONFIG,
 } from './generator/types';
-import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers } from './generator/parser';
+import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers, officialCatalog } from './generator/parser';
 import { generateRoutine, verifySchedule, verifyFrequency, frequencyRows, probeMove } from './generator/engine';
 import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, type PublishSummary } from './generator/store';
 import { COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
@@ -68,6 +68,10 @@ export default function SmartGenerator() {
   const [editClass, setEditClass] = useState<GenClass | null>(null);
   const [publishInfo, setPublishInfo] = useState<PublishSummary | null>(null);
   const [pulse, setPulse] = useState(0);
+  /** admin-defined courses (new semester / new subject) — code → catalog entry */
+  const [extraCourses, setExtraCourses] = usePersistentState<Record<string, { code: string; title: string; credits: number; type: OfferType }>>('extraCourses', {});
+  const [addFor, setAddFor] = useState<{ bn: number; sec: 'A' | 'B' } | null>(null);
+  const [catOpen, setCatOpen] = useState(false);
 
   const ctx = useMemo(() => (db ? buildGenCtx(db) : null), [db]);
   const knownFaculty = useMemo(() => (db ? db.faculty.filter((f) => f.is_active).map((f) => f.initials.toUpperCase()) : []), [db]);
@@ -75,6 +79,24 @@ export default function SmartGenerator() {
   const issues = useMemo(() => (ctx ? inspectOffers(offers, ctx, knownFaculty) : []), [offers, ctx, knownFaculty]);
   const labCourses = useMemo(() => [...new Set(offers.filter((o) => o.type === 'lab').map((o) => o.code))], [offers]);
   const allFaculty = useMemo(() => [...new Set(offers.map((o) => o.faculty).filter(Boolean))].sort(), [offers]);
+  /* course catalog: live DB → official offer → admin-defined extras (extras win).
+     Entering a course code snap-fills the title, which then stays locked. */
+  const officialCat = useMemo(() => officialCatalog(), []);
+  const catalogCodes = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of db?.courses ?? []) set.add(c.code);
+    for (const c of Object.keys(officialCat)) set.add(c);
+    for (const c of Object.keys(extraCourses)) set.add(c);
+    return [...set].sort();
+  }, [db, officialCat, extraCourses]);
+  const titleFor = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of db?.courses ?? []) if (c.code && c.title && !m.has(c.code)) m.set(c.code, c.title);
+    for (const [code, c] of Object.entries(officialCat)) if (!m.has(code) && c.title) m.set(code, c.title);
+    for (const [code, c] of Object.entries(extraCourses)) if (c.title) m.set(code, c.title);
+    return (code: string) => m.get(code.trim()) ?? null;
+  }, [db, officialCat, extraCourses]);
+  const isDuplicate = (bn: number, sec: string, code: string) => offers.some((o) => o.batchNo === bn && o.section === sec && o.code.trim().toLowerCase() === code.trim().toLowerCase());
   /* credit-based frequency: required vs scheduled, per course & section */
   const freq = useMemo(() => (ctx ? frequencyRows(ctx, offers, result?.classes ?? [], config) : []), [ctx, offers, result, config]);
   const freqOk = useMemo(() => freq.every((r) => r.ok), [freq]);
@@ -86,6 +108,16 @@ export default function SmartGenerator() {
 
   const patchOffer = (id: string, patch: Partial<OfferRow>) => setOffers((os) => os.map((o) => (o.id === id ? { ...o, ...patch } : o)));
   const patchConfig = (patch: Partial<GenConfig>) => setConfig((c) => ({ ...c, ...patch }));
+
+  /* ---------------- manual entry ---------------- */
+  function addManualRow(batchNo: number, section: 'A' | 'B', code: string, title: string, credits: number, type: OfferType, faculty: string) {
+    const id = `m-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const row: OfferRow = { id, batchNo, section, code: code.trim(), title: title.trim(), credits, type, faculty, facultyRaw: faculty, issues: [], source: 'manual' };
+    setOffers((prev) => [...prev, row]);
+  }
+  function saveExtraCourse(c: { code: string; title: string; credits: number; type: OfferType }) {
+    setExtraCourses((prev) => ({ ...prev, [c.code.trim()]: { ...c, code: c.code.trim(), title: c.title.trim() } }));
+  }
 
   /* ---------------- import ---------------- */
   const fileRef = useRef<HTMLInputElement>(null);
@@ -224,7 +256,7 @@ export default function SmartGenerator() {
               <Icon name="check" className="h-3.5 w-3.5" /> Last published {new Date(lastPublish).toLocaleString()}
             </span>
           )}
-          <button className="btn-secondary !py-1.5 text-xs" onClick={() => { clearGeneratorStorage(); setOffers([]); setConfig(DEFAULT_CONFIG); setLocks([]); setRotation({}); setResult(null); setPublishedByBatch({}); setPublishInfo(null); setStep(1); toast.push('info', 'Generator workspace cleared.'); }}>
+          <button className="btn-secondary !py-1.5 text-xs" onClick={() => { clearGeneratorStorage(); setOffers([]); setConfig(DEFAULT_CONFIG); setLocks([]); setRotation({}); setResult(null); setPublishedByBatch({}); setPublishInfo(null); setExtraCourses({}); setStep(1); toast.push('info', 'Generator workspace cleared.'); }}>
             <Icon name="refresh" className="h-3.5 w-3.5" /> Reset workspace
           </button>
         </div>
@@ -244,53 +276,67 @@ export default function SmartGenerator() {
         ))}
       </div>
 
-      {/* ================= STEP 1 · IMPORT ================= */}
+      {/* ================= STEP 1 · ENTER COURSE DATA ================= */}
       {step === 1 && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="card p-6">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Load the departmental course offer</h3>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
+          {/* primary: manual entry */}
+          <div className="card p-6 xl:col-span-3">
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Add course data manually</h3>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              The department provides: batch · section · course code · course title · credits · theory/practical · assigned faculty.
-              The system reads it and organizes the data — nothing is invented. Anything missing is highlighted in the next step.
+              Type each course yourself — batch · section · course code · credits · type · faculty.
+              Enter a <b>course code</b> and the title fills in automatically from the catalog (and stays locked);
+              brand-new courses (new semester) can be saved to the catalog right here.
             </p>
-            <div className="mt-4 space-y-2.5">
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-brand-300/70 bg-brand-50/50 px-4 py-8 text-center transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-glass-hover dark:border-brand-700 dark:bg-brand-950/30"
-              >
-                <span className="grad-icon-tile flex h-12 w-12 items-center justify-center rounded-2xl"><Icon name="download" className="h-5 w-5" /></span>
-                <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Upload Excel / CSV course offer</span>
-                <span className="text-[11px] text-slate-500">.xlsx · .xls · .csv — columns: Batch, Section, Course Code, Title, Credits, Type, Faculty</span>
-              </button>
-              <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
-              <button className="btn-primary w-full" onClick={loadOfficial} disabled={busy}>
-                <Icon name="calendar" className="h-4 w-4" /> Load official Fall 2026 course offer (bundled)
-              </button>
-            </div>
-          </div>
-
-          <div className="card p-6">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">② Or paste the offer table</h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Copy from the department Excel/PDF and paste here — tab-separated columns work best; the batch × subject × faculty matrix is also recognized.
-            </p>
-            <PasteBox onPaste={onPaste} busy={busy} />
-            <div className="mt-3 flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+            <ManualEntry
+              className="mt-4"
+              batches={ctx?.batches ?? []}
+              knownFaculty={knownFaculty}
+              titleFor={titleFor}
+              catalogCodes={catalogCodes}
+              isDuplicate={isDuplicate}
+              onAdd={addManualRow}
+              onSaveCourse={saveExtraCourse}
+            />
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
               <Icon name="info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-500" />
-              <span><b className="text-slate-600 dark:text-slate-300">Format example:</b> Batch | Section | Course Code | Title | Credits | Type | Faculty<br />36 | A | 0916-1101 | Inorganic Pharmacy-I | 3 | Theory | MSK</span>
+              <span><b className="text-slate-600 dark:text-slate-300">Note:</b> Project · Industrial Training · Oral Assessment (PRJ) need no faculty —
+              they are supervised by the department coordinator and appear in the routine as one guided session per week.
+              Laboratory courses automatically split into paired groups A1/A2 (or B1/B2).</span>
             </div>
           </div>
 
-          {offers.length > 0 && (
-            <div className="card flex items-center gap-4 p-5 lg:col-span-2">
-              <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
-              <div className="flex-1">
-                <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{offers.length} course rows loaded · {batchNos.length} batches · {new Set(offers.map((o) => o.code)).size} courses</p>
-                <p className="text-xs text-slate-500">{offers.filter((o) => o.type === 'lab').length} practical courses will generate paired lab-group sessions (A1/A2, B1/B2).</p>
+          {/* secondary: bulk import */}
+          <div className="space-y-4 xl:col-span-2">
+            <div className="card p-5">
+              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">② Or load everything at once</h3>
+              <div className="mt-3 space-y-2.5">
+                <button className="btn-primary w-full" onClick={loadOfficial} disabled={busy}>
+                  <Icon name="calendar" className="h-4 w-4" /> Load official Fall 2026 course offer (bundled)
+                </button>
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="flex w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-dashed border-brand-300/70 bg-brand-50/50 px-4 py-6 text-center transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-glass-hover dark:border-brand-700 dark:bg-brand-950/30"
+                >
+                  <span className="grad-icon-tile flex h-10 w-10 items-center justify-center rounded-xl"><Icon name="download" className="h-4 w-4" /></span>
+                  <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100">Upload Excel / CSV offer</span>
+                  <span className="text-[10px] text-slate-500">.xlsx · .xls · .csv — Batch, Section, Code, Title, Credits, Type, Faculty</span>
+                </button>
+                <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
+                <PasteBox onPaste={onPaste} busy={busy} />
               </div>
-              <button className="btn-primary" onClick={() => setStep(2)}>Review data <Icon name="chevronRight" className="h-4 w-4" /></button>
             </div>
-          )}
+
+            {offers.length > 0 && (
+              <div className="card flex items-center gap-4 p-5">
+                <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
+                <div className="flex-1">
+                  <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{offers.length} course rows · {batchNos.length} batches · {new Set(offers.map((o) => o.code)).size} courses</p>
+                  <p className="text-xs text-slate-500">{offers.filter((o) => o.type === 'lab').length} practicals → paired lab groups (A1/A2 · B1/B2) · {offers.filter((o) => o.type === 'prj').length} PRJ sessions with coordinator.</p>
+                </div>
+                <button className="btn-primary" onClick={() => setStep(2)}>Review <Icon name="chevronRight" className="h-4 w-4" /></button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -302,6 +348,8 @@ export default function SmartGenerator() {
               <button className={clsx('chip px-3 py-1.5 !text-xs', issues.length ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300')}>
                 <Icon name={issues.length ? 'alert' : 'check'} className="h-3.5 w-3.5" /> {issues.length ? `${issues.length} item(s) need attention` : 'All course data resolved'}
               </button>
+              <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => setCatOpen(true)}><Icon name="plus" className="h-3.5 w-3.5" /> New course (catalog)</button>
+              <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => { const bn = batchNos[0] ?? (ctx?.batches[0]?.batchNo ?? 29); setAddFor({ bn, sec: 'A' }); }}><Icon name="plus" className="h-3.5 w-3.5" /> Add row</button>
               <button className="btn-secondary !py-1 !px-2.5 text-xs" onClick={() => setStep(3)}>Continue → Configure rules</button>
             </div>
             <p className="text-[11px] font-semibold text-slate-400">Missing info is never invented — fix it here or flag it to the department.</p>
@@ -322,16 +370,14 @@ export default function SmartGenerator() {
           )}
 
           {batchNos.map((bn) => (
-            <BatchReviewTable key={bn} batchNo={bn} offers={offers.filter((o) => o.batchNo === bn)} knownFaculty={knownFaculty} patch={patchOffer} />
+            <BatchReviewTable key={bn} batchNo={bn} offers={offers.filter((o) => o.batchNo === bn)} knownFaculty={knownFaculty} patch={patchOffer} titleFor={titleFor} onAddRow={(sec) => setAddFor({ bn, sec })} />
           ))}
 
-          {labCourses.length > 0 && (
-            <div className="card flex flex-wrap items-center gap-2 p-4 text-xs text-slate-500">
-              <Icon name="flask" className="h-4 w-4 text-emerald-600" />
-              <span className="font-extrabold text-slate-700 dark:text-slate-200">{labCourses.length} practical courses</span>
-              <span>will run per section with two lab groups — <b>group A1/A2 (or B1/B2) lab rotation</b> is applied automatically at generation.</span>
-            </div>
-          )}
+          <div className="card flex flex-wrap items-center gap-x-3 gap-y-2 p-4 text-xs text-slate-500">
+            <span className="flex items-center gap-2"><Icon name="flask" className="h-4 w-4 text-emerald-600" /><b className="text-slate-700 dark:text-slate-200">{labCourses.length}</b>&nbsp;practical courses → paired lab groups with A1/A2 · B1/B2 rotation</span>
+            <span className="flex items-center gap-2"><Icon name="check" className="h-4 w-4 text-violet-600" /><b className="text-slate-700 dark:text-slate-200">{offers.filter((o) => o.type === 'prj').length}</b>&nbsp;PRJ sessions (Project / Industrial Training / Oral Assessment) → department coordinator</span>
+            <span className="flex items-center gap-2 text-[10px] text-slate-400">Code entered ⇒ title auto-filled &amp; locked from the catalog · unknown codes stay editable and can be saved as new courses.</span>
+          </div>
         </div>
       )}
 
@@ -764,6 +810,42 @@ export default function SmartGenerator() {
         </div>
       )}
 
+      {/* add-row modal */}
+      {addFor && (
+        <Modal open onClose={() => setAddFor(null)} title={`Add course — Batch ${addFor.bn} ${addFor.sec}`} subtitle="Manual entry — the code auto-fills the title from the catalog.">
+          <div className="p-5">
+            <ManualEntry
+              batches={ctx?.batches ?? []}
+              knownFaculty={knownFaculty}
+              titleFor={titleFor}
+              catalogCodes={catalogCodes}
+              isDuplicate={isDuplicate}
+              onAdd={addManualRow}
+              onSaveCourse={saveExtraCourse}
+              initialBatch={addFor.bn}
+              initialSection={addFor.sec}
+              onClose={() => setAddFor(null)}
+            />
+          </div>
+        </Modal>
+      )}
+
+      {/* course catalog modal */}
+      {catOpen && (
+        <Modal open onClose={() => setCatOpen(false)} title="Course catalog" subtitle="New semester? Add the new courses here — titles stay locked to the code everywhere.">
+          <div className="p-5">
+            <CatalogEditor
+              knownFaculty={knownFaculty}
+              titleFor={titleFor}
+              catalogCodes={catalogCodes}
+              extraCourses={extraCourses}
+              onSave={saveExtraCourse}
+              onRemove={(code) => setExtraCourses((prev) => { const { [code]: _omit, ...rest } = prev; return rest; })}
+            />
+          </div>
+        </Modal>
+      )}
+
       {/* edit modal */}
       {editClass && ctx && (
         <EditModal
@@ -793,59 +875,267 @@ function PasteBox({ onPaste, busy }: { onPaste: (t: string) => void; busy: boole
   );
 }
 
-function BatchReviewTable({ batchNo, offers, knownFaculty, patch }: { batchNo: number; offers: OfferRow[]; knownFaculty: string[]; patch: (id: string, p: Partial<OfferRow>) => void }) {
+function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, onAddRow }: {
+  batchNo: number; offers: OfferRow[]; knownFaculty: string[]; patch: (id: string, p: Partial<OfferRow>) => void;
+  titleFor: (code: string) => string | null; onAddRow: (sec: 'A' | 'B') => void;
+}) {
   const [open, setOpen] = useState(true);
-  const rowIssues = (o: OfferRow) => (!o.title ? 1 : 0) + (!o.faculty ? 1 : 0) + (!o.credits ? 1 : 0);
+  const rowIssues = (o: OfferRow) => (!o.title ? 1 : 0) + (!o.faculty && o.type !== 'prj' ? 1 : 0) + (!o.credits ? 1 : 0);
   return (
     <div className="card overflow-hidden !p-0">
-      <button className="flex w-full items-center justify-between px-4 py-3" onClick={() => setOpen((v) => !v)}>
-        <span className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100">
+      <div className="flex w-full items-center justify-between gap-2 px-4 py-3">
+        <button className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100" onClick={() => setOpen((v) => !v)}>
           <span className="grad-icon-tile flex h-7 w-7 items-center justify-center rounded-lg text-xs">B</span>
           Batch {batchNo} · {offers.length} rows
-        </span>
+        </button>
         <span className="flex items-center gap-2">
+          <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => onAddRow('A')}><Icon name="plus" className="h-3 w-3" /> Add row</button>
           {offers.some((o) => rowIssues(o)) && <Badge tone="amber"><Icon name="alert" className="h-3 w-3" /> needs attention</Badge>}
-          <Icon name="chevronDown" className={clsx('h-4 w-4 text-slate-400 transition-transform', !open && '-rotate-90')} />
+          <button onClick={() => setOpen((v) => !v)} className="p-1"><Icon name="chevronDown" className={clsx('h-4 w-4 text-slate-400 transition-transform', !open && '-rotate-90')} /></button>
         </span>
-      </button>
+      </div>
       {open && (
         <div className="overflow-x-auto border-t border-slate-100 scroll-thin dark:border-slate-800">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/40">
-                <th className="table-th">Sec</th><th className="table-th">Code</th><th className="table-th">Course title</th>
+                <th className="table-th">Sec</th><th className="table-th">Code → title</th><th className="table-th">Course title</th>
                 <th className="table-th">Cr</th><th className="table-th">Type</th><th className="table-th">Faculty</th>
               </tr>
             </thead>
             <tbody>
-              {offers.map((o) => (
-                <tr key={o.id} className={clsx('border-b border-slate-100/80 last:border-0 dark:border-slate-800/60', rowIssues(o) && 'bg-amber-50/40 dark:bg-amber-950/20')}>
-                  <td className="table-td font-extrabold">{o.section}</td>
-                  <td className="table-td font-mono text-xs font-bold text-brand-700 dark:text-brand-400">{o.code}</td>
-                  <td className="table-td min-w-[220px]">
-                    <input className={clsx('input !py-1 text-xs', !o.title && '!border-amber-400')} value={o.title} placeholder="— missing title —" onChange={(e) => patch(o.id, { title: e.target.value })} />
-                  </td>
-                  <td className="table-td w-16">
-                    <input type="number" min={0} max={3} className={clsx('input !w-14 !py-1 text-xs', !o.credits && '!border-amber-400')} value={o.credits || ''} placeholder="—" onChange={(e) => patch(o.id, { credits: Number(e.target.value) || 0 })} />
-                  </td>
-                  <td className="table-td w-28">
-                    <select className={clsx('input !py-1 text-xs', !o.type && '!border-amber-400')} value={o.type} onChange={(e) => patch(o.id, { type: e.target.value as OfferType })}>
-                      <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
-                    </select>
-                  </td>
-                  <td className="table-td w-32">
-                    <select className={clsx('input !py-1 text-xs', !o.faculty && '!border-amber-400')} value={o.faculty} onChange={(e) => patch(o.id, { faculty: e.target.value, facultyRaw: e.target.value })}>
-                      <option value="">— none —</option>
-                      {knownFaculty.map((f) => <option key={f} value={f}>{f}</option>)}
-                      {!knownFaculty.includes(o.faculty) && o.faculty && <option value={o.faculty}>{o.faculty} (unknown)</option>}
-                    </select>
-                  </td>
-                </tr>
-              ))}
+              {offers.map((o) => {
+                const autoTitle = titleFor(o.code);
+                return (
+                  <tr key={o.id} className={clsx('border-b border-slate-100/80 last:border-0 dark:border-slate-800/60', rowIssues(o) && 'bg-amber-50/40 dark:bg-amber-950/20')}>
+                    <td className="table-td font-extrabold">{o.section}</td>
+                    <td className="table-td w-36">
+                      <input
+                        className="input !w-full !py-1 font-mono text-xs font-bold text-brand-700 dark:text-brand-400"
+                        value={o.code}
+                        placeholder="0916-0000"
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          const t = titleFor(v);
+                          // code drives the title: auto-fill from the catalog, never editable afterwards
+                          patch(o.id, t ? { code: v, title: t } : { code: v });
+                        }}
+                      />
+                    </td>
+                    <td className="table-td min-w-[240px]">
+                      {autoTitle ? (
+                        <span className="group flex items-center gap-1.5" title="Title comes from the course catalog — change the code to switch it.">
+                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{o.title}</span>
+                          <Icon name="lock" className="h-3 w-3 shrink-0 text-slate-300 group-hover:text-slate-400" />
+                        </span>
+                      ) : (
+                        <input className={clsx('input !py-1 text-xs', !o.title && '!border-amber-400')} value={o.title} placeholder="— new course: enter title —" onChange={(e) => patch(o.id, { title: e.target.value })} />
+                      )}
+                    </td>
+                    <td className="table-td w-16">
+                      <input type="number" min={0} max={4} className={clsx('input !w-14 !py-1 text-xs', !o.credits && '!border-amber-400')} value={o.credits || ''} placeholder="—" onChange={(e) => patch(o.id, { credits: Number(e.target.value) || 0 })} />
+                    </td>
+                    <td className="table-td w-28">
+                      <select className={clsx('input !py-1 text-xs', !o.type && '!border-amber-400')} value={o.type} onChange={(e) => patch(o.id, { type: e.target.value as OfferType, ...(e.target.value === 'prj' ? { faculty: '' } : {}) })}>
+                        <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+                      </select>
+                    </td>
+                    <td className="table-td w-36">
+                      {o.type === 'prj' ? (
+                        <span className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                          <Icon name="check" className="h-3 w-3" /> coordinator
+                        </span>
+                      ) : (
+                        <select className={clsx('input !py-1 text-xs', !o.faculty && '!border-amber-400')} value={o.faculty} onChange={(e) => patch(o.id, { faculty: e.target.value, facultyRaw: e.target.value })}>
+                          <option value="">— none —</option>
+                          {knownFaculty.map((f) => <option key={f} value={f}>{f}</option>)}
+                          {!knownFaculty.includes(o.faculty) && o.faculty && <option value={o.faculty}>{o.faculty} (unknown)</option>}
+                        </select>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+          {!offers.length && (
+            <button className="w-full p-4 text-center text-xs font-bold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400" onClick={() => onAddRow('A')}>
+              No rows yet — add the first course to Batch {batchNo}
+            </button>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ================= manual course entry (primary import path) ================= */
+
+function ManualEntry({ batches, knownFaculty, titleFor, catalogCodes, isDuplicate, onAdd, onSaveCourse, initialBatch, initialSection, onClose, className }: {
+  batches: { id: string; batchNo: number; name: string }[];
+  knownFaculty: string[];
+  titleFor: (code: string) => string | null;
+  catalogCodes: string[];
+  isDuplicate: (bn: number, sec: string, code: string) => boolean;
+  onAdd: (bn: number, sec: 'A' | 'B', code: string, title: string, credits: number, type: OfferType, faculty: string) => void;
+  onSaveCourse: (c: { code: string; title: string; credits: number; type: OfferType }) => void;
+  initialBatch?: number; initialSection?: 'A' | 'B'; onClose?: () => void; className?: string;
+}) {
+  const toast = useToast();
+  const [batchNo, setBatchNo] = useState(initialBatch ?? batches[0]?.batchNo ?? 29);
+  const [section, setSection] = useState<'A' | 'B'>(initialSection ?? 'A');
+  const [code, setCode] = useState('');
+  const [title, setTitle] = useState('');
+  const [credits, setCredits] = useState(3);
+  const [type, setType] = useState<OfferType>('theory');
+  const [faculty, setFaculty] = useState('');
+  const [hint, setHint] = useState<string | null>(null);
+  const auto = code.trim() ? titleFor(code) : null;
+  const isNew = !!code.trim() && !auto;
+
+  function onCode(v: string) {
+    setCode(v);
+    const t = titleFor(v);
+    if (t) { setTitle(t); setHint(null); } else if (!v.trim()) setTitle('');
+  }
+  function submit() {
+    const c = code.trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9-]{2,}$/.test(c)) { setHint('Enter a valid course code, e.g. 0916-1101.'); return; }
+    if (!auto && !title.trim()) { setHint('New course — type its full title once (it is saved to the catalog).'); return; }
+    if (credits < 1 || credits > 4) { setHint('Credits must be 1–4.'); return; }
+    if (isDuplicate(batchNo, section, c)) { setHint(`Batch ${batchNo}${section} already has ${c} — edit that row in Review instead.`); return; }
+    if (type !== 'prj' && !faculty) { setHint('Pick the assigned faculty — or choose type PRJ (coordinator-supervised, no faculty needed).'); return; }
+    if (isNew) { onSaveCourse({ code: c, title: title.trim(), credits, type }); }
+    onAdd(batchNo, section, c, auto ?? title.trim(), credits, type, type === 'prj' ? '' : faculty);
+    toast.push('success', `Added ${c} · Batch ${batchNo}${section}.`);
+    setCode(''); setTitle(''); setHint(null);
+    if (onClose) onClose();
+  }
+  const label = 'text-[10px] font-extrabold uppercase tracking-wide text-slate-400';
+  return (
+    <div className={className}>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <label className="block">
+          <span className={label}>Batch</span>
+          <select className="input mt-1 !py-2 text-xs" value={batchNo} onChange={(e) => setBatchNo(Number(e.target.value))}>
+            {batches.map((b) => <option key={b.batchNo} value={b.batchNo}>{b.name}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className={label}>Section</span>
+          <select className="input mt-1 !py-2 text-xs" value={section} onChange={(e) => setSection(e.target.value as 'A' | 'B')}>
+            <option value="A">A</option><option value="B">B</option>
+          </select>
+        </label>
+        <label className="block sm:col-span-2">
+          <span className={label}>Course code</span>
+          <input list="gen-course-codes" className="input mt-1 !py-2 font-mono text-xs font-bold" value={code} placeholder="e.g. 0916-1101" onChange={(e) => onCode(e.target.value)} />
+          <datalist id="gen-course-codes">{catalogCodes.slice(0, 300).map((c) => <option key={c} value={c} />)}</datalist>
+        </label>
+      </div>
+      <label className="mt-3 block">
+        <span className={label}>
+          Course title {auto ? <span className="ml-1 normal-case text-emerald-600 dark:text-emerald-400"><Icon name="lock" className="h-3 w-3" /> auto from catalog — locked</span> : isNew ? <span className="ml-1 normal-case text-amber-600 dark:text-amber-400">new course — type title once (saved to catalog)</span> : null}
+        </span>
+        {auto ? (
+          <span className="mt-1 flex items-center gap-2 rounded-xl bg-emerald-50/70 px-3 py-2 text-xs font-bold text-slate-700 ring-1 ring-emerald-200/60 dark:bg-emerald-950/30 dark:text-slate-200 dark:ring-emerald-900/50">
+            <Icon name="book" className="h-3.5 w-3.5 text-emerald-600" /> {auto}
+            <span className="ml-auto text-[9px] font-extrabold uppercase tracking-wide text-emerald-500">{type === 'lab' ? 'Practical' : type === 'prj' ? 'PRJ' : credits + ' credit'}</span>
+          </span>
+        ) : (
+          <input className={clsx('input mt-1 !py-2 text-xs', isNew && '!border-amber-400')} value={title} placeholder="Course title" onChange={(e) => setTitle(e.target.value)} />
+        )}
+      </label>
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <label className="block">
+          <span className={label}>Credits</span>
+          <select className="input mt-1 !py-2 text-xs" value={credits} onChange={(e) => setCredits(Number(e.target.value))}>
+            {[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} credit{c > 1 ? 's' : ''}</option>)}
+          </select>
+        </label>
+        <label className="block">
+          <span className={label}>Type</span>
+          <select className="input mt-1 !py-2 text-xs" value={type} onChange={(e) => { const t = e.target.value as OfferType; setType(t); if (t === 'prj') setFaculty(''); if (t === 'lab') setCredits((v) => (v > 2 ? 2 : v)); }}>
+            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+          </select>
+        </label>
+        <label className="block sm:col-span-2">
+          <span className={label}>Faculty {type === 'prj' && <span className="ml-1 normal-case text-violet-500">coordinator (none needed)</span>}</span>
+          <select className={clsx('input mt-1 !py-2 text-xs', type !== 'prj' && !faculty && '!border-amber-400')} value={type === 'prj' ? '' : faculty} disabled={type === 'prj'} onChange={(e) => setFaculty(e.target.value)}>
+            <option value="">— none —</option>
+            {knownFaculty.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </label>
+      </div>
+      <p className="mt-2 text-[10px] text-slate-400">
+        {type === 'lab' ? 'Laboratory sessions split into paired groups A1/A2 (or B1/B2) with lab rotation.' : type === 'prj' ? 'Project / Industrial Training / Oral Assessment — one weekly session, supervised by the department coordinator.' : credits >= 3 ? '3-credit theory → 2 classes per week (different days preferred).' : credits === 2 ? '2-credit theory → 1 class per week.' : '1-credit course → 1 class per week.'}
+      </p>
+      {hint && <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400"><Icon name="alert" className="h-3.5 w-3.5" /> {hint}</p>}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button className="btn-primary !py-2.5" onClick={submit}><Icon name="plus" className="h-4 w-4" /> Add course{onClose ? '' : ' & add another'}</button>
+        {onClose && <button className="btn-secondary !py-2.5" onClick={onClose}>Cancel</button>}
+      </div>
+    </div>
+  );
+}
+
+/* ================= course catalog editor (new semester = new courses) ================= */
+
+function CatalogEditor({ knownFaculty, titleFor, catalogCodes, extraCourses, onSave, onRemove }: {
+  knownFaculty: string[]; titleFor: (code: string) => string | null; catalogCodes: string[];
+  extraCourses: Record<string, { code: string; title: string; credits: number; type: OfferType }>;
+  onSave: (c: { code: string; title: string; credits: number; type: OfferType }) => void;
+  onRemove: (code: string) => void;
+}) {
+  const toast = useToast();
+  const [code, setCode] = useState('');
+  const [title, setTitle] = useState('');
+  const [credits, setCredits] = useState(3);
+  const [type, setType] = useState<OfferType>('theory');
+  const [hint, setHint] = useState<string | null>(null);
+  const auto = code.trim() ? titleFor(code) : null;
+  function submit() {
+    const c = code.trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9-]{2,}$/.test(c)) { setHint('Enter a valid course code.'); return; }
+    if (!auto && !title.trim()) { setHint('New course — type its full title.'); return; }
+    onSave({ code: c, title: auto ?? title.trim(), credits, type });
+    toast.push('success', `Catalog: ${c} saved.`);
+    setCode(''); setTitle(''); setHint(null);
+  }
+  const label = 'text-[10px] font-extrabold uppercase tracking-wide text-slate-400';
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 dark:border-slate-800 dark:bg-slate-800/30">
+        <p className="mb-2.5 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Add a course to the catalog (new semester)</p>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          <input list="gen-cat-codes" className="input !py-2 font-mono text-xs" value={code} placeholder="Course code" onChange={(e) => { const v = e.target.value; setCode(v); const t = titleFor(v); if (t) setTitle(t); }} />
+          <datalist id="gen-cat-codes">{catalogCodes.map((c) => <option key={c} value={c} />)}</datalist>
+          <input className={clsx('input !py-2 text-xs sm:col-span-2', !auto && '!border-amber-400')} value={auto ?? title} placeholder={auto ? undefined : 'Course title (new course)'} disabled={!!auto} onChange={(e) => setTitle(e.target.value)} />
+          <select className="input !py-2 text-xs" value={credits} onChange={(e) => setCredits(Number(e.target.value))}>
+            {[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} credits</option>)}
+          </select>
+          <select className="input !py-2 text-xs" value={type} onChange={(e) => setType(e.target.value as OfferType)}>
+            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+          </select>
+          <button className="btn-primary !py-2 text-xs" onClick={submit}><Icon name="plus" className="h-3.5 w-3.5" /> Save</button>
+        </div>
+        {hint && <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-amber-600"><Icon name="alert" className="h-3.5 w-3.5" /> {hint}</p>}
+      </div>
+      <div>
+        <p className="mb-1.5 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Your custom courses ({Object.keys(extraCourses).length})</p>
+        {!Object.keys(extraCourses).length && <p className="text-xs text-slate-400">None yet — courses you define here stay available for the next semester too. Existing catalog: {catalogCodes.length} codes.</p>}
+        <div className="max-h-52 space-y-1.5 overflow-y-auto pr-1 scroll-thin">
+          {Object.values(extraCourses).map((c) => (
+            <div key={c.code} className="flex items-center gap-2 rounded-lg border border-slate-100 px-3 py-1.5 dark:border-slate-800">
+              <span className="font-mono text-[11px] font-bold text-brand-700 dark:text-brand-400">{c.code}</span>
+              <span className="min-w-0 flex-1 truncate text-xs text-slate-600 dark:text-slate-300">{c.title}</span>
+              <Badge tone={c.type === 'lab' ? 'green' : c.type === 'prj' ? 'purple' : 'blue'}>{c.credits}cr · {c.type}</Badge>
+              <button className="text-slate-300 hover:text-red-500" onClick={() => onRemove(c.code)} title="Remove from catalog"><Icon name="trash" className="h-3.5 w-3.5" /></button>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="text-[10px] leading-relaxed text-slate-400">Codes drive titles automatically everywhere — use the official codes so titles stay locked to the catalog. Custom courses are created in the database the first time you publish them (never guessed from elsewhere).</p>
     </div>
   );
 }

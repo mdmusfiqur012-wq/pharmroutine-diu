@@ -52,6 +52,7 @@ export const icons = {
   capsule: <><rect x="3.5" y="9" width="17" height="6" rx="3" transform="rotate(-40 12 12)" /><path d="M9.2 9.4 14.6 14.6" /></>,
   spark: <><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></>,
   zap: <><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" /></>,
+  lock: <><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></>,
 };
 
 export type IconName = keyof typeof icons;

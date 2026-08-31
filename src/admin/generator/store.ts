@@ -169,19 +169,34 @@ export async function publishResult(
     courseByCode.set(code, row as any);
     return row.id;
   };
+  /** faculty_id is NOT NULL in routine_entries: PRJ / unsassigned classes are
+   *  attached to one hidden department-coordinator row (never shown to students). */
+  const COORD_INIT = 'PC';   // displayed as “Coordinator” on student cards
   const ensureFaculty = async (init: string) => {
-    const existing = facultyByInit.get(init.toUpperCase());
+    const key = (init || COORD_INIT).toUpperCase();
+    const existing = facultyByInit.get(key);
     if (existing) return existing.id;
     const known: Record<string, string> = { MRS: 'MRS (English)', HTS: 'HTS (CSE)', MRA: 'MRA (Math & Statistics)', MK: 'MK (HEB)' };
+    if (!init) {
+      const row = {
+        id: uuid(), name: 'Project & Training Coordinator', initials: COORD_INIT,
+        designation: 'Project, Industrial Training & Assessment Coordinator', department: 'Pharmacy',
+        faculty_type: 'nfe', is_active: false,   // hidden from the student faculty directory
+      };
+      const r = await api.upsertRow('faculty', row);
+      if (!r.ok) { summary.errors.push(`Coordinator row: ${r.error}`); return null; }
+      facultyByInit.set(COORD_INIT, row as any);
+      return row.id;
+    }
     // create only a proxy row — admin can rename later; generator never invents real names
     const row = {
-      id: uuid(), name: known[init.toUpperCase()] ?? (init.length ? init : 'Unassigned'),
+      id: uuid(), name: known[init.toUpperCase()] ?? init,
       initials: init, designation: '', department: 'Pharmacy',
       faculty_type: 'guest', is_active: true,
     };
     const r = await api.upsertRow('faculty', row);
     if (!r.ok) { summary.errors.push(`Faculty ${init}: ${r.error}`); return null; }
-    facultyByInit.set(init.toUpperCase(), row as any);
+    facultyByInit.set(key, row as any);
     return row.id;
   };
 

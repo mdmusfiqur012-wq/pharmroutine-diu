@@ -337,7 +337,7 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
                               {e.course?.code}{e.labGroup ? ` · ${e.labGroup.name}` : ''}
                             </p>
                             <p className="text-[9px] font-semibold leading-tight text-slate-700">{e.course?.title}</p>
-                            <p className="text-[8px] text-slate-500">{e.faculty?.initials} · {e.room?.code}{e.status !== 'active' ? ` · ${STATUS_META[e.status].label.toUpperCase()}` : ''}</p>
+                            <p className="text-[8px] text-slate-500">{e.faculty?.initials === 'PC' ? 'Coordinator' : e.faculty?.initials} · {e.room?.code}{e.status !== 'active' ? ` · ${STATUS_META[e.status].label.toUpperCase()}` : ''}</p>
                           </div>
                         ))}
                         {!cell.length && <span className="text-slate-300">—</span>}
@@ -384,7 +384,7 @@ export function PrintTimetable({ entries, days, slots, offDayMap, selectionLabel
                             {e.status !== 'active' ? <span className="ml-1 rounded bg-amber-100 px-1 py-px text-[8.5px] font-bold text-amber-700">{STATUS_META[e.status].label.toUpperCase()}</span> : null}
                           </p>
                           <p className="text-[11px] font-semibold leading-tight text-slate-700">{e.course?.title}</p>
-                          <p className="text-[9.5px] text-slate-500">{e.faculty?.name} ({e.faculty?.initials}) · Room {e.room?.code}</p>
+                          <p className="text-[9.5px] text-slate-500">{e.faculty?.initials === 'PC' ? 'Department Coordinator (PC)' : `${e.faculty?.name} (${e.faculty?.initials})`} · Room {e.room?.code}</p>
                         </div>
                       </div>
                     ))}
