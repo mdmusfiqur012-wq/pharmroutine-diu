@@ -270,12 +270,29 @@ export function AdminBatches() {
     }
   };
   const countFor = (b: Batch) => db.routineEntries.filter((e) => e.batch_id === b.id).length;
+  const nextBatchNo = () => (db.batches.length ? Math.max(...db.batches.map((b) => b.batch_no)) + 1 : 39);
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    const bn = Number(modal?.batch_no);
+    // The modal shows the next free number even before the admin touches the field —
+    // never send a payload without batch_no (Supabase: NULL → not-null violation).
+    const batchNo = Number.isFinite(bn) && bn > 0 ? bn : nextBatchNo();
+    if (!modal!.id && db.batches.some((b) => b.batch_no === batchNo)) {
+      toast.push('error', `Batch ${batchNo} already exists — pick a different batch number.`);
+      return; // keep the modal open so the admin can change the number
+    }
     setBusy(true);
     try {
-      const res = await api.upsertRow('batches', modal);
+      const payload: Partial<Batch> = {
+        ...modal,
+        batch_no: batchNo,
+        name: (modal?.name ?? '').trim() || `Batch ${batchNo}`,
+        admission_year: modal?.admission_year ?? new Date().getFullYear() - 1,
+        current_level: modal?.current_level ?? 1,
+        is_active: modal?.is_active ?? true,
+      };
+      const res = await api.upsertRow('batches', payload);
       if (!res.ok) { toast.push('error', res.error ?? 'Save failed'); return; }
       // auto-create sections A/B + lab groups A1 A2 B1 B2 for brand-new batches
       if (!modal!.id && res.id && !db.sections.some((s) => s.batch_id === res.id)) {
@@ -304,7 +321,7 @@ export function AdminBatches() {
           {db.batches.length} batches ({Math.min(...db.batches.map((b) => b.batch_no))}–{Math.max(...db.batches.map((b) => b.batch_no))}) · every batch carries its own level, class days, off days and routine.
           Batches are added <b className="text-slate-700 dark:text-slate-300">only here</b> — after saving, the batch appears automatically in the <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b>'s batch list, where you pick any 8 (or any selection) to form a routine. Unlimited batches (1–999); only the selected ones contribute to each routine.
         </p>
-        <button className="btn-primary" onClick={() => setModal({ is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch ({Math.max(...db.batches.map((b) => b.batch_no)) + 1 || 39}+)</button>
+        <button className="btn-primary" onClick={() => setModal({ batch_no: nextBatchNo(), admission_year: new Date().getFullYear() - 1, current_level: 1, name: `Batch ${nextBatchNo()}`, is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch ({nextBatchNo()})</button>
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {[...db.batches].sort((a, b) => b.batch_no - a.batch_no).map((b) => {
@@ -354,10 +371,10 @@ export function AdminBatches() {
 
       <AdminModal open={Boolean(modal)} onClose={() => setModal(null)} title={modal?.id ? 'Edit batch' : 'Add new batch'}>
         <form onSubmit={save} className="grid grid-cols-2 gap-4">
-          <Field label="Batch number (unlimited)"><input className="input" type="number" min={1} max={999} required value={modal?.batch_no ?? (db.batches.length ? Math.max(...db.batches.map((b) => b.batch_no)) + 1 : 39)} onChange={(e) => setModal((m) => ({ ...m!, batch_no: Number(e.target.value) }))} /></Field>
+          <Field label="Batch number (unlimited)"><input className="input" type="number" min={1} max={999} required value={modal?.batch_no ?? ''} onChange={(e) => setModal((m) => ({ ...m!, batch_no: Number(e.target.value) }))} /></Field>
           <Field label="Admission year"><input className="input" type="number" min={2018} max={2035} value={modal?.admission_year ?? new Date().getFullYear() - 1} onChange={(e) => setModal((m) => ({ ...m!, admission_year: Number(e.target.value) }))} /></Field>
           <Field label="Current curriculum level"><input className="input" type="number" min={1} max={8} value={modal?.current_level ?? 1} onChange={(e) => setModal((m) => ({ ...m!, current_level: Number(e.target.value) }))} /></Field>
-          <Field label="Name"><input className="input" value={modal?.name ?? `Batch ${modal?.batch_no ?? ''}`} onChange={(e) => setModal((m) => ({ ...m!, name: e.target.value }))} /></Field>
+          <Field label="Name"><input className="input" value={modal?.name ?? ''} onChange={(e) => setModal((m) => ({ ...m!, name: e.target.value }))} /></Field>
           <label className="col-span-2 flex items-center justify-between rounded-xl border border-slate-100 bg-white/60 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-800/40">
             <span>
               <span className="block text-xs font-extrabold text-slate-700 dark:text-slate-200">Active batch</span>
