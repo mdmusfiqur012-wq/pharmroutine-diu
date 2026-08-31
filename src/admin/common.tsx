@@ -14,6 +14,7 @@ import { useData } from '../lib/data';
 const ADMIN_NAV: { to: string; icon: IconName; label: string; end?: boolean }[] = [
   { to: '/admin', icon: 'home', label: 'Dashboard', end: true },
   { to: '/admin/routines', icon: 'calendar', label: 'Routine Entries' },
+  { to: '/admin/generator', icon: 'zap', label: 'Smart Routine Generator' },
   { to: '/admin/offdays', icon: 'clock', label: 'Batch Off Days' },
   { to: '/admin/courses', icon: 'book', label: 'Courses' },
   { to: '/admin/faculty', icon: 'users', label: 'Faculty' },

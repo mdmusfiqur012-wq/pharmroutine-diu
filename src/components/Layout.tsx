@@ -49,6 +49,7 @@ const NAV: { to: string; icon: IconName; label: string; admin?: boolean }[] = [
   { to: '/announcements', icon: 'bell', label: 'Notices' },
   { to: '/contact', icon: 'phone', label: 'Contact' },
   { to: '/admin', icon: 'settings', label: 'Admin', admin: true },
+  { to: '/admin/generator', icon: 'zap', label: 'Smart Generator', admin: true },
 ];
 
 export default function Layout() {

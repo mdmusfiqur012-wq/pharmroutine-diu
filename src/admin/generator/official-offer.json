@@ -1,0 +1,217 @@
+{
+  "label": "Official Course Offer — Fall 2026 (B.Pharm, Batches 29–36)",
+  "semester": "Fall 2026",
+  "batches": [
+    {
+      "batchNo": 36, "term": "L1T1", "semCode": "263", "level": 1,
+      "sections": {
+        "A": [
+          ["0916-1101", 3, "MSK"], ["0917-1103", 3, "MTA"], ["0912-1105", 3, "DSS"],
+          ["0231-111", 3, "MRS"], ["0611-111", 3, "HTS"], ["0541-111", 3, "MRA"],
+          ["0531-1102", 2, "DSS"], ["0917-1104", 2, "MUA"]
+        ],
+        "B": [
+          ["0916-1101", 3, "MSK"], ["0917-1103", 3, "MTA"], ["0912-1105", 3, "BSS"],
+          ["0231-111", 3, "MRS"], ["0611-111", 3, "HTS"], ["0541-111", 3, "MRA"],
+          ["0531-1102", 2, "DSS"], ["0917-1104", 2, "DSH"]
+        ]
+      }
+    },
+    {
+      "batchNo": 35, "term": "L1T2", "semCode": "261", "level": 2,
+      "sections": {
+        "A": [
+          ["0531-1201", 3, "BSS"], ["0917-1203", 3, "SJM"], ["0531-1205", 3, "MUA"],
+          ["0531-1207", 3, "SKM"], ["0912-1209", 3, "MMS"], ["0531-1206", 2, "MUA"],
+          ["0531-1208", 2, "DSH"], ["0912-1210", 2, "FIJ"], ["0916-1211", 1, ""]
+        ],
+        "B": [
+          ["0531-1201", 3, "BSS"], ["0917-1203", 3, "SJM"], ["0531-1205", 3, "MUA"],
+          ["0531-1207", 3, "BTS"], ["0912-1209", 3, "SAF"], ["0531-1206", 2, "MUA"],
+          ["0531-1208", 2, "DSH"], ["0912-1210", 2, "FIJ"], ["0916-1211", 1, ""]
+        ]
+      }
+    },
+    {
+      "batchNo": 34, "term": "L2T1", "semCode": "231", "level": 3,
+      "sections": {
+        "A": [
+          ["0531-2101", 3, "DMS"], ["0531-2103", 3, "FIJ"], ["0912-2105", 3, "SAF"],
+          ["0512-2107", 3, "DSH"], ["0511-2109", 3, "NJN"], ["0222-113", 2, "MK"],
+          ["0512-2108", 2, "BSS"], ["0511-2110", 2, "MTA"]
+        ],
+        "B": [
+          ["0531-2101", 3, "BSS"], ["0531-2103", 3, "FIJ"], ["0912-2105", 3, "SAF"],
+          ["0512-2107", 3, "DSH"], ["0511-2109", 3, "NJN"], ["0222-113", 2, "MK"],
+          ["0512-2108", 2, "SAF"], ["0511-2110", 2, "MTA"]
+        ]
+      }
+    },
+    {
+      "batchNo": 33, "term": "L2T2", "semCode": "232", "level": 4,
+      "sections": {
+        "A": [
+          ["0916-2201", 3, "SKB"], ["0511-2203", 3, "NAS"], ["0916-2205", 3, "SAF"],
+          ["0916-2207", 3, "MSK"], ["0916-2209", 3, "MHL"], ["0223-111", 3, "MAP"],
+          ["0916-2202", 2, "MSH"], ["0916-2208", 2, "SJM"], ["0916-2211", 1, ""]
+        ],
+        "B": [
+          ["0916-2201", 3, "SKB"], ["0511-2203", 3, "BTS"], ["0916-2205", 3, "DMR"],
+          ["0916-2207", 3, "MSK"], ["0916-2209", 3, "MHL"], ["0223-111", 3, "MAP"],
+          ["0916-2202", 2, "MSH"], ["0916-2208", 2, "SJM"], ["0916-2211", 1, ""]
+        ]
+      }
+    },
+    {
+      "batchNo": 32, "term": "L3T1", "semCode": "241", "level": 5,
+      "sections": {
+        "A": [
+          ["0916-3101", 3, "NAS"], ["0916-3103", 3, "MM"], ["0916-3105", 3, "AKA"],
+          ["0916-3107", 3, "DMS"], ["0916-3109", 3, "MTA"], ["0916-3102", 2, "SKB"],
+          ["0916-3104", 2, "DMR"], ["0916-3106", 2, "AKA"], ["0916-3108", 2, "NAS"]
+        ],
+        "B": [
+          ["0916-3101", 3, "NAS"], ["0916-3103", 3, "NJN"], ["0916-3105", 3, "AKA"],
+          ["0916-3107", 3, "DMS"], ["0916-3109", 3, "MTA"], ["0916-3102", 2, "SKB"],
+          ["0916-3104", 2, "DMR"], ["0916-3106", 2, "AKA"], ["0916-3108", 2, "NAS"]
+        ]
+      }
+    },
+    {
+      "batchNo": 31, "term": "L3T2", "semCode": "243", "level": 6,
+      "sections": {
+        "A": [
+          ["0916-3201", 3, "BTS"], ["0916-3203", 3, "DMR"], ["0916-3205", 3, "MHL"],
+          ["0916-3207", 3, "SKM"], ["0414-3209", 2, "RZ"], ["0916-3202", 2, "DMS"],
+          ["0916-3204", 2, "MHL"], ["0916-3206", 2, "SKM"], ["0916-3211", 1, ""]
+        ],
+        "B": [
+          ["0916-3201", 3, "BTS"], ["0916-3203", 3, "DMR"], ["0916-3205", 3, "MHL"],
+          ["0916-3207", 3, "SKM"], ["0414-3209", 2, "RZ"], ["0916-3202", 2, "DMS"],
+          ["0916-3204", 2, "MHL"], ["0916-3206", 2, "SKM"], ["0916-3211", 1, ""]
+        ]
+      }
+    },
+    {
+      "batchNo": 30, "term": "L4T1", "semCode": "251", "level": 7,
+      "sections": {
+        "A": [
+          ["0916-4101", 3, "MSH"], ["0916-4103", 3, "DSS"], ["0916-4105", 3, "SKB"],
+          ["0916-4107", 3, "DSR"], ["0031-411", 3, "DMR"], ["0413-4113", 2, "MSK"],
+          ["0916-4102", 2, "BTS"], ["0916-4104", 2, "NJN"], ["0916-4106", 2, "MAP"],
+          ["0916-4108", 2, "DSR"]
+        ],
+        "B": [
+          ["0916-4101", 3, "MSH"], ["0916-4103", 3, "DSS"], ["0916-4105", 3, "SKB"],
+          ["0916-4107", 3, "DSR"], ["0031-411", 3, "DSR"], ["0413-4113", 2, "BSS"],
+          ["0916-4102", 2, "BTS"], ["0916-4104", 2, "NJN"], ["0916-4106", 2, "MAP"],
+          ["0916-4108", 2, "DSR"]
+        ]
+      }
+    },
+    {
+      "batchNo": 29, "term": "L4T2", "semCode": "253", "level": 8,
+      "sections": {
+        "A": [
+          ["0916-4201", 3, "MSH"], ["0916-4203", 3, "SER"], ["0916-4205", 3, "SJM"],
+          ["0917-4207", 3, "MAP"], ["0916-4209", 2, "AI"], ["0916-4211", 2, "SAF"],
+          ["0916-4206", 2, "MSK"], ["0916-4212", 0, ""], ["0916-4214", 0, ""],
+          ["0916-4217", 0, ""]
+        ],
+        "B": [
+          ["0916-4201", 3, "MSH"], ["0916-4203", 3, "NJN"], ["0916-4205", 3, "FIJ"],
+          ["0917-4207", 3, "MAP"], ["0916-4209", 2, "AI"], ["0916-4211", 2, "MHL"],
+          ["0916-4206", 2, "MSK"], ["0916-4212", 0, ""], ["0916-4214", 0, ""],
+          ["0916-4217", 0, ""]
+        ]
+      }
+    }
+  ],
+  "courses": {
+    "0916-1101": ["Inorganic Pharmacy-I", 3, "theory"],
+    "0531-1102": ["Inorganic Pharmacy-I Practical", 1, "lab"],
+    "0917-1103": ["Pharmacognosy-I", 3, "theory"],
+    "0917-1104": ["Pharmacognosy-I Practical", 1, "lab"],
+    "0912-1105": ["Basic Anatomy", 3, "theory"],
+    "0231-111": ["English Language", 3, "ged"],
+    "0611-111": ["Computer Fundamentals", 3, "ged"],
+    "0541-111": ["Basic Mathematics and Statistics", 3, "ged"],
+    "0531-1201": ["Inorganic Pharmacy-II", 3, "theory"],
+    "0917-1203": ["Pharmacognosy-II", 3, "theory"],
+    "0531-1205": ["Organic Pharmacy-I", 3, "theory"],
+    "0531-1206": ["Organic Pharmacy-I Practical", 1, "lab"],
+    "0531-1207": ["Physical Pharmacy-I", 3, "theory"],
+    "0531-1208": ["Physical Pharmacy-I Practical", 1, "lab"],
+    "0912-1209": ["Physiology-I", 3, "theory"],
+    "0912-1210": ["Physiology-I Practical", 1, "lab"],
+    "0916-1211": ["Oral Assessment-I", 1, "prj"],
+    "0531-2101": ["Organic Pharmacy-II", 3, "theory"],
+    "0531-2103": ["Physical Pharmacy-II", 3, "theory"],
+    "0912-2105": ["Physiology-II", 3, "theory"],
+    "0512-2107": ["Biochemistry & Molecular Biology", 3, "theory"],
+    "0512-2108": ["Biochemistry & Molecular Biology Practical", 1, "lab"],
+    "0511-2109": ["Pharmaceutical Microbiology-I", 3, "theory"],
+    "0511-2110": ["Pharmaceutical Microbiology-I Practical", 1, "lab"],
+    "0222-113": ["History of the Emergence of Bangladesh & Bangla", 2, "ged"],
+    "0916-2201": ["Pharmaceutical Analysis & Quality Control-I", 3, "theory"],
+    "0916-2202": ["Pharmaceutical Analysis & Quality Control-I Practical", 1, "lab"],
+    "0511-2203": ["Pharmaceutical Microbiology-II", 3, "theory"],
+    "0916-2205": ["Basic Pharmaceutics", 3, "theory"],
+    "0916-2207": ["Pharmacology-I", 3, "theory"],
+    "0916-2208": ["Pharmacology-I Practical", 1, "lab"],
+    "0916-2209": ["Clinical Pathology", 3, "theory"],
+    "0223-111": ["Art of Living", 3, "ged"],
+    "0916-2211": ["Oral Assessment-II", 1, "prj"],
+    "0916-3101": ["Pharmaceutical Analysis & Quality Control-II", 3, "theory"],
+    "0916-3102": ["Pharmaceutical Analysis & Quality Control-II Practical", 1, "lab"],
+    "0916-3103": ["Pharmaceutical Technology-I", 3, "theory"],
+    "0916-3104": ["Pharmaceutical Technology-I Practical", 1, "lab"],
+    "0916-3105": ["Pharmacology-II", 3, "theory"],
+    "0916-3106": ["Pharmacology-II Practical", 1, "lab"],
+    "0916-3107": ["Medicinal Chemistry-I", 3, "theory"],
+    "0916-3108": ["Medicinal Chemistry-I Practical", 1, "lab"],
+    "0916-3109": ["Hospital & Community Pharmacy", 3, "theory"],
+    "0916-3201": ["Medicinal Chemistry-II", 3, "theory"],
+    "0916-3202": ["Medicinal Chemistry-II Practical", 1, "lab"],
+    "0916-3203": ["Pharmaceutical Technology-II", 3, "theory"],
+    "0916-3204": ["Pharmaceutical Technology-II Practical", 1, "lab"],
+    "0916-3205": ["Biopharmaceutics & Pharmacokinetics-I", 3, "theory"],
+    "0916-3206": ["Biopharmaceutics & Pharmacokinetics-I Practical", 1, "lab"],
+    "0916-3207": ["Pharmacology-III", 3, "theory"],
+    "0414-3209": ["Pharmaceutical Marketing", 2, "theory"],
+    "0916-3211": ["Oral Assessment-III", 1, "prj"],
+    "0916-4101": ["Medicinal Chemistry-III", 3, "theory"],
+    "0916-4102": ["Medicinal Chemistry-III Practical", 1, "lab"],
+    "0916-4103": ["Pharmaceutical Technology-III", 3, "theory"],
+    "0916-4104": ["Pharmaceutical Technology-III Practical", 1, "lab"],
+    "0916-4105": ["Biopharmaceutics & Pharmacokinetics-II", 3, "theory"],
+    "0916-4106": ["Biopharmaceutics & Pharmacokinetics-II Practical", 1, "lab"],
+    "0916-4107": ["Advanced Pharmaceutical Analysis & Validation", 3, "theory"],
+    "0916-4108": ["Advanced Pharmaceutical Analysis & Validation Practical", 1, "lab"],
+    "0413-4113": ["Pharmaceutical Management", 2, "theory"],
+    "0031-411": ["Employability 360", 3, "ged"],
+    "0916-4201": ["Pharmaceutical Biotechnology", 3, "theory"],
+    "0916-4203": ["Pharmaceutical Engineering", 3, "theory"],
+    "0916-4205": ["Cosmetology", 3, "theory"],
+    "0916-4206": ["Cosmetology Practical", 1, "lab"],
+    "0917-4207": ["Nutraceuticals, Dietary Supplements & Herbal Products", 3, "theory"],
+    "0916-4209": ["Pharmaceutical Regulatory Affairs", 2, "theory"],
+    "0916-4211": ["Pharmacotherapeutics & Disease Management", 2, "theory"],
+    "0916-4212": ["Project", 3, "prj"],
+    "0916-4214": ["Industrial Training", 1, "prj"],
+    "0916-4217": ["Oral Assessment-IV", 1, "prj"]
+  },
+  "facultyOff": {
+    "MUA": [], "DSS": ["Friday", "Saturday"], "DSR": ["Thursday", "Saturday"],
+    "DMS": ["Wednesday", "Thursday"], "DMR": ["Wednesday", "Thursday"],
+    "FIJ": ["Wednesday", "Thursday"], "AKA": ["Wednesday", "Thursday"],
+    "SJM": ["Friday", "Saturday"], "MTA": ["Thursday", "Friday"],
+    "NAS": ["Wednesday", "Thursday"], "MSK": ["Thursday", "Friday"],
+    "MSH": ["Thursday", "Friday"], "SKM": ["Wednesday", "Thursday"],
+    "SKB": ["Friday", "Saturday"], "MAP": ["Thursday", "Friday"],
+    "MHL": ["Friday", "Saturday"], "SAF": ["Thursday", "Friday"],
+    "BSS": ["Friday", "Saturday"], "BTS": ["Thursday", "Friday"],
+    "NJN": ["Friday", "Saturday"]
+  },
+  "aliases": { "GT(MM)": "MM", "GT(MMS)": "MMS", "GT(RZ)": "RZ" }
+}

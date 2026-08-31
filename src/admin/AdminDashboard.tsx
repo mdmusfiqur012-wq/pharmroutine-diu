@@ -45,6 +45,24 @@ export default function AdminDashboard() {
         <StatCard icon="clock" label="Batch off-day records" value={offDays} tone="amber" />
       </div>
 
+      <Link to="/admin/generator" className="card group relative mt-6 block overflow-hidden !rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-glass-hover">
+        <div aria-hidden className="pointer-events-none absolute -right-10 -top-14 h-48 w-48 rounded-full bg-brand-400/15 blur-2xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-16 left-1/4 h-48 w-48 rounded-full bg-emerald-400/15 blur-2xl" />
+        <div className="relative flex flex-wrap items-center gap-4">
+          <span className="grad-icon-tile flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+            <Icon name="zap" className="h-6 w-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-extrabold text-slate-900 dark:text-white">Smart Routine Generator</p>
+            <p className="mt-0.5 max-w-2xl text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              Import the departmental course offer, set batch off-days and faculty rules, and auto-generate an
+              optimized, conflict-free weekly routine — theory, labs with A1/A2 · B1/B2 rotation, locks &amp; conflict reports. Admin only.
+            </p>
+          </div>
+          <span className="btn-primary !px-4 !py-2 text-xs"><Icon name="chevronRight" className="h-3.5 w-3.5" /> Open generator</span>
+        </div>
+      </Link>
+
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="card p-5">
           <h3 className="mb-3 text-sm font-extrabold text-slate-800 dark:text-slate-100">Latest routine changes · {activeSem?.name}</h3>

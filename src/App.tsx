@@ -13,6 +13,7 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminRoutines from './admin/AdminRoutines';
+import SmartGenerator from './admin/SmartGenerator';
 import AdminOffDays from './admin/AdminOffDays';
 import { AdminCourses, AdminFaculty, AdminRooms, AdminBatches, AdminCatalog, AdminAnnouncements, AdminSettings } from './admin/AdminCatalog';
 
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/routines" element={<AdminRoutines />} />
+              <Route path="/admin/generator" element={<SmartGenerator />} />
               <Route path="/admin/offdays" element={<AdminOffDays />} />
               <Route path="/admin/courses" element={<AdminCourses />} />
               <Route path="/admin/faculty" element={<AdminFaculty />} />
