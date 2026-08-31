@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useData } from '../lib/data';
@@ -39,6 +39,9 @@ const PHASES = [
   'Checking faculty, classroom & lab conflicts',
 ];
 
+/** one editable row of the per-batch entry table (import step) */
+interface ManualRow { rid: string; code: string; title: string; credits: number; type: OfferType; faculty: string; }
+
 const TYPE_META: Record<OfferType, { label: string; cls: string }> = {
   theory: { label: 'Theory', cls: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' },
   lab: { label: 'Laboratory', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
@@ -70,6 +73,10 @@ export default function SmartGenerator() {
   const [pulse, setPulse] = useState(0);
   /** admin-defined courses (new semester / new subject) — code → catalog entry */
   const [extraCourses, setExtraCourses] = usePersistentState<Record<string, { code: string; title: string; credits: number; type: OfferType }>>('extraCourses', {});
+  /** per-batch editable entry tables (import step): `batchNo|sec` → rows; blank rows are ignored */
+  const [manual, setManual] = usePersistentState<Record<string, ManualRow[]>>('manual', {});
+  /** which batches the admin chose for this routine (null = first 8 active batches) */
+  const [selBatches, setSelBatches] = usePersistentState<number[] | null>('selBatches', null);
   const [addFor, setAddFor] = useState<{ bn: number; sec: 'A' | 'B' } | null>(null);
   const [catOpen, setCatOpen] = useState(false);
 
@@ -99,6 +106,57 @@ export default function SmartGenerator() {
   const isDuplicate = (bn: number, sec: string, code: string) => offers.some((o) => o.batchNo === bn && o.section === sec && o.code.trim().toLowerCase() === code.trim().toLowerCase());
   /** batches in the offer that do not exist in the database yet → must be created before generation */
   const missingBatchNos = useMemo(() => batchNos.filter((bn) => !(ctx?.batches.some((b) => b.batchNo === bn))), [batchNos, ctx]);
+
+  /* ---------------- batch selection + per-batch entry tables ---------------- */
+  const allBatchNos = useMemo(() => (ctx ? [...ctx.batches].sort((a, b) => a.batchNo - b.batchNo).map((b) => b.batchNo) : []), [ctx]);
+  const effSel = useMemo(() => selBatches ?? allBatchNos.slice(0, 8), [selBatches, allBatchNos]);
+  const blankRow = (): ManualRow => ({ rid: `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`, code: '', title: '', credits: 3, type: 'theory', faculty: '' });
+  const rowsFor = (bn: number, sec: 'A' | 'B') => manual[`${bn}|${sec}`] ?? [];
+  const setRowsFor = (bn: number, sec: 'A' | 'B', rows: ManualRow[]) => setManual((m) => ({ ...m, [`${bn}|${sec}`]: rows }));
+  useEffect(() => {
+    setManual((m) => {
+      let changed = false; const next = { ...m };
+      for (const bn of effSel) for (const sec of ['A', 'B'] as const) {
+        const key = `${bn}|${sec}`;
+        if (!next[key]?.length) { next[key] = Array.from({ length: 10 }, blankRow); changed = true; }
+      }
+      return changed ? next : m;
+    });
+  }, [effSel]);
+  const filledCount = useMemo(() => effSel.reduce((n, bn) => n + (['A', 'B'] as const).reduce((k, sec) => k + rowsFor(bn, sec).filter((r) => r.code.trim()).length, 0), 0), [manual, effSel]);
+  const toggleBatch = (bn: number) => setSelBatches((s) => { const cur = s ?? allBatchNos.slice(0, 8); return cur.includes(bn) ? cur.filter((x) => x !== bn) : [...cur, bn].sort((a, b) => a - b); });
+  /** manual tables → OfferRow list (empty rows skipped — nothing is mandatory) */
+  function syncManualToOffers() {
+    const rows: OfferRow[] = [];
+    for (const [key, arr] of Object.entries(manual)) {
+      const [bn, sec] = key.split('|');
+      const n = Number(bn); if (!effSel.includes(n)) continue;
+      for (const r of arr) {
+        const code = r.code.trim(); if (!code) continue;
+        rows.push({
+          id: `m-${r.rid}`, batchNo: n, section: sec as 'A' | 'B', code,
+          title: r.title.trim() || titleFor(code) || '', credits: r.credits || 0, type: r.type,
+          faculty: r.type === 'prj' ? '' : r.faculty, facultyRaw: r.faculty, issues: [], source: 'manual',
+        });
+      }
+    }
+    setOffers((prev) => [...prev.filter((o) => o.source !== 'manual'), ...rows]);
+  }
+  /** offers → manual tables (when returning to step 1 so edits never get lost) */
+  function rebuildManualFromOffers() {
+    const m: Record<string, ManualRow[]> = {};
+    for (const o of offers) if (o.source === 'manual') {
+      const key = `${o.batchNo}|${o.section}`;
+      (m[key] ??= []).push({ rid: o.id.replace(/^m-/, ''), code: o.code, title: o.title, credits: o.credits, type: o.type, faculty: o.faculty, });
+    }
+    for (const bn of effSel) for (const sec of ['A', 'B'] as const) {
+      const key = `${bn}|${sec}`;
+      if (!m[key]) m[key] = [];
+      while (m[key].length < 10) m[key].push(blankRow());
+    }
+    setManual(m);
+  }
+  const goReview = () => { syncManualToOffers(); setStep(2); };
   const [syncing, setSyncing] = useState(false);
   async function createMissingBatch(bn: number) {
     if (!db) return;
@@ -279,7 +337,7 @@ export default function SmartGenerator() {
               <Icon name="check" className="h-3.5 w-3.5" /> Last published {new Date(lastPublish).toLocaleString()}
             </span>
           )}
-          <button className="btn-secondary !py-1.5 text-xs" onClick={() => { clearGeneratorStorage(); setOffers([]); setConfig(DEFAULT_CONFIG); setLocks([]); setRotation({}); setResult(null); setPublishedByBatch({}); setPublishInfo(null); setExtraCourses({}); setStep(1); toast.push('info', 'Generator workspace cleared.'); }}>
+          <button className="btn-secondary !py-1.5 text-xs" onClick={() => { clearGeneratorStorage(); setOffers([]); setConfig(DEFAULT_CONFIG); setLocks([]); setRotation({}); setResult(null); setPublishedByBatch({}); setPublishInfo(null); setExtraCourses({}); setManual({}); setSelBatches(null); setStep(1); toast.push('info', 'Generator workspace cleared.'); }}>
             <Icon name="refresh" className="h-3.5 w-3.5" /> Reset workspace
           </button>
         </div>
@@ -288,7 +346,7 @@ export default function SmartGenerator() {
       {/* step nav */}
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
         {STEPS.map((s, i) => (
-          <button key={s.n} onClick={() => setStep(s.n)} className={clsx(
+          <button key={s.n} onClick={() => { if (s.n === 2) goReview(); else if (s.n === 1 && step !== 1) { rebuildManualFromOffers(); setStep(1); } else setStep(s.n); }} className={clsx(
             'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-extrabold transition-all',
             step === s.n ? 'text-white shadow-glow-blue' : 'glass text-slate-500 hover:text-brand-700 dark:text-slate-400',
           )} style={step === s.n ? { backgroundImage: 'var(--grad-diu)' } : undefined}>
@@ -299,68 +357,82 @@ export default function SmartGenerator() {
         ))}
       </div>
 
-      {/* ================= STEP 1 · ENTER COURSE DATA ================= */}
+      {/* ================= STEP 1 · CHOOSE BATCHES & ENTER COURSE DATA ================= */}
       {step === 1 && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
-          {/* primary: manual entry */}
-          <div className="card p-6 xl:col-span-3">
-            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Add course data manually</h3>
-            <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Type each course yourself — batch · section · course code · credits · type · faculty.
-              Enter a <b>course code</b> and the title fills in automatically from the catalog (and stays locked);
-              brand-new courses (new semester) can be saved to the catalog right here.
-            </p>
-            <ManualEntry
-              className="mt-4"
-              batches={ctx?.batches ?? []}
-              knownFaculty={knownFaculty}
-              titleFor={titleFor}
-              catalogCodes={catalogCodes}
-              isDuplicate={isDuplicate}
-              onAdd={addManualRow}
-              onSaveCourse={saveExtraCourse}
-            />
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
-              <Icon name="info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-500" />
-              <span><b className="text-slate-600 dark:text-slate-300">Note:</b> Project · Industrial Training · Oral Assessment (PRJ) need no faculty —
-              they are supervised by the department coordinator and appear in the routine as one guided session per week.
-              Laboratory courses automatically split into paired groups A1/A2 (or B1/B2).
-              New batch (e.g. Batch 39)? <Link to="/admin/batches" className="font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">Add it in Batches &amp; Groups</Link> —
-              or import the offer and the generator will offer to create any missing batch in Review.</span>
-            </div>
-          </div>
-
-          {/* secondary: bulk import */}
-          <div className="space-y-4 xl:col-span-2">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            {/* ① batch selection */}
             <div className="card p-5">
-              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">② Or load everything at once</h3>
-              <div className="mt-3 space-y-2.5">
+              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Choose the batches for this routine</h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Normally a routine is built for <b>8 batches</b> — the first 8 are pre-selected. Pick any combination; only the selected batches get entry tables below.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {allBatchNos.map((bn) => {
+                  const on = effSel.includes(bn);
+                  return (
+                    <button key={bn} onClick={() => toggleBatch(bn)}
+                      className={clsx('chip !px-3 !py-1.5 text-xs', on ? 'grad-pill text-white shadow-glow-blue' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400')}>
+                      <Icon name={on ? 'check' : 'plus'} className="h-3 w-3" /> Batch {bn}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="rounded-lg bg-brand-50 px-2.5 py-1 text-[11px] font-extrabold text-brand-700 dark:bg-brand-950/40 dark:text-brand-300">
+                  {effSel.length} of {allBatchNos.length} batches selected
+                </span>
+                <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches(allBatchNos.slice(0, 8))}>First 8</button>
+                <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([...allBatchNos])}>All</button>
+                <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([])}>None</button>
+                <Link to="/admin/batches" className="ml-auto text-[11px] font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">+ add a new batch →</Link>
+              </div>
+            </div>
+
+            {/* ② bulk import */}
+            <div className="card p-5">
+              <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">② Or load everything at once <span className="ml-1 text-[10px] font-bold text-slate-400">(optional)</span></h3>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                The official offer, an Excel/CSV file or a pasted table fill the course rows for you — then every row stays editable in the tables below and in Review.
+              </p>
+              <div className="mt-3 space-y-2">
                 <button className="btn-primary w-full" onClick={loadOfficial} disabled={busy}>
-                  <Icon name="calendar" className="h-4 w-4" /> Load official Fall 2026 course offer (bundled)
+                  <Icon name="calendar" className="h-4 w-4" /> Load official Fall 2026 course offer (bundled) — {batchNos.length} batches
                 </button>
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="flex w-full flex-col items-center gap-1.5 rounded-2xl border-2 border-dashed border-brand-300/70 bg-brand-50/50 px-4 py-6 text-center transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-glass-hover dark:border-brand-700 dark:bg-brand-950/30"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand-300/70 bg-brand-50/40 px-4 py-3 text-xs font-extrabold text-slate-700 transition-all hover:border-brand-400 dark:border-brand-700 dark:bg-brand-950/20 dark:text-slate-200"
                 >
-                  <span className="grad-icon-tile flex h-10 w-10 items-center justify-center rounded-xl"><Icon name="download" className="h-4 w-4" /></span>
-                  <span className="text-xs font-extrabold text-slate-800 dark:text-slate-100">Upload Excel / CSV offer</span>
-                  <span className="text-[10px] text-slate-500">.xlsx · .xls · .csv — Batch, Section, Code, Title, Credits, Type, Faculty</span>
+                  <Icon name="download" className="h-4 w-4 text-brand-500" /> Upload Excel / CSV offer
                 </button>
                 <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
                 <PasteBox onPaste={onPaste} busy={busy} />
               </div>
             </div>
+          </div>
 
-            {offers.length > 0 && (
-              <div className="card flex items-center gap-4 p-5">
-                <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
-                <div className="flex-1">
-                  <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{offers.length} course rows · {batchNos.length} batches · {new Set(offers.map((o) => o.code)).size} courses</p>
-                  <p className="text-xs text-slate-500">{offers.filter((o) => o.type === 'lab').length} practicals → paired lab groups (A1/A2 · B1/B2) · {offers.filter((o) => o.type === 'prj').length} PRJ sessions with coordinator.</p>
-                </div>
-                <button className="btn-primary" onClick={() => setStep(2)}>Review <Icon name="chevronRight" className="h-4 w-4" /></button>
-              </div>
-            )}
+          {/* per-batch entry tables — 10 rows A + 10 rows B, nothing mandatory */}
+          {effSel.map((bn) => (
+            <BatchEntryTable
+              key={bn}
+              batchNo={bn}
+              rowsA={rowsFor(bn, 'A')}
+              rowsB={rowsFor(bn, 'B')}
+              knownFaculty={knownFaculty}
+              titleFor={titleFor}
+              isDuplicate={isDuplicate}
+              onChange={(sec, rows) => setRowsFor(bn, sec, rows)}
+            />
+          ))}
+
+          {/* continue */}
+          <div className="card flex flex-wrap items-center gap-3 p-5">
+            <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{filledCount} course row(s) entered · {effSel.length} batch(es) selected{offers.length > filledCount ? ` · ${offers.length - filledCount} more loaded from bulk import` : ''}</p>
+              <p className="text-xs text-slate-500">Blank rows are ignored · a typed code auto-fills and locks its title · gaps are always flagged in Review — never invented.</p>
+            </div>
+            <button className="btn-primary !py-3" onClick={goReview}><Icon name="search" className="h-4 w-4" /> Review &amp; correct ({filledCount})</button>
           </div>
         </div>
       )}
@@ -914,6 +986,135 @@ function PasteBox({ onPaste, busy }: { onPaste: (t: string) => void; busy: boole
       <button className="btn-secondary mt-2 w-full" disabled={busy || !text.trim()} onClick={() => onPaste(text)}>
         <Icon name="search" className="h-4 w-4" /> Parse pasted text
       </button>
+    </div>
+  );
+}
+
+/* ================= per-batch entry table (10 rows A + 10 rows B, optional) ================= */
+
+function EntryRow({ sec, r, knownFaculty, titleFor, isDup, onChange, onRemove }: {
+  sec: 'A' | 'B'; r: ManualRow; knownFaculty: string[]; titleFor: (code: string) => string | null;
+  isDup: (sec: 'A' | 'B', code: string) => boolean; onChange: (p: Partial<ManualRow>) => void; onRemove: () => void;
+}) {
+  const auto = r.code.trim() ? titleFor(r.code) : null;
+  const dup = r.code.trim() ? isDup(sec, r.code) : false;
+  const patch = (p: Partial<ManualRow>) => onChange(p);
+  return (
+    <tr className={clsx('border-b border-slate-100/80 last:border-0 dark:border-slate-800/60', !r.code.trim() && 'opacity-60', dup && 'bg-rose-50/40 dark:bg-rose-950/20')}>
+      <td className="table-td w-12">
+        <span className={clsx('rounded-md px-1.5 py-0.5 text-[9px] font-extrabold', sec === 'A' ? 'bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300' : 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300')}>{sec}</span>
+      </td>
+      <td className="table-td w-36">
+        <input
+          className={clsx('input !w-full !py-1 font-mono text-xs font-bold text-brand-700 dark:text-brand-400', dup && '!border-rose-400')}
+          value={r.code} placeholder="course code" title={dup ? 'This code already exists for the same batch & section' : 'Type the course code — the title fills in automatically'}
+          onChange={(e) => {
+            const v = e.target.value;
+            const t = titleFor(v);
+            patch(t ? { code: v, title: t } : { code: v });
+          }}
+        />
+      </td>
+      <td className="table-td min-w-[240px]">
+        {auto ? (
+          <span className="flex items-center gap-1.5" title="Title comes from the course catalog — change the code to switch it.">
+            <span className="truncate rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{auto}</span>
+            <Icon name="lock" className="h-3 w-3 shrink-0 text-slate-300" />
+          </span>
+        ) : (
+          <input className={clsx('input !py-1 text-xs', r.code.trim() && !r.title && '!border-amber-400')} value={r.title} placeholder={r.code.trim() ? '— new course: title —' : ''} onChange={(e) => patch({ title: e.target.value })} />
+        )}
+      </td>
+      <td className="table-td w-20">
+        <select className="input !w-16 !py-1 text-xs" value={r.credits || 0} onChange={(e) => patch({ credits: Number(e.target.value) })}>
+          {[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </td>
+      <td className="table-td w-28">
+        <select className="input !py-1 text-xs" value={r.type} onChange={(e) => { const t = e.target.value as OfferType; patch(t === 'prj' ? { type: t, faculty: '' } : { type: t }); }}>
+          <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+        </select>
+      </td>
+      <td className="table-td w-36">
+        {r.type === 'prj' ? (
+          <span className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+            <Icon name="check" className="h-3 w-3" /> coordinator
+          </span>
+        ) : (
+          <select className={clsx('input !py-1 text-xs', r.code.trim() && !r.faculty && '!border-amber-400')} value={r.faculty} onChange={(e) => patch({ faculty: e.target.value })}>
+            <option value="">— none —</option>
+            {knownFaculty.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+        )}
+      </td>
+      <td className="table-td w-10">
+        <button title="Clear this row" className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-slate-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+          onClick={onRemove}><Icon name="trash" className="h-3.5 w-3.5" /></button>
+      </td>
+    </tr>
+  );
+}
+
+function BatchEntryTable({ batchNo, rowsA, rowsB, knownFaculty, titleFor, isDuplicate, onChange }: {
+  batchNo: number; rowsA: ManualRow[]; rowsB: ManualRow[]; knownFaculty: string[];
+  titleFor: (code: string) => string | null; isDuplicate: (bn: number, sec: string, code: string) => boolean;
+  onChange: (sec: 'A' | 'B', rows: ManualRow[]) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const patchRow = (sec: 'A' | 'B', rid: string, p: Partial<ManualRow>) => {
+    const rows = (sec === 'A' ? rowsA : rowsB).map((r) => (r.rid === rid ? { ...r, ...p } : r));
+    onChange(sec, rows);
+  };
+  const removeRow = (sec: 'A' | 'B', rid: string) => onChange(sec, (sec === 'A' ? rowsA : rowsB).filter((r) => r.rid !== rid));
+  const addRow = (sec: 'A' | 'B') => onChange(sec, [...(sec === 'A' ? rowsA : rowsB), {
+    rid: `r-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`, code: '', title: '', credits: 3, type: 'theory', faculty: '',
+  }]);
+  const filled = [...rowsA, ...rowsB].filter((r) => r.code.trim()).length;
+  const inComplete = [...rowsA, ...rowsB].some((r) => r.code.trim() && ((!r.title && !titleFor(r.code)) || (r.type !== 'prj' && !r.faculty) || !r.credits));
+  const dupOf = (sec: 'A' | 'B', code: string) => code.trim() ? isDuplicate(batchNo, sec, code) : false;
+  return (
+    <div className="card overflow-hidden !p-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <button className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100" onClick={() => setOpen((v) => !v)}>
+          <span className="grad-icon-tile flex h-7 w-7 items-center justify-center rounded-lg text-xs">B</span>
+          Batch {batchNo} · {rowsA.length + rowsB.length} rows ({rowsA.length} A + {rowsB.length} B)
+        </button>
+        <span className="flex items-center gap-2">
+          {inComplete && <Badge tone="amber"><Icon name="alert" className="h-3 w-3" /> needs attention</Badge>}
+          <Badge tone={filled ? 'green' : 'slate'}>{filled} filled</Badge>
+          <button onClick={() => setOpen((v) => !v)} className="p-1"><Icon name="chevronDown" className={clsx('h-4 w-4 text-slate-400 transition-transform', !open && '-rotate-90')} /></button>
+        </span>
+      </div>
+      {open && (
+        <>
+          <div className="overflow-x-auto border-t border-slate-100 scroll-thin dark:border-slate-800">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 dark:bg-slate-800/40">
+                  <th className="table-th w-12">Sec</th><th className="table-th w-36">Code → title</th><th className="table-th">Course title</th>
+                  <th className="table-th w-20">Cr</th><th className="table-th w-28">Type</th><th className="table-th w-36">Faculty</th><th className="table-th w-10" />
+                </tr>
+              </thead>
+              <tbody>
+                {(rowsA.length ? rowsA : Array.from({ length: 10 }, (_, i) => ({ rid: `empty-A-${i}`, code: '', title: '', credits: 3, type: 'theory' as OfferType, faculty: '' }))).map((r) => (
+                  <EntryRow key={r.rid} sec="A" r={r} knownFaculty={knownFaculty} titleFor={titleFor} isDup={dupOf} onChange={(p) => patchRow('A', r.rid, p)} onRemove={() => removeRow('A', r.rid)} />
+                ))}
+                <tr className="bg-slate-50/60 dark:bg-slate-800/30"><td colSpan={7} className="px-4 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-violet-500">Section B</td></tr>
+                {(rowsB.length ? rowsB : Array.from({ length: 10 }, (_, i) => ({ rid: `empty-B-${i}`, code: '', title: '', credits: 3, type: 'theory' as OfferType, faculty: '' }))).map((r) => (
+                  <EntryRow key={r.rid} sec="B" r={r} knownFaculty={knownFaculty} titleFor={titleFor} isDup={dupOf} onChange={(p) => patchRow('B', r.rid, p)} onRemove={() => removeRow('B', r.rid)} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-2 dark:border-slate-800 dark:bg-slate-800/30">
+            <div className="flex gap-2">
+              <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => addRow('A')}><Icon name="plus" className="h-3 w-3" /> Add A row</button>
+              <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => addRow('B')}><Icon name="plus" className="h-3 w-3" /> Add B row</button>
+            </div>
+            <p className="text-[10px] text-slate-400">Blank rows are ignored · typed codes auto-fill titles · nothing here is mandatory.</p>
+          </div>
+        </>
+      )}
     </div>
   );
 }
