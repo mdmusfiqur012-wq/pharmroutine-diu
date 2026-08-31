@@ -34,7 +34,22 @@ function clone<T>(v: T): T {
 
 const store: { db: DB } = { db: clone(seed as unknown as DB) };
 
+/** demo-mode id (text) — only used by the in-memory fallback store */
 const uid = (p: string) => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+/** RFC-4122 v4 UUID — REQUIRED for Supabase: every PK column is `uuid`,
+ *  so rows created by the admin must carry a real UUID (a "b-xxxx" id is
+ *  rejected by Postgres with 22P02 → that is why "Add batch / Add faculty"
+ *  silently failed before). */
+function uuid4(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const b = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') crypto.getRandomValues(b);
+  else for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256);
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
 
 /** UI table key → Supabase table name */
 const SB_TABLE: Record<string, string> = {
@@ -94,7 +109,7 @@ export const api = {
   /* ---- routine entries ---- */
   async saveRoutineEntry(entry: any): Promise<{ ok: boolean; error?: string; entry?: any }> {
     if (supabase) {
-      const { data, error } = await supabase.from('routine_entries').insert(entry).select().single();
+      const { data, error } = await supabase.from('routine_entries').insert({ ...entry, id: entry?.id && /^[0-9a-f-]{36}$/i.test(entry.id) ? entry.id : uuid4() }).select().single();
       if (error) return { ok: false, error: `${error.message} (${error.code})` };
       return { ok: true, entry: data };
     }
@@ -156,9 +171,13 @@ export const api = {
         const { error } = await supabase.from(SB_TABLE[table] ?? table).update(row).eq('id', row.id);
         return error ? { ok: false, error: error.message } : { ok: true, id: row.id };
       }
-      const newId = uid(String(table).slice(0, 1));
+      const newId = uuid4();
       const { error } = await supabase.from(SB_TABLE[table] ?? table).insert({ ...row, id: newId });
-      return error ? { ok: false, error: error.message } : { ok: true, id: newId };
+      if (error) {
+        // RLS refusal = no valid admin session on this client (or expired)
+        return { ok: false, error: error.code === '42501' ? 'Permission denied (row-level security) — sign in again with the admin passcode and retry.' : error.message };
+      }
+      return { ok: true, id: newId };
     }
     await delay();
     const rows = store.db[table] as any[];
