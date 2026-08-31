@@ -550,26 +550,43 @@ export default function SmartGenerator() {
             <section className="card p-5">
               <h3 className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100"><span className="grad-icon-tile flex h-7 w-7 items-center justify-center rounded-lg"><Icon name="shield" className="h-3.5 w-3.5" /></span> Hard faculty &amp; classroom rules</h3>
               <p className="mb-3 mt-1 text-[11px] text-slate-400">MUA is never altered or reassigned. DSS theory → AB-1 104. MSH theory → AB-1 406. Enforced by the engine.</p>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 rounded-xl border border-brand-100 bg-brand-50/60 px-3 py-2 dark:border-brand-900 dark:bg-brand-950/30">
-                  <Icon name="shield" className="h-4 w-4 text-brand-600 dark:text-brand-400" />
-                  <span className="flex-1 text-xs font-bold text-slate-700 dark:text-slate-200">Locked faculty (never reassigned)</span>
-                  {allFaculty.map((f) => (
-                    <button key={f} onClick={() => patchConfig({ lockedFaculty: config.lockedFaculty.includes(f) ? config.lockedFaculty.filter((x) => x !== f) : [...config.lockedFaculty, f] })}
-                      className={clsx('rounded-lg px-2 py-1 text-[10px] font-extrabold transition-all', config.lockedFaculty.includes(f) ? 'grad-pill text-white shadow-glow-blue' : 'bg-slate-100 text-slate-500 dark:bg-slate-800')}>
-                      {f}
-                    </button>
-                  ))}
-                </div>
-                {Object.entries(config.fixedRooms).map(([init, code]) => (
-                  <div key={init} className="flex items-center gap-2">
-                    <span className="w-14 text-xs font-extrabold text-slate-600 dark:text-slate-300">{init}</span>
-                    <span className="text-[10px] text-slate-400">theory →</span>
-                    <Select className="flex-1" value={code} onChange={(v) => patchConfig({ fixedRooms: { ...config.fixedRooms, [init]: v } })} options={ctx!.rooms.filter((r) => r.type !== 'lab').map((r) => ({ value: r.code, label: r.code }))} />
-                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950" onClick={() => { const n = { ...config.fixedRooms }; delete n[init]; patchConfig({ fixedRooms: n }); }}><Icon name="trash" className="h-3.5 w-3.5" /></button>
+              <div className="space-y-3">
+                <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-3 dark:border-brand-900 dark:bg-brand-950/30">
+                  <p className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <Icon name="shield" className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
+                    Locked faculty (never reassigned / never altered)
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {allFaculty.map((f) => (
+                      <button key={f} onClick={() => patchConfig({ lockedFaculty: config.lockedFaculty.includes(f) ? config.lockedFaculty.filter((x) => x !== f) : [...config.lockedFaculty, f] })}
+                        className={clsx('rounded-lg px-2 py-1 text-[10px] font-extrabold transition-all', config.lockedFaculty.includes(f) ? 'grad-pill text-white shadow-glow-blue' : 'bg-slate-100 text-slate-500 dark:bg-slate-800')}>
+                        {f}
+                      </button>
+                    ))}
                   </div>
-                ))}
-                <AddFixedRoom config={config} patch={patchConfig} rooms={ctx!.rooms.filter((r) => r.type !== 'lab').map((r) => r.code)} faculty={allFaculty} />
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+                  <p className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <Icon name="door" className="h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" />
+                    Fixed faculty → classroom (theory only)
+                  </p>
+                  <div className="space-y-2">
+                    {Object.entries(config.fixedRooms).map(([init, code]) => (
+                      <div key={init} className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 dark:bg-slate-800/60">
+                        <button onClick={() => { const n = { ...config.fixedRooms }; delete n[init]; patchConfig({ fixedRooms: n }); }}
+                          className="rounded-lg p-1 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-slate-600 dark:hover:bg-red-950" title={`Remove ${init}'s fixed room`}>
+                          <Icon name="trash" className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="w-12 text-xs font-extrabold text-slate-700 dark:text-slate-200">{init}</span>
+                        <span className="text-[10px] text-slate-400">theory →</span>
+                        <div className="min-w-[130px] flex-1">
+                          <Select className="!w-full" value={code} onChange={(v) => patchConfig({ fixedRooms: { ...config.fixedRooms, [init]: v } })} options={ctx!.rooms.filter((r) => r.type !== 'lab').map((r) => ({ value: r.code, label: r.code }))} />
+                        </div>
+                      </div>
+                    ))}
+                    <AddFixedRoom config={config} patch={patchConfig} rooms={ctx!.rooms.filter((r) => r.type !== 'lab').map((r) => r.code)} faculty={allFaculty} />
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -620,9 +637,16 @@ export default function SmartGenerator() {
                 {labCourses.map((code) => {
                   const cur = config.labRoomsByCourse[code];
                   const on = cur?.length ? cur : config.labRooms;
+                  const title = titleFor(code);
+                  const secs = offers.filter((o) => o.code === code && o.type === 'lab');
+                  const batched = [...new Set(secs.map((o) => `${o.batchNo}${o.section}`))].sort().join(' · ');
                   return (
                     <div key={code} className="rounded-xl border border-slate-100 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-800/40">
-                      <p className="mb-1.5 text-[11px] font-extrabold text-slate-700 dark:text-slate-200">{code}</p>
+                      <p className="mb-0.5 text-[11px] font-extrabold text-slate-700 dark:text-slate-200">
+                        <span className="font-mono text-brand-700 dark:text-brand-400">{code}</span>
+                        {title && <span className="ml-1.5 font-semibold text-slate-500 dark:text-slate-400">{title.length > 34 ? title.slice(0, 34) + '…' : title}</span>}
+                      </p>
+                      <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wide text-slate-400">{batched || '—'}</p>
                       <div className="flex flex-wrap gap-1">
                         {ctx!.rooms.filter((r) => r.type === 'lab').map((r) => (
                           <RoomToggle key={r.id} code={r.code} on={on.includes(r.code)} tone="green" small
