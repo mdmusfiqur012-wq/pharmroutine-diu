@@ -93,19 +93,19 @@
     {
       "id": "r-402",
       "code": "AB-1 402",
-      "name": "Lecture Theatre 2",
+      "name": "Classroom AB-402",
       "type": "theory"
     },
     {
       "id": "r-403",
       "code": "AB-1 403",
-      "name": "Lecture Theatre 3",
+      "name": "Classroom AB-403",
       "type": "theory"
     },
     {
       "id": "r-404",
       "code": "AB-1 404",
-      "name": "Lecture Theatre 4",
+      "name": "Classroom AB-404",
       "type": "theory"
     },
     {
@@ -123,7 +123,7 @@
     {
       "id": "r-504",
       "code": "AB-1 504",
-      "name": "Seminar Hall AB-504",
+      "name": "Classroom AB-504",
       "type": "theory"
     },
     {

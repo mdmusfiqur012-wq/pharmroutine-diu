@@ -1416,7 +1416,7 @@
       "id": "r-103",
       "code": "AB-1 103",
       "name": "Classroom AB-103",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1425,7 +1425,7 @@
       "id": "r-104",
       "code": "AB-1 104",
       "name": "Classroom AB-104",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1433,8 +1433,8 @@
     {
       "id": "r-402",
       "code": "AB-1 402",
-      "name": "Lecture Theatre 2",
-      "building": "Academic Building (AB-1)",
+      "name": "Classroom AB-402",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1442,8 +1442,8 @@
     {
       "id": "r-403",
       "code": "AB-1 403",
-      "name": "Lecture Theatre 3",
-      "building": "Academic Building (AB-1)",
+      "name": "Classroom AB-403",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1451,8 +1451,8 @@
     {
       "id": "r-404",
       "code": "AB-1 404",
-      "name": "Lecture Theatre 4",
-      "building": "Academic Building (AB-1)",
+      "name": "Classroom AB-404",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1461,7 +1461,7 @@
       "id": "r-405",
       "code": "AB-1 405",
       "name": "Classroom AB-405",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1470,7 +1470,7 @@
       "id": "r-406",
       "code": "AB-1 406",
       "name": "Classroom AB-406",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1478,8 +1478,8 @@
     {
       "id": "r-504",
       "code": "AB-1 504",
-      "name": "Seminar Hall AB-504",
-      "building": "Academic Building (AB-1)",
+      "name": "Classroom AB-504",
+      "building": "Inspiration Building",
       "room_type": "theory",
       "capacity": 60,
       "is_active": true
@@ -1488,7 +1488,7 @@
       "id": "r-602",
       "code": "AB-1 602",
       "name": "Pharmaceutical Microbiology Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1497,7 +1497,7 @@
       "id": "r-603",
       "code": "AB-1 603",
       "name": "Pharmacognosy and Phytochemistry Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1506,7 +1506,7 @@
       "id": "r-605",
       "code": "AB-1 605",
       "name": "Biopharmaceutics and Pharmacokinetics Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1515,7 +1515,7 @@
       "id": "r-606",
       "code": "AB-1 606",
       "name": "Pharmaceutical Technology and Cosmetology Lab",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1524,7 +1524,7 @@
       "id": "r-702",
       "code": "AB-1 702",
       "name": "Physiology and Pharmacology Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1533,7 +1533,7 @@
       "id": "r-703",
       "code": "AB-1 703",
       "name": "Inorganic and Physical Pharmacy Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1542,7 +1542,7 @@
       "id": "r-704",
       "code": "AB-1 704",
       "name": "Organic Pharmacy and Medicinal Chemistry Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -1551,7 +1551,7 @@
       "id": "r-706",
       "code": "AB-1 706",
       "name": "Pharmaceutical Analysis Laboratory",
-      "building": "Academic Building (AB-1)",
+      "building": "Inspiration Building",
       "room_type": "lab",
       "capacity": 30,
       "is_active": true
@@ -6559,7 +6559,7 @@
       "category": "event",
       "semester_id": "sem-f26",
       "batch_id": "b29",
-      "body": "A guest lecture on \"Pharmacovigilance in Bangladesh\" by Prof. Dr. Muniruddin Ahamed will be held for Batch 29 in the Seminar Hall, AB-1 504. Attendance is mandatory.",
+      "body": "A guest lecture on \"Pharmacovigilance in Bangladesh\" by Prof. Dr. Muniruddin Ahamed will be held for Batch 29 in Classroom AB-1 504. Attendance is mandatory.",
       "pinned": false,
       "is_active": true,
       "created_by": null,
@@ -6585,7 +6585,7 @@
       "category": "notice",
       "semester_id": "sem-f26",
       "batch_id": null,
-      "body": "Per the official routine, Classroom AB-1 103 is reserved for the Agriculture Dept and Seminar Hall AB-1 504 is used by the NFE Dept (Sun–Thu). Pharmacy students should report to their scheduled rooms; these two rooms are not Pharmacy teaching rooms.",
+      "body": "Per the official routine, Classroom AB-1 103 is reserved for the Agriculture Dept and Classroom AB-1 504 is used by the NFE Dept (Sun–Thu). Pharmacy students should report to their scheduled rooms; these two rooms are not Pharmacy teaching rooms.",
       "pinned": false,
       "is_active": true,
       "created_by": null,
