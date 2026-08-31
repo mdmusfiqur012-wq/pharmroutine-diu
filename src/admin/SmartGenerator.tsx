@@ -39,8 +39,12 @@ const PHASES = [
   'Checking faculty, classroom & lab conflicts',
 ];
 
-/** one editable row of the per-batch entry table (import step) */
-interface ManualRow { rid: string; code: string; title: string; credits: number; type: OfferType; faculty: string; }
+/** one editable row of the per-batch entry table (import step) — `src` remembers where the row came from
+ *  so a loaded row stays a loaded row even after edits, and typed rows stay typed. */
+interface ManualRow { rid: string; code: string; title: string; credits: number; type: OfferType; faculty: string; src?: OfferRow['source']; }
+
+const SRC_LABEL: Record<OfferRow['source'], string> = { official: 'official', xlsx: 'file', paste: 'pasted', manual: 'typed' };
+const SRC_TONE: Record<OfferRow['source'], 'slate' | 'blue' | 'teal' | 'purple'> = { official: 'slate', xlsx: 'blue', paste: 'teal', manual: 'purple' };
 
 const TYPE_META: Record<OfferType, { label: string; cls: string }> = {
   theory: { label: 'Theory', cls: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' },
@@ -123,34 +127,39 @@ export default function SmartGenerator() {
       return changed ? next : m;
     });
   }, [effSel]);
-  const filledCount = useMemo(() => effSel.reduce((n, bn) => n + (['A', 'B'] as const).reduce((k, sec) => k + rowsFor(bn, sec).filter((r) => r.code.trim()).length, 0), 0), [manual, effSel]);
   const toggleBatch = (bn: number) => setSelBatches((s) => { const cur = s ?? allBatchNos.slice(0, 8); return cur.includes(bn) ? cur.filter((x) => x !== bn) : [...cur, bn].sort((a, b) => a - b); });
-  /** manual tables → OfferRow list (empty rows skipped — nothing is mandatory) */
+  /** manual tables → OfferRow list (empty rows skipped — nothing is mandatory).
+   *  The tables ARE the complete row set for the selected batches — what you see
+   *  is exactly what will be reviewed and generated. Duplicates are merged here too. */
   function syncManualToOffers() {
+    const seen = new Set<string>();
     const rows: OfferRow[] = [];
     for (const [key, arr] of Object.entries(manual)) {
       const [bn, sec] = key.split('|');
       const n = Number(bn); if (!effSel.includes(n)) continue;
       for (const r of arr) {
         const code = r.code.trim(); if (!code) continue;
+        const dupKey = `${n}|${sec}|${code.toLowerCase()}`;
+        if (seen.has(dupKey)) continue; // duplicate row in the tables — first one wins
+        seen.add(dupKey);
+        const src: OfferRow['source'] = r.src ?? 'manual';
         rows.push({
-          id: `m-${r.rid}`, batchNo: n, section: sec as 'A' | 'B', code,
+          id: src === 'manual' ? `m-${r.rid.replace(/^m-/, '')}` : r.rid, batchNo: n, section: sec as 'A' | 'B', code,
           title: r.title.trim() || titleFor(code) || '', credits: r.credits || 0, type: r.type,
-          faculty: r.type === 'prj' ? '' : r.faculty, facultyRaw: r.faculty, issues: [], source: 'manual',
+          faculty: r.type === 'prj' ? '' : r.faculty, facultyRaw: r.faculty, issues: [], source: src,
         });
       }
     }
-    setOffers((prev) => [
-      ...prev.filter((o) => o.source !== 'manual' && effSel.includes(o.batchNo)),
-      ...rows.filter((o) => effSel.includes(o.batchNo)),
-    ]);
+    setOffers(rows);
   }
-  /** offers → manual tables (when returning to step 1 so edits never get lost) */
+  /** offers → manual tables (when returning to step 1 so edits never get lost).
+   *  ALL rows are shown — loaded official/file/pasted rows AND typed rows, so the
+   *  admin sees and edits exactly the data that will proceed. */
   const manualMapFrom = (list: OfferRow[]) => {
     const m: Record<string, ManualRow[]> = {};
-    for (const o of list) if (o.source === 'manual') {
+    for (const o of list) if (effSel.includes(o.batchNo)) {
       const key = `${o.batchNo}|${o.section}`;
-      (m[key] ??= []).push({ rid: o.id.replace(/^m-/, ''), code: o.code, title: o.title, credits: o.credits, type: o.type, faculty: o.faculty });
+      (m[key] ??= []).push({ rid: o.id, code: o.code, title: o.title, credits: o.credits, type: o.type, faculty: o.faculty, src: o.source });
     }
     for (const bn of effSel) for (const sec of ['A', 'B'] as const) {
       const key = `${bn}|${sec}`;
@@ -161,6 +170,39 @@ export default function SmartGenerator() {
   };
   function rebuildManualFromOffers() { setManual(manualMapFrom(offers)); }
   const goReview = () => { syncManualToOffers(); setStep(2); };
+  /** ANY bulk import (official / Excel / paste) REPLACES every previous bulk row —
+   *  only manually-typed rows of the selected batches survive. No old bulk data
+   *  from other sources or earlier sessions can sneak into the new data set. */
+  function mergeImport(rows: OfferRow[]) {
+    const keptManual = offers.filter((o) => o.source === 'manual' && effSel.includes(o.batchNo));
+    const seen = new Set(keptManual.map((o) => `${o.batchNo}|${o.section}|${o.code.trim().toLowerCase()}`));
+    const fresh: OfferRow[] = [];
+    let dupes = 0;
+    for (const r of rows) {
+      const k = `${r.batchNo}|${r.section}|${r.code.trim().toLowerCase()}`;
+      if (seen.has(k)) { dupes++; continue; }
+      seen.add(k); fresh.push(r);
+    }
+    const next = [...keptManual, ...fresh];
+    const dropped = offers.length - keptManual.length;
+    setOffers(next);
+    setManual(manualMapFrom(next));          // tables now show exactly the new data set
+    setResult(null); setPublishInfo(null); setLocks([]); // stale draft dies with the old data
+    return { next, dropped, keptManual: keptManual.length, dupes };
+  }
+  /** visible "discard old data" — the old rows in the persistent workspace are wiped, tables start blank */
+  function clearOldData() {
+    setOffers([]); setManual({}); setResult(null); setPublishInfo(null); setLocks([]); setRotation({});
+    toast.push('info', 'Old rows discarded — the entry tables are blank again, ready for the new data.');
+  }
+  /** tables edited on this screen never survive without being seen — if the workspace holds
+   *  persisted rows while the tables are blank (e.g. from an earlier session), show them first. */
+  useEffect(() => {
+    if (!offers.length) return;
+    const anyRow = Object.values(manual).some((arr) => arr.some((r) => r.code.trim()));
+    if (!anyRow) setManual(manualMapFrom(offers));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   /** room code (e.g. 406 / 602) for a generated class — resolves id or code */
   const roomLabel = useMemo(() => {
     const byId = new Map<string, string>(); const byCode = new Map<string, string>();
@@ -205,6 +247,20 @@ export default function SmartGenerator() {
 
   /* ---------------- import ---------------- */
   const fileRef = useRef<HTMLInputElement>(null);
+  function loadOfficial() {
+    const b = loadOfficialOffer();
+    const rows = effSel.length ? b.offers.filter((o) => effSel.includes(o.batchNo)) : b.offers;
+    setConfig((c) => ({ ...c, facultyOff: { ...b.facultyOff, ...c.facultyOff } }));
+    // any load REPLACES the old bulk data — only your typed rows survive (never a stale draft)
+    const { next, dropped, keptManual, dupes } = mergeImport(rows);
+    const skipped = b.offers.length - rows.length;
+    toast.push('success',
+      `Loaded the official Fall 2026 offer — ${next.length} row(s) for the ${effSel.length} selected batch(es)` +
+      `${keptManual ? ` · kept ${keptManual} of your typed row(s)` : ''}${dropped ? ` · replaced ${dropped} old row(s)` : ''}` +
+      `${dupes ? ` · merged ${dupes} duplicate(s)` : ''}${skipped > 0 ? ` · ${skipped} row(s) of unselected batches skipped` : ''}. ` +
+      `Old draft cleared — press “Proceed with these rows” to review the NEW data.`);
+    setStep(1);
+  }
   async function onFile(f: File | null) {
     if (!f) return;
     setBusy(true);
@@ -212,39 +268,28 @@ export default function SmartGenerator() {
       const { offers: rows, errors } = await parseWorkbookFile(f);
       if (!rows.length) { toast.push('error', errors[0] ?? 'No recognizable rows — use columns: Batch, Section, Course Code, Title, Credits, Type, Faculty.'); return; }
       const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
-      setOffers((prev) => [...prev.filter((o) => o.source !== 'xlsx'), ...keep]);
-      setResult(null); setPublishInfo(null);
-      toast.push('success', `Imported ${keep.length} course rows from ${f.name}${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
-      setStep(2);
+      const { next, dropped, keptManual, dupes } = mergeImport(keep);
+      toast.push('success',
+        `Imported ${keep.length} row(s) from ${f.name} — the NEW data set has ${next.length} row(s)` +
+        `${keptManual ? ` (your ${keptManual} typed row(s) kept)` : ''}${dropped ? ` · ${dropped} old row(s) replaced` : ''}` +
+        `${dupes ? ` · ${dupes} duplicate(s) merged` : ''}${keep.length < rows.length ? ` · ${rows.length - keep.length} row(s) of unselected batches skipped` : ''}. ` +
+        `Old draft cleared — press “Proceed with these rows” to review the NEW data.`);
+      setStep(1);
     } catch (e: any) {
       toast.push('error', 'Import failed: ' + (e?.message ?? 'unknown error'));
     } finally { setBusy(false); }
-  }
-  function loadOfficial() {
-    const b = loadOfficialOffer();
-    const rows = effSel.length ? b.offers.filter((o) => effSel.includes(o.batchNo)) : b.offers;
-    setConfig((c) => ({ ...c, facultyOff: { ...b.facultyOff, ...c.facultyOff } }));
-    // merge: keep the admin's typed rows, replace only earlier bulk rows —
-    // loading NEVER silently throws away manual data, and never uses stale drafts
-    const keptManual = offers.filter((o) => o.source === 'manual' && effSel.includes(o.batchNo));
-    const manualKeys = new Set(keptManual.map((o) => `${o.batchNo}|${o.section}|${o.code}`));
-    const fresh = rows.filter((o) => !manualKeys.has(`${o.batchNo}|${o.section}|${o.code}`));
-    const next = [...keptManual, ...fresh];
-    setOffers(next);
-    setManual(manualMapFrom(next));
-    setResult(null); setPublishInfo(null); setLocks([]);
-    const skipped = b.offers.length - rows.length;
-    toast.push('success', `Loaded the official Fall 2026 offer — ${fresh.length} row(s) for the ${effSel.length} selected batch(es)${skipped > 0 ? `; ${skipped} row(s) of unselected batches skipped` : ''}. Old draft cleared — press “Proceed with these rows” to review the NEW data.`);
-    setStep(1);
   }
   function onPaste(text: string) {
     const { offers: rows, errors } = parsePastedText(text);
     if (!rows.length) { toast.push('error', errors[0] ?? 'Nothing recognized — paste the batch × faculty matrix or a full column table.'); return; }
     const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
-    setOffers((prev) => [...prev.filter((o) => o.source !== 'paste'), ...keep]);
-    setResult(null); setPublishInfo(null);
-    toast.push('success', `Parsed ${keep.length} rows from pasted text${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
-    setStep(2);
+    const { next, dropped, keptManual, dupes } = mergeImport(keep);
+    toast.push('success',
+      `Parsed ${keep.length} row(s) from the pasted table — the NEW data set has ${next.length} row(s)` +
+      `${keptManual ? ` (your ${keptManual} typed row(s) kept)` : ''}${dropped ? ` · ${dropped} old row(s) replaced` : ''}` +
+      `${dupes ? ` · ${dupes} duplicate(s) merged` : ''}${keep.length < rows.length ? ` · ${rows.length - keep.length} row(s) of unselected batches skipped` : ''}. ` +
+      `Old draft cleared — press “Proceed with these rows” to review the NEW data.`);
+    setStep(1);
   }
 
   /* ---------------- generate ---------------- */
@@ -424,7 +469,8 @@ export default function SmartGenerator() {
             <div className="card p-5">
               <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">② Or load everything at once <span className="ml-1 text-[10px] font-bold text-slate-400">(optional)</span></h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                The official offer, an Excel/CSV file or a pasted table fill the course rows for you — then every row stays editable in the tables below and in Review.
+                The official offer, an Excel/CSV file or a pasted table fill the course rows for you — <b>loading always replaces the old data</b>
+                (only your typed rows survive), and every row becomes editable in the tables below and in Review.
               </p>
               <div className="mt-3 space-y-2">
                 <button className="btn-primary w-full" onClick={loadOfficial} disabled={busy}>
@@ -442,6 +488,11 @@ export default function SmartGenerator() {
               {offers.length > 0 && (
                 <button className="btn-secondary w-full !py-2.5 text-xs" onClick={goReview}>
                   <Icon name="arrowLeft" className="h-3.5 w-3.5 rotate-180" /> Proceed with these {offers.length} rows → Review &amp; correct
+                </button>
+              )}
+              {offers.length > 0 && (
+                <button className="w-full pt-1 text-[11px] font-extrabold text-red-500 underline-offset-2 hover:underline dark:text-red-400" onClick={clearOldData}>
+                  <Icon name="trash" className="mr-1 inline h-3 w-3" /> Discard these {offers.length} old row(s) &amp; start fresh
                 </button>
               )}
             </div>
@@ -466,9 +517,10 @@ export default function SmartGenerator() {
             <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
-                {offers.length} course row(s) ready to generate · {effSel.length} batch(es) selected{filledCount ? ` · ${filledCount} row(s) typed manually` : ''}
+                {offers.length} course row(s) ready to generate · {effSel.length} batch(es) selected
+                <span className="font-semibold text-slate-500"> — {offers.filter((o) => o.source === 'manual').length} typed · {offers.length - offers.filter((o) => o.source === 'manual').length} loaded</span>
               </p>
-              <p className="text-xs text-slate-500">This is the NEW data set — the old draft was cleared · only selected batches contribute · gaps are flagged in Review, never invented.</p>
+              <p className="text-xs text-slate-500">The tables below show exactly these rows — edit them here before proceeding · only selected batches contribute · gaps are flagged in Review, never invented.</p>
             </div>
             <button className="btn-primary !px-6 !py-3" onClick={goReview} disabled={!offers.length}>
               <Icon name="arrowLeft" className="h-4 w-4 rotate-180" /> Proceed with these rows → Review &amp; correct ({offers.length})
@@ -1223,7 +1275,12 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, remo
                 const autoTitle = titleFor(o.code);
                 return (
                   <tr key={o.id} className={clsx('border-b border-slate-100/80 last:border-0 dark:border-slate-800/60', rowIssues(o) && 'bg-amber-50/40 dark:bg-amber-950/20')}>
-                    <td className="table-td font-extrabold">{o.section}</td>
+                    <td className="table-td">
+                      <span className="flex flex-col gap-0.5">
+                        <span className="font-extrabold">{o.section}</span>
+                        <span className={clsx('w-fit rounded px-1 py-px text-[8px] font-extrabold uppercase tracking-wide', SRC_TONE[o.source] === 'slate' && 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400', SRC_TONE[o.source] === 'blue' && 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300', SRC_TONE[o.source] === 'teal' && 'bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300', SRC_TONE[o.source] === 'purple' && 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300')}>{SRC_LABEL[o.source]}</span>
+                      </span>
+                    </td>
                     <td className="table-td w-36">
                       <div className="relative">
                         <input
