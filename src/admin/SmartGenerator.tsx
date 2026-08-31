@@ -146,20 +146,30 @@ export default function SmartGenerator() {
     ]);
   }
   /** offers → manual tables (when returning to step 1 so edits never get lost) */
-  function rebuildManualFromOffers() {
+  const manualMapFrom = (list: OfferRow[]) => {
     const m: Record<string, ManualRow[]> = {};
-    for (const o of offers) if (o.source === 'manual') {
+    for (const o of list) if (o.source === 'manual') {
       const key = `${o.batchNo}|${o.section}`;
-      (m[key] ??= []).push({ rid: o.id.replace(/^m-/, ''), code: o.code, title: o.title, credits: o.credits, type: o.type, faculty: o.faculty, });
+      (m[key] ??= []).push({ rid: o.id.replace(/^m-/, ''), code: o.code, title: o.title, credits: o.credits, type: o.type, faculty: o.faculty });
     }
     for (const bn of effSel) for (const sec of ['A', 'B'] as const) {
       const key = `${bn}|${sec}`;
       if (!m[key]) m[key] = [];
       while (m[key].length < 10) m[key].push(blankRow());
     }
-    setManual(m);
-  }
+    return m;
+  };
+  function rebuildManualFromOffers() { setManual(manualMapFrom(offers)); }
   const goReview = () => { syncManualToOffers(); setStep(2); };
+  /** room code (e.g. 406 / 602) for a generated class — resolves id or code */
+  const roomLabel = useMemo(() => {
+    const byId = new Map<string, string>(); const byCode = new Map<string, string>();
+    for (const r of ctx?.rooms ?? []) { byId.set(r.id, r.code); byCode.set(r.code, r.code); }
+    return (c: GenClass) => {
+      const code = byId.get(c.roomId) ?? byCode.get(c.roomId);
+      return code ? code.replace(/^AB-1\s*/, '') : '—';
+    };
+  }, [ctx]);
   const [syncing, setSyncing] = useState(false);
   const [newBatch, setNewBatch] = useState<{ bn: number; level: number } | null>(null);
   const [creatingBatch, setCreatingBatch] = useState(false);
@@ -226,6 +236,7 @@ export default function SmartGenerator() {
       if (!rows.length) { toast.push('error', errors[0] ?? 'No recognizable rows — use columns: Batch, Section, Course Code, Title, Credits, Type, Faculty.'); return; }
       const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
       setOffers((prev) => [...prev.filter((o) => o.source !== 'xlsx'), ...keep]);
+      setResult(null); setPublishInfo(null);
       toast.push('success', `Imported ${keep.length} course rows from ${f.name}${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
       setStep(2);
     } catch (e: any) {
@@ -235,17 +246,26 @@ export default function SmartGenerator() {
   function loadOfficial() {
     const b = loadOfficialOffer();
     const rows = effSel.length ? b.offers.filter((o) => effSel.includes(o.batchNo)) : b.offers;
-    setOffers(rows);
     setConfig((c) => ({ ...c, facultyOff: { ...b.facultyOff, ...c.facultyOff } }));
+    // merge: keep the admin's typed rows, replace only earlier bulk rows —
+    // loading NEVER silently throws away manual data, and never uses stale drafts
+    const keptManual = offers.filter((o) => o.source === 'manual' && effSel.includes(o.batchNo));
+    const manualKeys = new Set(keptManual.map((o) => `${o.batchNo}|${o.section}|${o.code}`));
+    const fresh = rows.filter((o) => !manualKeys.has(`${o.batchNo}|${o.section}|${o.code}`));
+    const next = [...keptManual, ...fresh];
+    setOffers(next);
+    setManual(manualMapFrom(next));
+    setResult(null); setPublishInfo(null); setLocks([]);
     const skipped = b.offers.length - rows.length;
-    toast.push('success', `Loaded the official Fall 2026 course offer — ${rows.length} rows for the ${effSel.length} selected batch(es)${skipped > 0 ? `; ${skipped} row(s) of unselected batches were skipped` : ''}.`);
-    setStep(2);
+    toast.push('success', `Loaded the official Fall 2026 offer — ${fresh.length} row(s) for the ${effSel.length} selected batch(es)${skipped > 0 ? `; ${skipped} row(s) of unselected batches skipped` : ''}. Old draft cleared — press “Proceed with these rows” to review the NEW data.`);
+    setStep(1);
   }
   function onPaste(text: string) {
     const { offers: rows, errors } = parsePastedText(text);
     if (!rows.length) { toast.push('error', errors[0] ?? 'Nothing recognized — paste the batch × faculty matrix or a full column table.'); return; }
     const keep = effSel.length ? rows.filter((o) => effSel.includes(o.batchNo)) : rows;
     setOffers((prev) => [...prev.filter((o) => o.source !== 'paste'), ...keep]);
+    setResult(null); setPublishInfo(null);
     toast.push('success', `Parsed ${keep.length} rows from pasted text${keep.length < rows.length ? ` (${rows.length - keep.length} row(s) of unselected batches skipped)` : ''}.`);
     setStep(2);
   }
@@ -442,6 +462,11 @@ export default function SmartGenerator() {
                 <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
                 <PasteBox onPaste={onPaste} busy={busy} />
               </div>
+              {offers.length > 0 && (
+                <button className="btn-secondary w-full !py-2.5 text-xs" onClick={goReview}>
+                  <Icon name="arrowLeft" className="h-3.5 w-3.5 rotate-180" /> Proceed with these {offers.length} rows → Review &amp; correct
+                </button>
+              )}
             </div>
           </div>
 
@@ -459,14 +484,18 @@ export default function SmartGenerator() {
             />
           ))}
 
-          {/* continue */}
-          <div className="card flex flex-wrap items-center gap-3 p-5">
+          {/* continue — proceed with the NEW data */}
+          <div className="card sticky bottom-3 z-20 flex flex-wrap items-center gap-3 border-brand-200/70 p-5 shadow-glass-hover dark:border-brand-800">
             <span className="grad-icon-tile flex h-11 w-11 items-center justify-center rounded-xl"><Icon name="check" className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{filledCount} course row(s) entered · {effSel.length} batch(es) selected{offers.length > filledCount ? ` · ${offers.length - filledCount} more loaded from bulk import` : ''}</p>
-              <p className="text-xs text-slate-500">Blank rows are ignored · a typed code auto-fills and locks its title · gaps are always flagged in Review — never invented.</p>
+              <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {offers.length} course row(s) ready to generate · {effSel.length} batch(es) selected{filledCount ? ` · ${filledCount} row(s) typed manually` : ''}
+              </p>
+              <p className="text-xs text-slate-500">This is the NEW data set — the old draft was cleared · only selected batches contribute · gaps are flagged in Review, never invented.</p>
             </div>
-            <button className="btn-primary !py-3" onClick={goReview}><Icon name="search" className="h-4 w-4" /> Review &amp; correct ({filledCount})</button>
+            <button className="btn-primary !px-6 !py-3" onClick={goReview} disabled={!offers.length}>
+              <Icon name="arrowLeft" className="h-4 w-4 rotate-180" /> Proceed with these rows → Review &amp; correct ({offers.length})
+            </button>
           </div>
         </div>
       )}
@@ -886,7 +915,7 @@ export default function SmartGenerator() {
                           return (
                             <td key={slot.id} className="table-td w-[13%] min-w-[150px] border-l border-slate-100/90 p-1 align-top dark:border-slate-800/70">
                               <div className="flex min-h-[96px] flex-col gap-1">
-                                {off ? null : cells.map((c) => <ResultCard key={c.uid} c={c} onEdit={() => setEditClass(c)} />)}
+                                {off ? null : cells.map((c) => <ResultCard key={c.uid} c={c} onEdit={() => setEditClass(c)} roomLabel={roomLabel} />)}
                               </div>
                             </td>
                           );
@@ -1550,7 +1579,7 @@ function SegSec({ value, onChange }: { value: 'A' | 'B'; onChange: (v: 'A' | 'B'
   );
 }
 
-function ResultCard({ c, onEdit }: { c: GenClass; onEdit: () => void }) {
+function ResultCard({ c, onEdit, roomLabel }: { c: GenClass; onEdit: () => void; roomLabel: (c: GenClass) => string }) {
   const isLab = c.type === 'lab';
   const isPrj = c.type === 'prj' || c.type === 'ged';
   return (
@@ -1566,7 +1595,7 @@ function ResultCard({ c, onEdit }: { c: GenClass; onEdit: () => void }) {
       </p>
       <p className="pl-2 line-clamp-2 text-[10px] font-bold leading-snug text-slate-800 dark:text-slate-100">{c.title || c.code}</p>
       <p className="pl-2 pt-0.5 text-[9px] font-semibold text-slate-500 dark:text-slate-400">
-        {c.faculty} · {roomShort(c)}
+        {c.faculty} · {roomLabel(c)}
         {c.locked && <span className="ml-1 inline-flex items-center gap-0.5 rounded bg-slate-800/80 px-1 py-px text-[8px] font-extrabold text-white"><Icon name="shield" className="h-2 w-2" /> locked</span>}
       </p>
       <span className="absolute right-1 top-1 rounded-md bg-white/70 p-0.5 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 dark:bg-slate-800/70">
@@ -1579,9 +1608,7 @@ function ResultCard({ c, onEdit }: { c: GenClass; onEdit: () => void }) {
 function groupName(c: GenClass) {
   return (c.uid.split(':')[1] ?? '').replace(/^g\d+-/, '') || 'grp';
 }
-function roomShort(c: GenClass) {
-  return c.roomId.slice(-8).replace(/^AB-1\s/g, '');
-}
+
 
 function EditModal({ c, result, ctx, config, onClose, onSave }: {
   c: GenClass; result: GenResult; ctx: NonNullable<ReturnType<typeof buildGenCtx>>; config: GenConfig;
