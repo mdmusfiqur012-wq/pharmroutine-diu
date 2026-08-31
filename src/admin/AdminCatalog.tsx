@@ -302,7 +302,7 @@ export function AdminBatches() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           {db.batches.length} batches ({Math.min(...db.batches.map((b) => b.batch_no))}–{Math.max(...db.batches.map((b) => b.batch_no))}) · every batch carries its own level, class days, off days and routine.
-          The <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b> reads this list — you can add unlimited batches (1–999); only the 8 (or any selection) chosen in its Import step contribute to each routine.
+          Batches are added <b className="text-slate-700 dark:text-slate-300">only here</b> — after saving, the batch appears automatically in the <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b>'s batch list, where you pick any 8 (or any selection) to form a routine. Unlimited batches (1–999); only the selected ones contribute to each routine.
         </p>
         <button className="btn-primary" onClick={() => setModal({ is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch ({Math.max(...db.batches.map((b) => b.batch_no)) + 1 || 39}+)</button>
       </div>

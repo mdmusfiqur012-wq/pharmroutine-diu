@@ -11,7 +11,7 @@ import {
 } from './generator/types';
 import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers, officialCatalog, officialBatchLevel } from './generator/parser';
 import { generateRoutine, verifySchedule, verifyFrequency, frequencyRows, probeMove } from './generator/engine';
-import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, ensureBatchRows, type PublishSummary } from './generator/store';
+import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, type PublishSummary } from './generator/store';
 import { COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
 
 /* ============================================================
@@ -170,34 +170,11 @@ export default function SmartGenerator() {
       return code ? code.replace(/^AB-1\s*/, '') : '—';
     };
   }, [ctx]);
-  const [syncing, setSyncing] = useState(false);
-  const [newBatch, setNewBatch] = useState<{ bn: number; level: number } | null>(null);
-  const [creatingBatch, setCreatingBatch] = useState(false);
-  async function createMissingBatch(bn: number) {
-    if (!db) return;
-    setSyncing(true);
-    try {
-      const level = officialBatchLevel(bn) ?? 1;
-      const r = await ensureBatchRows(db, bn, level);
-      if (!r.ok) { toast.push('error', `Batch ${bn}: ${r.error ?? 'could not be created'}`); return; }
-      await refresh();
-      toast.push('success', `Batch ${bn} created with sections A/B and lab groups A1/A2/B1/B2 — it is now available in the generator and on the Batches & Groups page.`);
-    } finally { setSyncing(false); }
-  }
-  /** unlimited batches: create any new batch number from inside the generator
-   *  (batch + sections A/B + lab groups A1/A2/B1/B2) and select it right away. */
-  async function createBatchInline() {
-    if (!newBatch || !db) return;
-    if (db.batches.some((b) => b.batch_no === newBatch.bn)) { toast.push('error', `Batch ${newBatch.bn} already exists — pick another number.`); return; }
-    setCreatingBatch(true);
-    try {
-      const r = await ensureBatchRows(db, newBatch.bn, newBatch.level);
-      if (!r.ok) { toast.push('error', `Batch ${newBatch.bn}: ${r.error ?? 'could not be created'}`); return; }
-      await refresh();
-      setSelBatches((s) => [...(s ?? allBatchNos.slice(0, 8)).filter((x) => x !== newBatch!.bn), newBatch!.bn].sort((a, b) => a - b));
-      toast.push('success', `Batch ${newBatch.bn} created (sections A/B + lab groups A1/A2/B1/B2) and selected for this routine.`);
-      setNewBatch(null);
-    } finally { setCreatingBatch(false); }
+  /* batch creation lives ONLY on the Administrator Dashboard (Batches & Groups) —
+   * here the admin only SELECTS from the batches that already exist there. */
+  function goCreateBatch() {
+    toast.push('info', 'Batches are created in the Administrator Dashboard → Batches & Groups — never here. Once created, the batch appears in the list above for selection.');
+    navigate('/admin/batches');
   }
   function removeOfferRow(id: string) {
     setOffers((os) => os.filter((o) => o.id !== id));
@@ -413,9 +390,9 @@ export default function SmartGenerator() {
             <div className="card p-5">
               <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">① Choose the batches for this routine</h3>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Normally a routine is built for <b>8 batches</b> — the first 8 are pre-selected. Pick any combination:
-                <b> only the selected batches contribute to the routine</b> — everything else stays in the database, untouched.
-                An unlimited number of batches can exist.
+                Normally a routine is built for <b>8 batches</b> — the first 8 are pre-selected. Pick <b>any 8</b> (or any number) of
+                the batches below: <b>only the selected batches contribute to the routine</b> — everything else stays in the database, untouched.
+                Batches themselves are created on the <b>Administrator Dashboard → Batches &amp; Groups</b>; they appear here automatically.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {allBatchNos.map((bn) => {
@@ -435,12 +412,12 @@ export default function SmartGenerator() {
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches(allBatchNos.slice(0, 8))}>First 8</button>
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([...allBatchNos])}>All</button>
                 <button className="btn-secondary !px-2.5 !py-1 text-[10px]" onClick={() => setSelBatches([])}>None</button>
-                <button className="btn-primary !px-3 !py-1.5 text-[11px]" onClick={() => setNewBatch({ bn: (allBatchNos.length ? Math.max(...allBatchNos) + 1 : 39), level: 1 })}>
-                  <Icon name="plus" className="h-3.5 w-3.5" /> New batch (unlimited)
+                <button className="btn-secondary !px-3 !py-1.5 text-[11px]" onClick={goCreateBatch}>
+                  <Icon name="plus" className="h-3.5 w-3.5" /> Add batch → dashboard
                 </button>
                 <Link to="/admin/batches" className="ml-auto text-[11px] font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">manage all batches →</Link>
               </div>
-              <p className="mt-2 text-[10px] text-slate-400">Unselected batches are ignored by generation &amp; publishing — select 8 (or any number) and only those will form this routine.</p>
+              <p className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400"><Icon name="shield" className="h-3 w-3 text-brand-500" /> Adding / editing / deleting batches is done only on the Administrator Dashboard (Batches &amp; Groups). Here you only select which of them make up this routine — select 8 (or any number) and only those form the routine.</p>
             </div>
 
             {/* ② bulk import */}
@@ -519,16 +496,16 @@ export default function SmartGenerator() {
             <div className="card border-amber-200/70 p-4">
               <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400"><Icon name="alert" className="h-4 w-4" /> Batches missing from the database</p>
               <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                The offer contains batch(es) that don't exist on the <b>Batches &amp; Groups</b> page yet — they must be created before generation.
-                One click creates the batch with sections A/B and lab groups A1/A2/B1/B2 (level from the official term; off-day set later in Rules or Batch Off Days).
+                The offer contains batch(es) that don't exist on the <b>Batches &amp; Groups</b> page yet — they must be created there before generation.
+                Batches are added only on the <b>Administrator Dashboard → Batches &amp; Groups</b> (one click creates the batch with sections A/B and lab groups A1/A2/B1/B2; off-day set on that page or in Rules). Nothing else can create a batch.
               </p>
               <div className="flex flex-wrap gap-2">
                 {missingBatchNos.map((bn) => (
-                  <button key={bn} className="btn-primary !px-3.5 !py-2 text-xs" disabled={syncing} onClick={() => void createMissingBatch(bn)}>
-                    <Icon name="plus" className="h-3.5 w-3.5" /> Create Batch {bn} (of {batchNos.length})
-                  </button>
+                  <span key={bn} className="chip !px-3.5 !py-2 text-xs !normal-case bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    <Icon name="alert" className="h-3.5 w-3.5" /> Batch {bn} — not created yet
+                  </span>
                 ))}
-                <Link to="/admin/batches" className="btn-secondary !px-3.5 !py-2 text-xs"><Icon name="award" className="h-3.5 w-3.5" /> Open Batches &amp; Groups</Link>
+                <Link to="/admin/batches" className="btn-primary !px-3.5 !py-2 text-xs"><Icon name="award" className="h-3.5 w-3.5" /> Create them in Batches &amp; Groups</Link>
               </div>
             </div>
           )}
@@ -1012,44 +989,6 @@ export default function SmartGenerator() {
             </div>
           )}
         </div>
-      )}
-
-      {/* new batch modal */}
-      {newBatch && (
-        <Modal open onClose={() => setNewBatch(null)} title="Create a new batch" subtitle="Unlimited batches — only the ones selected above contribute to this routine.">
-          <div className="space-y-4 p-5">
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Batch number</span>
-                <input type="number" min={1} max={999} className="input mt-1 !py-2 text-sm font-extrabold" value={newBatch.bn}
-                  onChange={(e) => setNewBatch({ ...newBatch, bn: Number(e.target.value) || 1 })} />
-              </label>
-              <label className="block">
-                <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Curriculum level</span>
-                <select className="input mt-1 !py-2 text-sm" value={newBatch.level} onChange={(e) => setNewBatch({ ...newBatch, level: Number(e.target.value) })}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((l) => <option key={l} value={l}>Level {l}</option>)}
-                </select>
-              </label>
-            </div>
-            <div className="rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
-              <Icon name="info" className="mr-1 inline h-3.5 w-3.5 text-brand-500" />
-              Creates <b>Batch {newBatch.bn}</b> with sections A/B and lab groups A1, A2, B1, B2 — visible in Batches &amp; Groups,
-              automatically <b>selected</b> for this routine, with its own entry tables below. Set its off-day in the Rules step.
-            </div>
-            {db?.batches.some((b) => b.batch_no === newBatch.bn) && (
-              <p className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-                <Icon name="alert" className="h-3.5 w-3.5" /> Batch {newBatch.bn} already exists — choose a different number.
-              </p>
-            )}
-            <div className="flex justify-end gap-2">
-              <button className="btn-secondary" onClick={() => setNewBatch(null)}>Cancel</button>
-              <button className="btn-primary" disabled={creatingBatch || (db?.batches.some((b) => b.batch_no === newBatch.bn) ?? false)} onClick={() => void createBatchInline()}>
-                {creatingBatch ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Icon name="plus" className="h-4 w-4" />}
-                {creatingBatch ? 'Creating…' : `Create Batch ${newBatch.bn} & select`}
-              </button>
-            </div>
-          </div>
-        </Modal>
       )}
 
       {/* add-row modal */}
