@@ -42,37 +42,37 @@
   "slots": [
     {
       "id": "t1",
-      "label": "8:30 AM \u2013 10:00 AM",
+      "label": "8:30 AM – 10:00 AM",
       "start": "08:30",
       "end": "10:00"
     },
     {
       "id": "t2",
-      "label": "10:00 AM \u2013 11:30 AM",
+      "label": "10:00 AM – 11:30 AM",
       "start": "10:00",
       "end": "11:30"
     },
     {
       "id": "t3",
-      "label": "11:30 AM \u2013 1:00 PM",
+      "label": "11:30 AM – 1:00 PM",
       "start": "11:30",
       "end": "13:00"
     },
     {
       "id": "t4",
-      "label": "1:00 PM \u2013 2:30 PM",
+      "label": "1:00 PM – 2:30 PM",
       "start": "13:00",
       "end": "14:30"
     },
     {
       "id": "t5",
-      "label": "2:30 PM \u2013 4:00 PM",
+      "label": "2:30 PM – 4:00 PM",
       "start": "14:30",
       "end": "16:00"
     },
     {
       "id": "t6",
-      "label": "4:00 PM \u2013 5:30 PM",
+      "label": "4:00 PM – 5:30 PM",
       "start": "16:00",
       "end": "17:30"
     }
@@ -129,49 +129,49 @@
     {
       "id": "r-602",
       "code": "AB-1 602",
-      "name": "Pharmacology Laboratory",
+      "name": "Pharmaceutical Microbiology Laboratory",
       "type": "lab"
     },
     {
       "id": "r-603",
       "code": "AB-1 603",
-      "name": "Pharmaceutical Chemistry Laboratory",
+      "name": "Pharmacognosy and Phytochemistry Laboratory",
       "type": "lab"
     },
     {
       "id": "r-605",
       "code": "AB-1 605",
-      "name": "Instrumentation Laboratory",
+      "name": "Biopharmaceutics and Pharmacokinetics Laboratory",
       "type": "lab"
     },
     {
       "id": "r-606",
       "code": "AB-1 606",
-      "name": "Computer & Bio-Simulation Lab",
+      "name": "Pharmaceutical Technology and Cosmetology Lab",
       "type": "lab"
     },
     {
       "id": "r-702",
       "code": "AB-1 702",
-      "name": "Pharmaceutics Laboratory",
+      "name": "Physiology and Pharmacology Laboratory",
       "type": "lab"
     },
     {
       "id": "r-703",
       "code": "AB-1 703",
-      "name": "Microbiology Laboratory",
+      "name": "Inorganic and Physical Pharmacy Laboratory",
       "type": "lab"
     },
     {
       "id": "r-704",
       "code": "AB-1 704",
-      "name": "Pharmacognosy Laboratory",
+      "name": "Organic Pharmacy and Medicinal Chemistry Laboratory",
       "type": "lab"
     },
     {
       "id": "r-706",
       "code": "AB-1 706",
-      "name": "Physiology Laboratory",
+      "name": "Pharmaceutical Analysis Laboratory",
       "type": "lab"
     }
   ],

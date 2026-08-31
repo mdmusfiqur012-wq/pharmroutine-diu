@@ -1487,7 +1487,7 @@
     {
       "id": "r-602",
       "code": "AB-1 602",
-      "name": "Pharmacology Laboratory",
+      "name": "Pharmaceutical Microbiology Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1496,7 +1496,7 @@
     {
       "id": "r-603",
       "code": "AB-1 603",
-      "name": "Pharmaceutical Chemistry Laboratory",
+      "name": "Pharmacognosy and Phytochemistry Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1505,7 +1505,7 @@
     {
       "id": "r-605",
       "code": "AB-1 605",
-      "name": "Instrumentation Laboratory",
+      "name": "Biopharmaceutics and Pharmacokinetics Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1514,7 +1514,7 @@
     {
       "id": "r-606",
       "code": "AB-1 606",
-      "name": "Computer & Bio-Simulation Lab",
+      "name": "Pharmaceutical Technology and Cosmetology Lab",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1523,7 +1523,7 @@
     {
       "id": "r-702",
       "code": "AB-1 702",
-      "name": "Pharmaceutics Laboratory",
+      "name": "Physiology and Pharmacology Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1532,7 +1532,7 @@
     {
       "id": "r-703",
       "code": "AB-1 703",
-      "name": "Microbiology Laboratory",
+      "name": "Inorganic and Physical Pharmacy Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1541,7 +1541,7 @@
     {
       "id": "r-704",
       "code": "AB-1 704",
-      "name": "Pharmacognosy Laboratory",
+      "name": "Organic Pharmacy and Medicinal Chemistry Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -1550,7 +1550,7 @@
     {
       "id": "r-706",
       "code": "AB-1 706",
-      "name": "Physiology Laboratory",
+      "name": "Pharmaceutical Analysis Laboratory",
       "building": "Academic Building (AB-1)",
       "room_type": "lab",
       "capacity": 30,
@@ -6596,7 +6596,7 @@
   "settings": [
     {
       "key": "app",
-      "value": "{\"universityName\":\"Daffodil International University\",\"departmentName\":\"Department of Pharmacy\",\"universityTagline\":\"Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002\",\"colors\":{\"theory\":\"#1d4ed8\",\"lab\":\"#16a34a\",\"guest\":\"#7c3aed\",\"ged\":\"#0e7490\",\"nfe\":\"#0f766e\",\"agriculture\":\"#65a30d\",\"cancelled\":\"#dc2626\",\"rescheduled\":\"#d97706\"}}"
+      "value": "{\"universityName\":\"Daffodil International University\",\"departmentName\":\"Department of Pharmacy\",\"universityTagline\":\"Permanent Campus · Daffodil Smart City, Birulia, Savar, Dhaka · Estd. 2002\",\"colors\":{\"theory\":\"#7c3aed\",\"lab\":\"#2563eb\",\"guest\":\"#ea580c\",\"ged\":\"#ca8a04\",\"nfe\":\"#db2777\",\"agriculture\":\"#15803d\",\"cancelled\":\"#dc2626\",\"rescheduled\":\"#d97706\"}}"
     }
   ]
 }
