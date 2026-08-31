@@ -9,9 +9,9 @@ import {
   type OfferRow, type GenConfig, type ClassLock, type RotationState, type GenResult, type GenClass,
   type ConflictIssue, type OfferType, DEFAULT_CONFIG,
 } from './generator/types';
-import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers, officialCatalog } from './generator/parser';
+import { loadOfficialOffer, parseWorkbookFile, parsePastedText, inspectOffers, officialCatalog, officialBatchLevel } from './generator/parser';
 import { generateRoutine, verifySchedule, verifyFrequency, frequencyRows, probeMove } from './generator/engine';
-import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, type PublishSummary } from './generator/store';
+import { buildGenCtx, publishResult, usePersistentState, clearGeneratorStorage, buildAutoLocks, mergeLocks, ensureBatchRows, type PublishSummary } from './generator/store';
 import { COMBINED_LAB, NO_LAB } from '../components/SelectionPanel';
 
 /* ============================================================
@@ -47,7 +47,7 @@ const TYPE_META: Record<OfferType, { label: string; cls: string }> = {
 };
 
 export default function SmartGenerator() {
-  const { db } = useData();
+  const { db, refresh } = useData();
   const toast = useToast();
   const navigate = useNavigate();
   const setSelection = useApp((s) => s.setSelection);
@@ -97,6 +97,25 @@ export default function SmartGenerator() {
     return (code: string) => m.get(code.trim()) ?? null;
   }, [db, officialCat, extraCourses]);
   const isDuplicate = (bn: number, sec: string, code: string) => offers.some((o) => o.batchNo === bn && o.section === sec && o.code.trim().toLowerCase() === code.trim().toLowerCase());
+  /** batches in the offer that do not exist in the database yet → must be created before generation */
+  const missingBatchNos = useMemo(() => batchNos.filter((bn) => !(ctx?.batches.some((b) => b.batchNo === bn))), [batchNos, ctx]);
+  const [syncing, setSyncing] = useState(false);
+  async function createMissingBatch(bn: number) {
+    if (!db) return;
+    setSyncing(true);
+    try {
+      const level = officialBatchLevel(bn) ?? 1;
+      const r = await ensureBatchRows(db, bn, level);
+      if (!r.ok) { toast.push('error', `Batch ${bn}: ${r.error ?? 'could not be created'}`); return; }
+      await refresh();
+      toast.push('success', `Batch ${bn} created with sections A/B and lab groups A1/A2/B1/B2 — it is now available in the generator and on the Batches & Groups page.`);
+    } finally { setSyncing(false); }
+  }
+  function removeOfferRow(id: string) {
+    setOffers((os) => os.filter((o) => o.id !== id));
+    if (result) { setResult(null); toast.push('info', 'Row removed — the previous draft is stale, generate again.'); }
+    toast.push('success', 'Course row removed.');
+  }
   /* credit-based frequency: required vs scheduled, per course & section */
   const freq = useMemo(() => (ctx ? frequencyRows(ctx, offers, result?.classes ?? [], config) : []), [ctx, offers, result, config]);
   const freqOk = useMemo(() => freq.every((r) => r.ok), [freq]);
@@ -155,6 +174,10 @@ export default function SmartGenerator() {
     if (!offers.length) { toast.push('error', 'Import the course offer first.'); return; }
     if (issues.some((i) => i.kind === 'missing-title' || i.kind === 'no-faculty')) {
       toast.push('error', 'Unresolved data (missing titles / faculty) — fix in Review before generating.');
+      setStep(2); return;
+    }
+    if (missingBatchNos.length) {
+      toast.push('error', `Batch ${missingBatchNos.join(', ')} exists in the offer but not in the database — create it in Review first (one click).`);
       setStep(2); return;
     }
     setBusy(true); setPhaseIdx(0); setPulse((p) => p + 1);
@@ -301,7 +324,9 @@ export default function SmartGenerator() {
               <Icon name="info" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-500" />
               <span><b className="text-slate-600 dark:text-slate-300">Note:</b> Project · Industrial Training · Oral Assessment (PRJ) need no faculty —
               they are supervised by the department coordinator and appear in the routine as one guided session per week.
-              Laboratory courses automatically split into paired groups A1/A2 (or B1/B2).</span>
+              Laboratory courses automatically split into paired groups A1/A2 (or B1/B2).
+              New batch (e.g. Batch 39)? <Link to="/admin/batches" className="font-extrabold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400">Add it in Batches &amp; Groups</Link> —
+              or import the offer and the generator will offer to create any missing batch in Review.</span>
             </div>
           </div>
 
@@ -355,6 +380,24 @@ export default function SmartGenerator() {
             <p className="text-[11px] font-semibold text-slate-400">Missing info is never invented — fix it here or flag it to the department.</p>
           </div>
 
+          {missingBatchNos.length > 0 && (
+            <div className="card border-amber-200/70 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400"><Icon name="alert" className="h-4 w-4" /> Batches missing from the database</p>
+              <p className="mb-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                The offer contains batch(es) that don't exist on the <b>Batches &amp; Groups</b> page yet — they must be created before generation.
+                One click creates the batch with sections A/B and lab groups A1/A2/B1/B2 (level from the official term; off-day set later in Rules or Batch Off Days).
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {missingBatchNos.map((bn) => (
+                  <button key={bn} className="btn-primary !px-3.5 !py-2 text-xs" disabled={syncing} onClick={() => void createMissingBatch(bn)}>
+                    <Icon name="plus" className="h-3.5 w-3.5" /> Create Batch {bn} (of {batchNos.length})
+                  </button>
+                ))}
+                <Link to="/admin/batches" className="btn-secondary !px-3.5 !py-2 text-xs"><Icon name="award" className="h-3.5 w-3.5" /> Open Batches &amp; Groups</Link>
+              </div>
+            </div>
+          )}
+
           {issues.length > 0 && (
             <div className="card border-amber-200/70 p-4">
               <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400"><Icon name="alert" className="h-4 w-4" /> Data attention list</p>
@@ -370,7 +413,7 @@ export default function SmartGenerator() {
           )}
 
           {batchNos.map((bn) => (
-            <BatchReviewTable key={bn} batchNo={bn} offers={offers.filter((o) => o.batchNo === bn)} knownFaculty={knownFaculty} patch={patchOffer} titleFor={titleFor} onAddRow={(sec) => setAddFor({ bn, sec })} />
+            <BatchReviewTable key={bn} batchNo={bn} offers={offers.filter((o) => o.batchNo === bn)} knownFaculty={knownFaculty} patch={patchOffer} titleFor={titleFor} remove={removeOfferRow} onAddRow={(sec) => setAddFor({ bn, sec })} />
           ))}
 
           <div className="card flex flex-wrap items-center gap-x-3 gap-y-2 p-4 text-xs text-slate-500">
@@ -875,11 +918,12 @@ function PasteBox({ onPaste, busy }: { onPaste: (t: string) => void; busy: boole
   );
 }
 
-function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, onAddRow }: {
+function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, remove, onAddRow }: {
   batchNo: number; offers: OfferRow[]; knownFaculty: string[]; patch: (id: string, p: Partial<OfferRow>) => void;
-  titleFor: (code: string) => string | null; onAddRow: (sec: 'A' | 'B') => void;
+  titleFor: (code: string) => string | null; remove: (id: string) => void; onAddRow: (sec: 'A' | 'B') => void;
 }) {
   const [open, setOpen] = useState(true);
+  const [arm, setArm] = useState<string | null>(null);
   const rowIssues = (o: OfferRow) => (!o.title ? 1 : 0) + (!o.faculty && o.type !== 'prj' ? 1 : 0) + (!o.credits ? 1 : 0);
   return (
     <div className="card overflow-hidden !p-0">
@@ -900,7 +944,7 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, onAd
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/40">
                 <th className="table-th">Sec</th><th className="table-th">Code → title</th><th className="table-th">Course title</th>
-                <th className="table-th">Cr</th><th className="table-th">Type</th><th className="table-th">Faculty</th>
+                <th className="table-th">Cr</th><th className="table-th">Type</th><th className="table-th">Faculty</th><th className="table-th w-14" />
               </tr>
             </thead>
             <tbody>
@@ -953,6 +997,21 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, onAd
                         </select>
                       )}
                     </td>
+                    <td className="table-td w-14">
+                      {arm === o.id ? (
+                        <button title="Click again to delete"
+                          className="flex items-center gap-1 rounded-lg bg-red-500 px-2 py-1 text-[9px] font-extrabold text-white shadow-glow-blue"
+                          onClick={() => { remove(o.id); setArm(null); }}>
+                          <Icon name="trash" className="h-3 w-3" /> sure?
+                        </button>
+                      ) : (
+                        <button title="Remove this course row"
+                          className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-slate-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                          onClick={() => { setArm(o.id); window.setTimeout(() => setArm((a) => (a === o.id ? null : a)), 3000); }}>
+                          <Icon name="trash" className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -962,6 +1021,14 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, onAd
             <button className="w-full p-4 text-center text-xs font-bold text-brand-600 underline-offset-2 hover:underline dark:text-brand-400" onClick={() => onAddRow('A')}>
               No rows yet — add the first course to Batch {batchNo}
             </button>
+          )}
+          {offers.length > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-4 py-2 dark:border-slate-800 dark:bg-slate-800/30">
+              <p className="text-[10px] text-slate-400">Rows are removed individually — regenerate after editing.</p>
+              <button className="text-[10px] font-extrabold text-red-400 hover:text-red-600" onClick={() => { if (arm === 'all') { offers.forEach((o) => remove(o.id)); setArm(null); } else { setArm('all'); window.setTimeout(() => setArm((a) => (a === 'all' ? null : a)), 3000); } }}>
+                {arm === 'all' ? 'Click again to confirm' : 'Remove all rows of this batch'}
+              </button>
+            </div>
           )}
         </div>
       )}

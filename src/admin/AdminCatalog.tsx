@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../lib/data';
 import { AdminShell, AdminModal, Field, SaveBar, useRefresh } from './common';
 import { Badge, Icon, useToast } from '../lib/ui';
@@ -250,9 +251,25 @@ export function AdminBatches() {
   const { db, loading } = useData();
   const refresh = R();
   const toast = T();
+  const navigate = useNavigate();
   const [modal, setModal] = useState<Partial<Batch> | null>(null);
+  const [del, setDel] = useState<Batch | null>(null);   // batch pending deletion
   const [busy, setBusy] = useState(false);
   if (loading || !db) return null;
+
+  const removeBatch = async () => {
+    const b = del!;
+    setBusy(true);
+    try {
+      const r = await api.deleteRow('batches', b.id);
+      if (!r.ok) { toast.push('error', r.error ?? 'Delete failed'); return; }
+      toast.push('success', `Batch ${b.batch_no} deleted — its sections, lab groups, off days and ${countFor(b)} class(es) were removed too.`);
+    } finally {
+      setBusy(false); setDel(null);
+      await refresh();
+    }
+  };
+  const countFor = (b: Batch) => db.routineEntries.filter((e) => e.batch_id === b.id).length;
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -282,11 +299,12 @@ export function AdminBatches() {
 
   return (
     <AdminShell>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          {db.batches.length} batches (29–38) · every batch carries its own level, class days, off days and routine — adding a new batch never requires code changes.
+          {db.batches.length} batches ({Math.min(...db.batches.map((b) => b.batch_no))}–{Math.max(...db.batches.map((b) => b.batch_no))}) · every batch carries its own level, class days, off days and routine.
+          The <b className="text-slate-700 dark:text-slate-300">Smart Routine Generator</b> reads this list — batches found in the imported offer but missing here are created from Review in one click.
         </p>
-        <button className="btn-primary" onClick={() => setModal({ is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch (39+)</button>
+        <button className="btn-primary" onClick={() => setModal({ is_active: true })}><Icon name="plus" className="h-4 w-4" /> Add batch ({Math.max(...db.batches.map((b) => b.batch_no)) + 1 || 39}+)</button>
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {[...db.batches].sort((a, b) => b.batch_no - a.batch_no).map((b) => {
@@ -300,7 +318,7 @@ export function AdminBatches() {
             <div key={b.id} className="card p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{b.name}</p>
+                  <p className="flex items-center gap-1.5 text-sm font-extrabold text-slate-800 dark:text-slate-100">{b.name} {b.is_active ? <Badge tone="green">active</Badge> : <Badge tone="amber">inactive</Badge>}</p>
                   <p className="text-[11px] text-slate-400">Admitted {b.admission_year} · Level {b.current_level} · {sem?.name}</p>
                 </div>
                 <Badge tone="green">{entries} classes</Badge>
@@ -318,8 +336,17 @@ export function AdminBatches() {
               </div>
               <div className="mt-3 flex gap-2">
                 <button className="btn-secondary flex-1 !py-1.5 text-xs" onClick={() => setModal(b)}><Icon name="edit" className="h-3 w-3" /> Edit</button>
-                <button className="btn-secondary flex-1 !py-1.5 text-xs" onClick={() => toast.push('info', 'Use “Batch Off Days” tab to configure this batch’s weekly calendar.')}><Icon name="clock" className="h-3 w-3" /> Off days</button>
+                <button className="btn-secondary flex-1 !py-1.5 text-xs" onClick={() => navigate('/admin/offdays')} title="Configure this batch's weekly calendar"><Icon name="clock" className="h-3 w-3" /> Off days</button>
+                <button className="btn-secondary flex-1 !py-1.5 text-xs" onClick={() => navigate('/admin/generator')} title="Generate this batch's routine"><Icon name="zap" className="h-3 w-3" /> Routine</button>
+                <button className="rounded-lg border border-red-200/70 px-2.5 py-1.5 text-red-500 transition-colors hover:bg-red-50 dark:border-red-900/60 dark:hover:bg-red-950/40" onClick={() => setDel(b)} title={`Delete Batch ${b.batch_no} and everything attached to it`}>
+                  <Icon name="trash" className="h-3.5 w-3.5" />
+                </button>
               </div>
+              {!b.is_active && (
+                <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                  Inactive — students can't select it. Delete it permanently if the batch has left the university.
+                </p>
+              )}
             </div>
           );
         })}
@@ -331,6 +358,13 @@ export function AdminBatches() {
           <Field label="Admission year"><input className="input" type="number" min={2018} max={2035} value={modal?.admission_year ?? new Date().getFullYear() - 1} onChange={(e) => setModal((m) => ({ ...m!, admission_year: Number(e.target.value) }))} /></Field>
           <Field label="Current curriculum level"><input className="input" type="number" min={1} max={8} value={modal?.current_level ?? 1} onChange={(e) => setModal((m) => ({ ...m!, current_level: Number(e.target.value) }))} /></Field>
           <Field label="Name"><input className="input" value={modal?.name ?? `Batch ${modal?.batch_no ?? ''}`} onChange={(e) => setModal((m) => ({ ...m!, name: e.target.value }))} /></Field>
+          <label className="col-span-2 flex items-center justify-between rounded-xl border border-slate-100 bg-white/60 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-800/40">
+            <span>
+              <span className="block text-xs font-extrabold text-slate-700 dark:text-slate-200">Active batch</span>
+              <span className="block text-[10px] text-slate-400">Inactive batches disappear from student selection &amp; the generator.</span>
+            </span>
+            <input type="checkbox" className="h-4 w-4 accent-brand-600" checked={modal?.is_active ?? true} onChange={(e) => setModal((m) => ({ ...m!, is_active: e.target.checked }))} />
+          </label>
           <div className="col-span-2">
             <p className="rounded-lg bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500 dark:bg-slate-800 dark:text-slate-400">
               Sections A & B plus lab groups A1, A2, B1, B2 are created automatically. Then add courses, routine entries and its own off-day calendar from the admin tabs.
@@ -338,6 +372,29 @@ export function AdminBatches() {
           </div>
           <div className="col-span-2"><SaveBar busy={busy} label="Create batch" /></div>
         </form>
+      </AdminModal>
+      {/* delete confirmation */}
+      <AdminModal open={Boolean(del)} onClose={() => setDel(null)} title={`Delete ${del?.name}?`}>
+        <div className="space-y-3">
+          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+            This permanently removes <b>{del?.name}</b>{db.sections.filter((x) => x.batch_id === del?.id).map((x) => ` Section ${x.name}`).join(' & ')} and everything attached to it:
+          </p>
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <span className="rounded-lg bg-red-50 px-3 py-2 font-bold text-red-600 dark:bg-red-950/40 dark:text-red-300">{del ? countFor(del) : 0} routine class(es)</span>
+            <span className="rounded-lg bg-slate-50 px-3 py-2 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{db.sections.filter((x) => x.batch_id === del?.id).length} section(s) · {db.labGroups.filter((g) => db.sections.some((x) => x.batch_id === del?.id && x.id === g.section_id)).length} lab group(s)</span>
+            <span className="rounded-lg bg-slate-50 px-3 py-2 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{db.batchOffDays.filter((o) => o.batch_id === del?.id).length} off-day record(s)</span>
+            <span className="rounded-lg bg-slate-50 px-3 py-2 font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{db.routineEntries.filter((e) => e.batch_id === del?.id && (db.sections.find((x) => x.id === e.section_id))) .length} linked section rows</span>
+          </div>
+          <p className="rounded-lg bg-amber-50 p-3 text-[11px] leading-relaxed text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+            Courses and faculty records stay in the catalog (they may be used by other batches). If the batch has only left temporarily, keep it and just tick it inactive in Edit instead.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button className="btn-secondary" onClick={() => setDel(null)}>Keep batch</button>
+            <button className="rounded-xl bg-gradient-to-br from-rose-500 to-red-600 px-4 py-2 text-xs font-extrabold text-white shadow-glow-blue" disabled={busy} onClick={() => void removeBatch()}>
+              <Icon name="trash" className="h-3.5 w-3.5" /> {busy ? 'Deleting…' : `Delete ${del?.batch_no ?? ''} permanently`}
+            </button>
+          </div>
+        </div>
       </AdminModal>
     </AdminShell>
   );

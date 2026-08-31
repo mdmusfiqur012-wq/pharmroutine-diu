@@ -101,6 +101,35 @@ export function mergeLocks(auto: ClassLock[], user: ClassLock[]): ClassLock[] {
   return [...auto.filter((l) => !byUid.has(l.uid)), ...user];
 }
 
+/* ---------------- batches: create from explicit offer data ---------------- */
+/** A batch number present in the imported offer but missing from the database
+ *  is created here — batch no, sections A/B and lab groups A1/A2/B1/B2.
+ *  Nothing is guessed: the number comes from the department's offer, and the
+ *  semester/level from the official metadata (or the admin's choice). */
+export interface CreatedBatch { batchId?: string; sectionAId?: string; sectionBId?: string; groupIds?: string[] }
+export async function ensureBatchRows(db: Database, batchNo: number, level: number): Promise<{ ok: boolean; error?: string } & CreatedBatch> {
+  const existing = db.batches.find((b) => b.batch_no === batchNo);
+  if (existing) return { ok: true, batchId: existing.id };
+  const r = await api.upsertRow('batches', {
+    batch_no: batchNo,
+    name: `Batch ${batchNo}`,
+    admission_year: new Date().getFullYear() - (db.batches.length ? 1 : 1),
+    current_level: Math.max(1, Math.min(8, level || 1)),
+    is_active: true,
+  });
+  if (!r.ok || !r.id) return { ok: false, error: r.error ?? 'batch insert failed' };
+  const secA = await api.upsertRow('sections', { name: 'A', batch_id: r.id });
+  const secB = await api.upsertRow('sections', { name: 'B', batch_id: r.id });
+  const groupIds: string[] = [];
+  if (secA.ok && secB.ok) {
+    for (const [name, sid] of [['A1', secA.id!], ['A2', secA.id!], ['B1', secB.id!], ['B2', secB.id!]] as const) {
+      const g = await api.upsertRow('labGroups', { name, section_id: sid });
+      if (g.ok && g.id) groupIds.push(g.id);
+    }
+  }
+  return { ok: true, batchId: r.id, sectionAId: secA.id, sectionBId: secB.id, groupIds };
+}
+
 /* ---------------- publishing ---------------- */
 
 export interface PublishOptions {
@@ -137,6 +166,36 @@ export async function publishResult(
   const facultyByInit = new Map<string, any>(db.faculty.map((f) => [f.initials.toUpperCase(), f]));
   const dayById = new Map(ctx.days.map((d) => [d.id, d]));
   const slotById = new Map(ctx.slots.map((s) => [s.id, s]));
+
+  // 0) safety: every batch we publish must exist in the database
+  for (const bn of batchNos) {
+    if (!batchByNo.get(bn)) {
+      const made = await ensureBatchRows(db, bn, 1);
+      if (made.ok) {
+        if (!made.batchId) continue;
+        batchByNo.set(bn, { id: made.batchId, batchNo: bn, name: `Batch ${bn}` });
+        // wire the freshly created structure into the local lookup maps
+        const secA = made.sectionAId ? { id: made.sectionAId, name: 'A', batchId: made.batchId } : null;
+        const secB = made.sectionBId ? { id: made.sectionBId, name: 'B', batchId: made.batchId } : null;
+        for (const [key, sec] of [['A', secA], ['B', secB]] as const) {
+          if (!sec) continue;
+          secByKey.set(`${made.batchId}|${key}`, sec); sectByKey.set(`${made.batchId}|${key}`, sec);
+          ctx.batches.push({ id: made.batchId, batchNo: bn, name: `Batch ${bn}` });
+          ctx.sections.push(sec);
+        }
+        if (made.sectionAId && made.groupIds?.length) {
+          const names = ['A1', 'A2', 'B1', 'B2'];
+          made.groupIds.slice(0, 4).forEach((gid, i) => {
+            const g = { id: gid, name: names[i], sectionId: names[i].startsWith('A') ? made.sectionAId! : made.sectionBId! };
+            ctx.groups.push(g); groupByKey.set(`${g.sectionId}|${g.name}`, g);
+          });
+        }
+        summary.errors.push(`Batch ${bn} was missing — created with sections A/B and lab groups A1/A2/B1/B2.`);
+      } else {
+        summary.errors.push(`Batch ${bn} could not be created: ${made.error ?? 'unknown'}`);
+      }
+    }
+  }
 
   // 1) optional: clear existing entries of target batches (published + official)
   if (opts.replaceExisting) {

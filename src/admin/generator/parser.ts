@@ -57,6 +57,12 @@ export function officialCatalog(): Record<string, { title: string; credits: numb
   return out;
 }
 
+/** Official term/level for a batch number (used when creating a missing batch). */
+export function officialBatchLevel(batchNo: number): number | null {
+  const b = (OFFICIAL.batches as any[]).find((x) => x.batchNo === batchNo);
+  return b && typeof b.level === 'number' ? b.level : null;
+}
+
 export function loadOfficialOffer(): OfficialBundle {
   const offers: OfferRow[] = [];
   const meta = OFFICIAL.courses as unknown as Record<string, [string, number, string]>;
