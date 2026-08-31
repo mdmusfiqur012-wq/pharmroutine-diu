@@ -318,6 +318,8 @@ export default function SmartGenerator() {
 
   return (
     <AdminShell>
+      {/* course-code dropdown: shared by every entry/review table + modals */}
+      <datalist id="gen-dl-codes">{catalogCodes.slice(0, 400).map((c) => <option key={c} value={c} />)}</datalist>
       {/* header */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -1005,15 +1007,19 @@ function EntryRow({ sec, r, knownFaculty, titleFor, isDup, onChange, onRemove }:
         <span className={clsx('rounded-md px-1.5 py-0.5 text-[9px] font-extrabold', sec === 'A' ? 'bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300' : 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300')}>{sec}</span>
       </td>
       <td className="table-td w-36">
-        <input
-          className={clsx('input !w-full !py-1 font-mono text-xs font-bold text-brand-700 dark:text-brand-400', dup && '!border-rose-400')}
-          value={r.code} placeholder="course code" title={dup ? 'This code already exists for the same batch & section' : 'Type the course code — the title fills in automatically'}
-          onChange={(e) => {
-            const v = e.target.value;
-            const t = titleFor(v);
-            patch(t ? { code: v, title: t } : { code: v });
-          }}
-        />
+        <div className="relative">
+          <input
+            list="gen-dl-codes"
+            className={clsx('input !w-full !py-1 pr-6 font-mono text-xs font-bold text-brand-700 dark:text-brand-400', dup && '!border-rose-400')}
+            value={r.code} placeholder="course code ▾" title={dup ? 'This code already exists for the same batch & section' : 'Click or type — pick a code from the dropdown; the title fills in automatically'}
+            onChange={(e) => {
+              const v = e.target.value;
+              const t = titleFor(v);
+              patch(t ? { code: v, title: t } : { code: v });
+            }}
+          />
+          <Icon name="chevronDown" className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+        </div>
       </td>
       <td className="table-td min-w-[240px]">
         {auto ? (
@@ -1155,17 +1161,21 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, remo
                   <tr key={o.id} className={clsx('border-b border-slate-100/80 last:border-0 dark:border-slate-800/60', rowIssues(o) && 'bg-amber-50/40 dark:bg-amber-950/20')}>
                     <td className="table-td font-extrabold">{o.section}</td>
                     <td className="table-td w-36">
-                      <input
-                        className="input !w-full !py-1 font-mono text-xs font-bold text-brand-700 dark:text-brand-400"
-                        value={o.code}
-                        placeholder="0916-0000"
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          const t = titleFor(v);
-                          // code drives the title: auto-fill from the catalog, never editable afterwards
-                          patch(o.id, t ? { code: v, title: t } : { code: v });
-                        }}
-                      />
+                      <div className="relative">
+                        <input
+                          list="gen-dl-codes"
+                          className="input !w-full !py-1 pr-6 font-mono text-xs font-bold text-brand-700 dark:text-brand-400"
+                          value={o.code}
+                          placeholder="0916-0000 ▾"
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            const t = titleFor(v);
+                            // code drives the title: auto-fill from the catalog, never editable afterwards
+                            patch(o.id, t ? { code: v, title: t } : { code: v });
+                          }}
+                        />
+                        <Icon name="chevronDown" className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                      </div>
                     </td>
                     <td className="table-td min-w-[240px]">
                       {autoTitle ? (
@@ -1297,8 +1307,7 @@ function ManualEntry({ batches, knownFaculty, titleFor, catalogCodes, isDuplicat
         </label>
         <label className="block sm:col-span-2">
           <span className={label}>Course code</span>
-          <input list="gen-course-codes" className="input mt-1 !py-2 font-mono text-xs font-bold" value={code} placeholder="e.g. 0916-1101" onChange={(e) => onCode(e.target.value)} />
-          <datalist id="gen-course-codes">{catalogCodes.slice(0, 300).map((c) => <option key={c} value={c} />)}</datalist>
+          <input list="gen-dl-codes" className="input mt-1 !py-2 font-mono text-xs font-bold" value={code} placeholder="e.g. 0916-1101" onChange={(e) => onCode(e.target.value)} />
         </label>
       </div>
       <label className="mt-3 block">
@@ -1376,8 +1385,7 @@ function CatalogEditor({ knownFaculty, titleFor, catalogCodes, extraCourses, onS
       <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 dark:border-slate-800 dark:bg-slate-800/30">
         <p className="mb-2.5 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Add a course to the catalog (new semester)</p>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-          <input list="gen-cat-codes" className="input !py-2 font-mono text-xs" value={code} placeholder="Course code" onChange={(e) => { const v = e.target.value; setCode(v); const t = titleFor(v); if (t) setTitle(t); }} />
-          <datalist id="gen-cat-codes">{catalogCodes.map((c) => <option key={c} value={c} />)}</datalist>
+          <input list="gen-dl-codes" className="input !py-2 font-mono text-xs" value={code} placeholder="Course code" onChange={(e) => { const v = e.target.value; setCode(v); const t = titleFor(v); if (t) setTitle(t); }} />
           <input className={clsx('input !py-2 text-xs sm:col-span-2', !auto && '!border-amber-400')} value={auto ?? title} placeholder={auto ? undefined : 'Course title (new course)'} disabled={!!auto} onChange={(e) => setTitle(e.target.value)} />
           <select className="input !py-2 text-xs" value={credits} onChange={(e) => setCredits(Number(e.target.value))}>
             {[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} credits</option>)}
