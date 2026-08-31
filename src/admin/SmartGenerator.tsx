@@ -492,7 +492,7 @@ export default function SmartGenerator() {
 
           <div className="card flex flex-wrap items-center gap-x-3 gap-y-2 p-4 text-xs text-slate-500">
             <span className="flex items-center gap-2"><Icon name="flask" className="h-4 w-4 text-emerald-600" /><b className="text-slate-700 dark:text-slate-200">{labCourses.length}</b>&nbsp;practical courses → paired lab groups with A1/A2 · B1/B2 rotation</span>
-            <span className="flex items-center gap-2"><Icon name="check" className="h-4 w-4 text-violet-600" /><b className="text-slate-700 dark:text-slate-200">{offers.filter((o) => o.type === 'prj').length}</b>&nbsp;PRJ sessions (Project / Industrial Training / Oral Assessment) → department coordinator</span>
+            <span className="flex items-center gap-2"><Icon name="x" className="h-4 w-4 text-violet-600" /><b className="text-slate-700 dark:text-slate-200">{offers.filter((o) => o.type === 'prj').length}</b>&nbsp;PRJ (Project / Industrial Training / Oral Assessment) — <b>excluded, never scheduled</b></span>
             <span className="flex items-center gap-2 text-[10px] text-slate-400">Code entered ⇒ title auto-filled &amp; locked from the catalog · unknown codes stay editable and can be saved as new courses.</span>
           </div>
         </div>
@@ -705,7 +705,7 @@ export default function SmartGenerator() {
               <span className="grad-icon-tile flex h-8 w-8 items-center justify-center rounded-xl"><Icon name="list" className="h-4 w-4" /></span>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Credit-based weekly frequency — required vs scheduled</h3>
-                <p className="text-[10px] text-slate-400">Derived automatically from the course offer: 3-credit theory = 2 classes/week · 2-credit theory = 1 class/week · 1-credit GED/PRJ = 1 class/week · practicals = one paired laboratory session (A1/A2 · B1/B2), each group in its own lab.</p>
+                <p className="text-[10px] text-slate-400">Derived automatically from the course offer: 3-credit theory = 2 classes/week · 2-credit theory = 1 class/week · 1-credit GED = 1 class/week · practicals = one paired laboratory session (A1/A2 · B1/B2), each group in its own lab · PRJ (Project / Industrial Training / Oral Assessment) is excluded — never scheduled.</p>
               </div>
               <span className={clsx('rounded-full px-3 py-1 text-[11px] font-extrabold', freqOk ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300')}>
                 {freq.filter((r) => r.ok).length}/{freq.length} courses ✓
@@ -740,10 +740,12 @@ export default function SmartGenerator() {
                             <span className="mr-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-extrabold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{r.credits} cr</span>
                             <span className={clsx('rounded px-1.5 py-0.5 text-[9px] font-extrabold', TYPE_META[r.type].cls)}>{TYPE_META[r.type].label}</span>
                           </td>
-                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.map((g) => g.name).join(' + ') || 'paired groups') : `${r.required} class${r.required === 1 ? '' : 'es'}/week`}</td>
-                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.filter((g) => g.scheduled).map((g) => g.name).join(' + ') || 'none') : `${r.scheduled} class${r.scheduled === 1 ? '' : 'es'}/week`}</td>
+                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.map((g) => g.name).join(' + ') || 'paired groups') : r.type === 'prj' ? '—' : `${r.required} class${r.required === 1 ? '' : 'es'}/week`}</td>
+                          <td className="px-3 py-1.5 font-bold text-slate-600 dark:text-slate-300">{r.type === 'lab' ? (r.groups.filter((g) => g.scheduled).map((g) => g.name).join(' + ') || 'none') : r.type === 'prj' ? '—' : `${r.scheduled} class${r.scheduled === 1 ? '' : 'es'}/week`}</td>
                           <td className="px-3 py-1.5">
-                            {r.type === 'lab' ? (
+                            {r.type === 'prj' ? (
+                              <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[9px] font-extrabold text-violet-700 dark:bg-violet-950 dark:text-violet-300">excluded · never scheduled</span>
+                            ) : r.type === 'lab' ? (
                               <span className="flex flex-wrap gap-1">
                                 {r.groups.map((g) => (
                                   <span key={g.name} title={`${g.name}${g.roomCode ? ` · ${g.roomCode}` : ''}${g.scheduled ? '' : ' — not scheduled'}`}
@@ -1038,13 +1040,13 @@ function EntryRow({ sec, r, knownFaculty, titleFor, isDup, onChange, onRemove }:
       </td>
       <td className="table-td w-28">
         <select className="input !py-1 text-xs" value={r.type} onChange={(e) => { const t = e.target.value as OfferType; patch(t === 'prj' ? { type: t, faculty: '' } : { type: t }); }}>
-          <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+          <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ (not scheduled)</option>
         </select>
       </td>
       <td className="table-td w-36">
         {r.type === 'prj' ? (
-          <span className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
-            <Icon name="check" className="h-3 w-3" /> coordinator
+          <span title="Project / Industrial Training / Oral Assessment — never scheduled in the routine" className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+            <Icon name="x" className="h-3 w-3" /> never scheduled
           </span>
         ) : (
           <select className={clsx('input !py-1 text-xs', r.code.trim() && !r.faculty && '!border-amber-400')} value={r.faculty} onChange={(e) => patch({ faculty: e.target.value })}>
@@ -1192,13 +1194,13 @@ function BatchReviewTable({ batchNo, offers, knownFaculty, patch, titleFor, remo
                     </td>
                     <td className="table-td w-28">
                       <select className={clsx('input !py-1 text-xs', !o.type && '!border-amber-400')} value={o.type} onChange={(e) => patch(o.id, { type: e.target.value as OfferType, ...(e.target.value === 'prj' ? { faculty: '' } : {}) })}>
-                        <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+                        <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ (not scheduled)</option>
                       </select>
                     </td>
                     <td className="table-td w-36">
                       {o.type === 'prj' ? (
-                        <span className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
-                          <Icon name="check" className="h-3 w-3" /> coordinator
+                        <span title="Project / Industrial Training / Oral Assessment — never scheduled in the routine" className="flex items-center gap-1.5 rounded-lg bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                          <Icon name="x" className="h-3 w-3" /> never scheduled
                         </span>
                       ) : (
                         <select className={clsx('input !py-1 text-xs', !o.faculty && '!border-amber-400')} value={o.faculty} onChange={(e) => patch(o.id, { faculty: e.target.value, facultyRaw: e.target.value })}>
@@ -1282,7 +1284,7 @@ function ManualEntry({ batches, knownFaculty, titleFor, catalogCodes, isDuplicat
     if (!auto && !title.trim()) { setHint('New course — type its full title once (it is saved to the catalog).'); return; }
     if (credits < 1 || credits > 4) { setHint('Credits must be 1–4.'); return; }
     if (isDuplicate(batchNo, section, c)) { setHint(`Batch ${batchNo}${section} already has ${c} — edit that row in Review instead.`); return; }
-    if (type !== 'prj' && !faculty) { setHint('Pick the assigned faculty — or choose type PRJ (coordinator-supervised, no faculty needed).'); return; }
+    if (type !== 'prj' && !faculty) { setHint('Pick the assigned faculty — or choose type PRJ (recorded only, never scheduled).'); return; }
     if (isNew) { onSaveCourse({ code: c, title: title.trim(), credits, type }); }
     onAdd(batchNo, section, c, auto ?? title.trim(), credits, type, type === 'prj' ? '' : faculty);
     toast.push('success', `Added ${c} · Batch ${batchNo}${section}.`);
@@ -1333,11 +1335,11 @@ function ManualEntry({ batches, knownFaculty, titleFor, catalogCodes, isDuplicat
         <label className="block">
           <span className={label}>Type</span>
           <select className="input mt-1 !py-2 text-xs" value={type} onChange={(e) => { const t = e.target.value as OfferType; setType(t); if (t === 'prj') setFaculty(''); if (t === 'lab') setCredits((v) => (v > 2 ? 2 : v)); }}>
-            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ (not scheduled)</option>
           </select>
         </label>
         <label className="block sm:col-span-2">
-          <span className={label}>Faculty {type === 'prj' && <span className="ml-1 normal-case text-violet-500">coordinator (none needed)</span>}</span>
+          <span className={label}>Faculty {type === 'prj' && <span className="ml-1 normal-case text-violet-500">not scheduled</span>}</span>
           <select className={clsx('input mt-1 !py-2 text-xs', type !== 'prj' && !faculty && '!border-amber-400')} value={type === 'prj' ? '' : faculty} disabled={type === 'prj'} onChange={(e) => setFaculty(e.target.value)}>
             <option value="">— none —</option>
             {knownFaculty.map((f) => <option key={f} value={f}>{f}</option>)}
@@ -1345,7 +1347,7 @@ function ManualEntry({ batches, knownFaculty, titleFor, catalogCodes, isDuplicat
         </label>
       </div>
       <p className="mt-2 text-[10px] text-slate-400">
-        {type === 'lab' ? 'Laboratory sessions split into paired groups A1/A2 (or B1/B2) with lab rotation.' : type === 'prj' ? 'Project / Industrial Training / Oral Assessment — one weekly session, supervised by the department coordinator.' : credits >= 3 ? '3-credit theory → 2 classes per week (different days preferred).' : credits === 2 ? '2-credit theory → 1 class per week.' : '1-credit course → 1 class per week.'}
+        {type === 'lab' ? 'Laboratory sessions split into paired groups A1/A2 (or B1/B2) with lab rotation.' : type === 'prj' ? 'Project / Industrial Training / Oral Assessment — recorded here but NEVER scheduled in the weekly routine.' : credits >= 3 ? '3-credit theory → 2 classes per week (different days preferred).' : credits === 2 ? '2-credit theory → 1 class per week.' : '1-credit course → 1 class per week.'}
       </p>
       {hint && <p className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400"><Icon name="alert" className="h-3.5 w-3.5" /> {hint}</p>}
       <div className="mt-4 flex flex-wrap gap-2">
@@ -1391,7 +1393,7 @@ function CatalogEditor({ knownFaculty, titleFor, catalogCodes, extraCourses, onS
             {[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} credits</option>)}
           </select>
           <select className="input !py-2 text-xs" value={type} onChange={(e) => setType(e.target.value as OfferType)}>
-            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ</option>
+            <option value="theory">Theory</option><option value="lab">Laboratory</option><option value="ged">GED</option><option value="prj">PRJ (not scheduled)</option>
           </select>
           <button className="btn-primary !py-2 text-xs" onClick={submit}><Icon name="plus" className="h-3.5 w-3.5" /> Save</button>
         </div>

@@ -38,7 +38,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function sessionsFor(offer: OfferRow, cfg: GenConfig): number {
   if (offer.type === 'lab') return 1;
-  if (offer.type === 'prj') return 1;   // Project / Industrial Training / Oral Assessment = one guided session/week
+  if (offer.type === 'prj') return 0;   // Project / Industrial Training / Oral Assessment are NEVER part of the weekly routine
   const c = Math.min(3, Math.max(1, Math.round(offer.credits)));
   return cfg.sessions[c as 1 | 2 | 3] ?? 1;
 }
@@ -58,7 +58,7 @@ export function buildUnits(offers: OfferRow[], cfg: GenConfig): Unit[] {
       units.push({ uid: `${offer.id}-lab`, offer, sessionIdx: 0, isLab: true, label: `${offer.code} · Lab`, priority: priorityOf(offer, cfg) });
     } else {
       const n = sessionsFor(offer, cfg);
-      for (let i = 0; i < n; i++) {
+      for (let i = 0; i < n; i++) {  // n = 0 → PRJ courses are excluded from scheduling
         units.push({ uid: `${offer.id}-s${i}`, offer, sessionIdx: i, isLab: false, label: `${offer.code}${offer.type === 'prj' ? ' · PRJ' : ''}`, priority: priorityOf(offer, cfg) });
       }
     }
