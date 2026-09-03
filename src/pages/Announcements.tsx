@@ -36,7 +36,7 @@ export default function Announcements() {
           : 'bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400';
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader title="Announcements" subtitle="Official notices from the Department of Pharmacy — routine updates, guest lectures, exams and events." />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">

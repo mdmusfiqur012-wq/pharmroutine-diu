@@ -51,7 +51,7 @@ export default function FacultyRoutine() {
   if (!db) return <EmptyState icon="alert" title="Could not load data" />;
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader
         title="Faculty Routine"
         subtitle="Search any faculty member by name or initials and view their complete weekly teaching schedule — batch, section, laboratory group, course, room, day and time."

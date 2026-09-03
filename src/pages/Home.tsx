@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Tilt3D from '../components/Tilt3D';
 import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
 import { Icon, Logo, Badge, StatCard, type IconName } from '../lib/ui';
@@ -143,7 +144,7 @@ export default function Home() {
   }, [db]);
 
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className="space-y-8">
       {/* ---------- Hero ---------- */}
       <section className="card relative overflow-hidden !rounded-3xl p-6 sm:p-10">
         {/* ambient decor */}
@@ -193,10 +194,10 @@ export default function Home() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link to="/routine" className="btn-primary !px-5 !py-2.5">
+              <Link to="/routine" className="btn-primary btn-shine !px-5 !py-2.5">
                 <Icon name="calendar" /> Generate My Routine
               </Link>
-              <Link to="/lab" className="btn-secondary !px-5 !py-2.5">
+              <Link to="/lab" className="btn-secondary btn-shine !px-5 !py-2.5">
                 <Icon name="flask" /> Laboratory Routine
               </Link>
             </div>
@@ -209,7 +210,7 @@ export default function Home() {
       </section>
 
       {/* ---------- Live dashboard cards ---------- */}
-      <section className="grid grid-cols-2 gap-3.5 md:grid-cols-3 xl:grid-cols-6">
+      <section className="stagger grid grid-cols-2 gap-3.5 md:grid-cols-3 xl:grid-cols-6">
         <StatCard icon="calendar" tone="blue" label="Weekly classes" value={loading ? '…' : totalClasses} />
         <StatCard icon="book" tone="green" label="Theory / week" value={loading ? '…' : theoryCount} />
         <StatCard icon="flask" tone="teal" label="Labs / week" value={loading ? '…' : labCount} />
@@ -224,16 +225,15 @@ export default function Home() {
           <span className="h-4 w-1 rounded-full" style={{ backgroundImage: 'var(--grad-diu)' }} />
           <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Quick access</h2>
         </div>
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-          {QUICK.map((q, i) => (
+        <div className="stagger grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+          {QUICK.map((q) => (
+            <Tilt3D key={q.to} className="anim-rise h-full" style={{ '--d': `${QUICK.indexOf(q) * 60}ms` } as CSSProperties} max={8} scale={1.015} lift={7}>
             <button
-              key={q.to}
               onClick={() => navigate(q.to)}
-              className="card group p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-glass-hover"
-              style={{ animationDelay: `${i * 60}ms` }}
+              className="card card-3d group h-full w-full p-4 text-left"
             >
               <div className="flex items-start gap-3.5">
-                <span className="grad-icon-tile flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                <span className="grad-icon-tile icon-3d flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                   <Icon name={q.icon} className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
@@ -245,6 +245,7 @@ export default function Home() {
                 </div>
               </div>
             </button>
+            </Tilt3D>
           ))}
         </div>
       </section>

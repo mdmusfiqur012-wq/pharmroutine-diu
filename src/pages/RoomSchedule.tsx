@@ -34,7 +34,7 @@ export default function RoomSchedule() {
   if (!db) return <EmptyState icon="alert" title="Could not load data" />;
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader
         title="Room Schedule & Availability"
         subtitle="Select any room to see its full weekly schedule — or check a specific day and time slot to see whether the room is occupied or free."

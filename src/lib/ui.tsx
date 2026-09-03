@@ -97,7 +97,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal>
       <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-[3px] animate-fade-in" onClick={onClose} />
       <div className={clsx(
-        'relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl shadow-float animate-scale-in sm:rounded-3xl scroll-thin',
+        'relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl shadow-float animate-pop-3d sm:rounded-3xl scroll-thin',
         'border border-white/70 bg-white/90 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/95',
         wide ? 'sm:max-w-3xl' : 'sm:max-w-lg',
       )}>
@@ -304,8 +304,8 @@ export function StatCard({ icon, label, value, tone = 'green' }: { icon: IconNam
     slate: 'from-slate-500 to-slate-700',
   };
   return (
-    <div className="card group flex items-center gap-3.5 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-glass-hover">
-      <div className={clsx('flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3', tones[tone])}>
+    <div className="card card-3d group flex items-center gap-3.5 p-4">
+      <div className={clsx('icon-3d flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3', tones[tone])}>
         <Icon name={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0">

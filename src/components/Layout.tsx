@@ -85,7 +85,15 @@ export default function Layout() {
   const visibleNav = NAV.filter((n) => !n.admin || role === 'admin');
 
   return (
-    <div className="bg-ambient bg-science relative min-h-screen">
+    <div className="bg-ambient bg-science relative min-h-screen overflow-x-clip">
+      {/* ---------- floating 3D parallax orbs (decorative) ---------- */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="orb orb-a left-[-6%] top-[12%] h-[420px] w-[420px] bg-gradient-to-br from-brand-400/25 to-sky-300/20" />
+        <div className="orb orb-b right-[-8%] top-[30%] h-[380px] w-[380px] bg-gradient-to-bl from-emerald-400/22 to-teal-300/18" />
+        <div className="orb orb-a left-[30%] bottom-[-12%] h-[460px] w-[460px] bg-gradient-to-tr from-sky-400/18 to-brand-500/16" style={{ animationDelay: '-9s' }} />
+        <div className="orb orb-b right-[22%] bottom-[6%] h-[260px] w-[260px] bg-gradient-to-b from-daffodil-400/22 to-cyan-300/14" style={{ animationDelay: '-14s' }} />
+      </div>
+
       {/* ---------- Floating glass navbar ---------- */}
       <header className="no-print sticky top-0 z-40 px-3 pt-3">
         <div className="glass-strong mx-auto flex max-w-7xl items-center gap-2 rounded-2xl px-3 py-2 sm:px-4">
@@ -111,9 +119,9 @@ export default function Layout() {
                 key={n.to}
                 to={n.to}
                 end={n.to === '/'}
-                className={({ isActive }) => clsx('nav-floating', isActive && 'nav-floating-active')}
+                className={({ isActive }) => clsx('nav-floating group', isActive && 'nav-floating-active')}
               >
-                <Icon name={n.icon} className="h-4 w-4" />
+                <Icon name={n.icon} className="icon-3d h-4 w-4" />
                 <span className="hidden xl:inline">{n.label}</span>
                 {n.to === '/announcements' && pendingAnnouncements > 0 && (
                   <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm">
@@ -153,7 +161,7 @@ export default function Layout() {
       {mobileOpen && (
         <div className="no-print fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal>
           <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px] animate-fade-in" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-white/60 bg-white/85 shadow-float backdrop-blur-2xl animate-fade-in dark:border-slate-700 dark:bg-slate-900/90">
+          <div className="drawer-anim absolute inset-y-0 right-0 flex w-72 max-w-[85vw] flex-col border-l border-white/60 bg-white/85 shadow-float backdrop-blur-2xl dark:border-slate-700 dark:bg-slate-900/90">
             <div className="flex items-center gap-2.5 border-b border-slate-100 px-4 py-3.5 dark:border-slate-800">
               <Logo size={30} />
               <div className="min-w-0">
@@ -164,15 +172,15 @@ export default function Layout() {
                 <Icon name="x" />
               </button>
             </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto p-3 scroll-thin">
+            <nav className="stagger flex-1 space-y-1 overflow-y-auto p-3 scroll-thin">
               {visibleNav.map((n) => (
                 <NavLink
                   key={n.to}
                   to={n.to}
                   end={n.to === '/'}
-                  className={({ isActive }) => clsx('nav-link', isActive && 'nav-link-active')}
+                  className={({ isActive }) => clsx('nav-link group', isActive && 'nav-link-active')}
                 >
-                  <Icon name={n.icon} className="h-[18px] w-[18px]" />
+                  <Icon name={n.icon} className="icon-3d h-[18px] w-[18px]" />
                   {n.label}
                   {n.to === '/announcements' && pendingAnnouncements > 0 && (
                     <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{pendingAnnouncements}</span>
@@ -206,9 +214,12 @@ export default function Layout() {
       )}
 
       {/* ---------- Main ---------- */}
-      <main className="relative">
+      <main className="relative z-10">
         <div className="mx-auto max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8">
-          <Outlet />
+          {/* key = pathname → every navigation replays the 3D page transition */}
+          <div key={loc.pathname} className="page-anim">
+            <Outlet />
+          </div>
         </div>
 
         <footer

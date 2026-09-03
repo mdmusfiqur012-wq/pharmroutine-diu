@@ -139,7 +139,7 @@ export default function Routine() {
   }
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader
         title="My Routine"
         subtitle="Select your semester, batch, section and laboratory group — the routine is generated dynamically from the department database. Every batch has its own class days, off days and weekly structure."

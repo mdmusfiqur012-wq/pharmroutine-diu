@@ -53,7 +53,7 @@ export default function LabRoutine() {
   const labCourses = new Set(labs.map((e) => e.course_id));
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader
         title="Laboratory Routine"
         subtitle="Laboratory sessions are section-based and group-specific. Select your batch → section → lab group to see exactly which labs your group attends — the other group's sessions are excluded automatically."

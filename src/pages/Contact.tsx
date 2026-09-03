@@ -14,7 +14,7 @@ export default function Contact() {
   const faculty = db?.faculty.filter((f) => f.is_active) ?? [];
 
   return (
-    <div className="animate-fade-in space-y-6">
+    <div className="space-y-6">
       <PageHeader title="Contact" subtitle="Department of Pharmacy, Daffodil International University — reach us or browse the official faculty directory." />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

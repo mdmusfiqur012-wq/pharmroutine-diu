@@ -5,6 +5,7 @@ import { classColor, STATUS_META, advisorFor } from '../lib/routine';
 import { useData } from '../lib/data';
 import { useApp } from '../lib/store';
 import { Badge, Icon, Modal } from '../lib/ui';
+import Tilt3D from './Tilt3D';
 
 /* ============================================================
  * ClassCard — compact interactive card for one slot in the
@@ -107,76 +108,80 @@ export function ClassModalHost({ entry, onClose }: { entry: JoinedEntry | null; 
   );
 }
 
-/* Compact glass card rendered inside a timetable cell */
+/* Compact glass card rendered inside a timetable cell — 3D tilt + glare */
 export function MiniClassCard({ entry, onClick }: { entry: JoinedEntry; onClick?: () => void }) {
   const settings = useApp((s) => s.settings);
   const color = classColor(entry, settings.colors);
   const cancelled = entry.status === 'cancelled';
   const rescheduled = entry.status === 'rescheduled';
   return (
-    <button
-      onClick={onClick}
-      title={`${entry.course?.title} · ${entry.course?.code} · ${entry.faculty?.name}`}
-      className={clsx(
-        'group relative w-full overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all duration-200',
-        'hover:-translate-y-0.5 hover:shadow-glass-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50',
-        cancelled && 'opacity-60 saturate-50',
-      )}
-      style={{
-        borderColor: hexToRgba(color, .38),
-        backgroundColor: hexToRgba(color, 0.08),
-        boxShadow: `0 1px 2px rgba(30,58,138,.05), 0 0 0 1px rgba(255,255,255,.4) inset`,
-      }}
-    >
-      {/* gradient accent bar */}
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-1 rounded-full"
-        style={{ background: `linear-gradient(180deg, ${hexToRgba(color, .95)}, ${hexToRgba(color, .5)})` }}
-      />
-      {rescheduled && (
-        <span className="absolute right-1.5 top-1.5 rounded-md px-1.5 py-px text-[8px] font-extrabold uppercase tracking-wide text-white shadow-sm" style={{ backgroundColor: color }}>
-          Moved
-        </span>
-      )}
-      {cancelled && (
-        <span className="absolute right-1.5 top-1.5 rounded-md bg-red-600 px-1.5 py-px text-[8px] font-extrabold uppercase tracking-wide text-white shadow-sm">
-          ✕
-        </span>
-      )}
-      <p className="pr-10 text-[10px] font-extrabold uppercase tracking-wide" style={{ color: hexToRgba(color, .92) }}>
-        {entry.course?.code}
-        {entry.labGroup && <span className="ml-1">· {entry.labGroup.name}</span>}
-      </p>
-      <p className={clsx('mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-slate-800 dark:text-slate-100', cancelled && 'line-through')}>
-        {entry.course?.title}
-      </p>
-      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-        <span className="font-bold text-slate-700 dark:text-slate-300">{entry.faculty?.initials === 'PC' ? 'Coordinator' : entry.faculty?.initials}</span>
-        <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-2.5 w-2.5" />{entry.room?.code}</span>
-      </p>
-      {/* hover-reveal extra info: time + faculty name */}
-      <p className="max-h-0 overflow-hidden text-[9px] font-semibold text-slate-400 opacity-0 transition-all duration-300 group-hover:max-h-6 group-hover:opacity-100 dark:text-slate-500">
-        {entry.timeSlot?.label} · {entry.faculty?.initials === 'PC' ? 'Dept. Coordinator' : entry.faculty?.name}
-      </p>
-    </button>
+    <Tilt3D className="h-full" max={10} scale={1.035} lift={8}>
+      <button
+        onClick={onClick}
+        title={`${entry.course?.title} · ${entry.course?.code} · ${entry.faculty?.name}`}
+        className={clsx(
+          'group relative w-full overflow-hidden rounded-xl border px-2.5 py-2 text-left transition-all duration-200',
+          'hover:-translate-y-0.5 hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50',
+          'shadow-[0_1px_2px_rgba(30,58,138,.05),0_4px_12px_-4px_rgba(29,78,216,.10),0_0_0_1px_rgba(255,255,255,.4)_inset]',
+          cancelled && 'opacity-60 saturate-50',
+        )}
+        style={{
+          borderColor: hexToRgba(color, .38),
+          backgroundColor: hexToRgba(color, 0.08),
+        }}
+      >
+        {/* gradient accent bar — pops forward on hover for depth */}
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-1 rounded-full transition-all duration-300 group-hover:w-1.5 group-hover:shadow-[0_0_12px_0]"
+          style={{ background: `linear-gradient(180deg, ${hexToRgba(color, .95)}, ${hexToRgba(color, .5)})`, color: hexToRgba(color, .55) }}
+        />
+        {rescheduled && (
+          <span className="absolute right-1.5 top-1.5 rounded-md px-1.5 py-px text-[8px] font-extrabold uppercase tracking-wide text-white shadow-sm animate-pulse-soft" style={{ backgroundColor: color }}>
+            Moved
+          </span>
+        )}
+        {cancelled && (
+          <span className="absolute right-1.5 top-1.5 rounded-md bg-red-600 px-1.5 py-px text-[8px] font-extrabold uppercase tracking-wide text-white shadow-sm">
+            ✕
+          </span>
+        )}
+        <p className="pr-10 text-[10px] font-extrabold uppercase tracking-wide transition-transform duration-300 group-hover:translate-x-0.5" style={{ color: hexToRgba(color, .92) }}>
+          {entry.course?.code}
+          {entry.labGroup && <span className="ml-1">· {entry.labGroup.name}</span>}
+        </p>
+        <p className={clsx('mt-0.5 line-clamp-2 text-[11px] font-bold leading-snug text-slate-800 dark:text-slate-100', cancelled && 'line-through')}>
+          {entry.course?.title}
+        </p>
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+          <span className="font-bold text-slate-700 dark:text-slate-300">{entry.faculty?.initials === 'PC' ? 'Coordinator' : entry.faculty?.initials}</span>
+          <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-2.5 w-2.5" />{entry.room?.code}</span>
+        </p>
+        {/* hover-reveal extra info: time + faculty name */}
+        <p className="max-h-0 overflow-hidden text-[9px] font-semibold text-slate-400 opacity-0 transition-all duration-300 group-hover:max-h-6 group-hover:opacity-100 dark:text-slate-500">
+          {entry.timeSlot?.label} · {entry.faculty?.initials === 'PC' ? 'Dept. Coordinator' : entry.faculty?.name}
+        </p>
+      </button>
+    </Tilt3D>
   );
 }
 
-/* Mobile stacked card */
+/* Mobile stacked card — 3D press */
 export function MobileClassCard({ entry, onClick }: { entry: JoinedEntry; onClick?: () => void }) {
   const settings = useApp((s) => s.settings);
   const color = classColor(entry, settings.colors);
   const cancelled = entry.status === 'cancelled';
   const rescheduled = entry.status === 'rescheduled';
   return (
-    <button
-      onClick={onClick}
-      className={clsx(
-        'flex w-full items-stretch gap-0 overflow-hidden rounded-2xl border border-white/70 bg-white/80 text-left shadow-card backdrop-blur transition-all active:scale-[.99] dark:border-slate-700 dark:bg-slate-900/80',
-        cancelled && 'opacity-70',
-      )}
-    >
+    <Tilt3D max={6} scale={1.01} lift={5} glare={false}>
+      <button
+        onClick={onClick}
+        className={clsx(
+          'flex w-full items-stretch gap-0 overflow-hidden rounded-2xl border border-white/70 bg-white/80 text-left shadow-card backdrop-blur transition-all duration-300',
+          'hover:-translate-y-1 hover:shadow-card-hover active:scale-[.98] active:rotate-[.6deg] dark:border-slate-700 dark:bg-slate-900/80',
+          cancelled && 'opacity-70',
+        )}
+      >
       <div
         className="flex w-[76px] shrink-0 flex-col items-center justify-center py-3 text-white"
         style={{ backgroundColor: color, backgroundImage: 'linear-gradient(160deg, rgba(255,255,255,.22), rgba(0,0,0,.12))' }}
@@ -200,6 +205,7 @@ export function MobileClassCard({ entry, onClick }: { entry: JoinedEntry; onClic
           {entry.timeSlot?.label} · {entry.faculty?.initials === 'PC' ? 'Dept. Coordinator' : entry.faculty?.name} ({entry.faculty?.initials}) · <span className="inline-flex items-center gap-0.5"><Icon name="door" className="h-3 w-3" />{entry.room?.code}</span>
         </p>
       </div>
-    </button>
+      </button>
+    </Tilt3D>
   );
 }

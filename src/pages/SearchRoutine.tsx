@@ -41,7 +41,7 @@ export default function SearchRoutine() {
   if (!db) return <EmptyState icon="alert" title="Could not load data" />;
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <PageHeader
         title="Search Routine"
         subtitle="Search every scheduled class across the department by faculty name or initials, course name or code, room number, batch — and jump straight to the class details."

@@ -189,6 +189,107 @@
   -webkit-mask-image: radial-gradient(680px 420px at 30% 10%, black, transparent 75%);
 }
 
+/* ============================================================
+ * 3D DEPTH LAYER — tilt cards, parallax orbs, layered shadows
+ * ============================================================ */
+.persp { perspective: 1100px; }
+.persp-lg { perspective: 1600px; }
+.preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+
+/* interactive tilt card — JS sets --rx / --ry / --gx / --gy on the element */
+.tilt-card {
+  transform: perspective(950px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+  transition: transform .18s ease-out, box-shadow .25s ease, border-color .25s ease;
+  will-change: transform;
+}
+.tilt-card:hover { z-index: 5; }
+/* glare that follows the cursor */
+.tilt-glare {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+  background: radial-gradient(360px circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.5), rgba(255,255,255,.12) 38%, transparent 65%);
+}
+.tilt-card:hover > .tilt-glare, .tilt-wrap:hover .tilt-glare { opacity: 1; }
+
+/* resting 3D shadows: the card floats above the page */
+.shadow-depth {
+  box-shadow: 0 2px 4px rgb(30 58 138 / .05), 0 14px 30px -10px rgb(29 78 216 / .16), 0 34px 70px -22px rgb(14 165 233 / .22), 0 0 0 1px rgb(255 255 255 / .55) inset;
+}
+.tilt-card:hover, .card-3d:hover {
+  box-shadow: 0 3px 6px rgb(30 58 138 / .07), 0 22px 44px -12px rgb(29 78 216 / .30), 0 52px 100px -30px rgb(22 163 74 / .30), 0 0 0 1px rgb(255 255 255 / .75) inset;
+}
+.card-3d {
+  transform: translateY(0);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+  will-change: transform;
+}
+.card-3d:hover { transform: translateY(-6px) rotateX(.6deg) scale(1.012); }
+
+/* sweeping shine across primary buttons & highlighted cards */
+.btn-shine::after, .shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.42) 50%, transparent 62%);
+  transition: transform .65s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.btn-shine:hover::after, .shine:hover::after { transform: translateX(130%) skewX(-18deg); }
+
+/* staggered entrance — set --d (delay) per element or use .stagger on the parent */
+.anim-rise { animation: rise .5s cubic-bezier(.22,1,.36,1) both; animation-delay: var(--d, 0ms); }
+.stagger > * { animation: rise .5s cubic-bezier(.22,1,.36,1) both; }
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 90ms; }
+.stagger > *:nth-child(3) { animation-delay: 140ms; }
+.stagger > *:nth-child(4) { animation-delay: 190ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 290ms; }
+.stagger > *:nth-child(7) { animation-delay: 340ms; }
+.stagger > *:nth-child(8) { animation-delay: 390ms; }
+.stagger > *:nth-child(9) { animation-delay: 440ms; }
+.stagger > *:nth-child(10) { animation-delay: 490ms; }
+.stagger > *:nth-child(n+11) { animation-delay: 540ms; }
+
+/* page transition wrapper */
+.page-anim { animation: page-in .42s cubic-bezier(.22,1,.36,1) both; }
+
+/* floating 3D parallax orbs (fixed background layer) */
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+.orb-a { animation: orb-a 26s ease-in-out infinite; }
+.orb-b { animation: orb-b 32s ease-in-out infinite; }
+
+/* 3D flip-able mini badges / icons */
+.icon-3d {
+  transform-style: preserve-3d;
+  transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+}
+.group:hover .icon-3d {
+  transform: perspective(500px) rotateY(-14deg) rotateX(8deg) translateZ(14px);
+}
+
+/* mobile drawer slide */
+.drawer-anim { animation: drawer-in .3s cubic-bezier(.22,1,.36,1) both; }
+
+/* respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card, .card-3d, .orb, .anim-rise, .stagger > *, .page-anim, .btn-shine::after, .shine::after, .icon-3d {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 /* thin scrollbars for the timetable panes */
 .scroll-thin::-webkit-scrollbar {
   height: 8px;
